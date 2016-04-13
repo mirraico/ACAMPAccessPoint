@@ -20,7 +20,8 @@ acamp_element* make_acamp_element(u16 type, u16 len, u8* data)
     acamp_element* element = (acamp_element*)malloc(sizeof(acamp_element));
     element->type = type;
     element->len = len;
-    element->data = data;
+    element->data = (u8*)malloc(sizeof(u8) * len);
+    memcpy(element->data, data, len);
     return element;
 }
 
@@ -28,18 +29,38 @@ u8* acamp_encapsulate(acamp_header* header, acamp_element* element[], int ele_nu
 {
     u8* buf= (u8*)malloc(header->msg_len * sizeof(u8));
     u8* ptr = buf;
-    memcpy(ptr, header, sizeof(acamp_header));
-    ptr += sizeof(acamp_header);
+    u32 net_preamble = htonl(header->preamble);
+    memcpy(ptr, &net_preamble, sizeof(net_preamble));
+    ptr += sizeof(net_preamble);
+    memcpy(ptr, &header->version, sizeof(header->version));
+    ptr += sizeof(header->version);
+    memcpy(ptr, &header->type, sizeof(header->type));
+    ptr += sizeof(header->type);
+    u16 net_apid = htons(header->apid);
+    memcpy(ptr, &net_apid, sizeof(net_apid));
+    ptr += sizeof(net_apid);
+    u32 net_seq = htonl(header->seq_num);
+    memcpy(ptr, &net_seq, sizeof(net_seq));
+    ptr += sizeof(net_seq);
+    u16 net_msg_type = htons(header->msg_type);
+    memcpy(ptr, &net_msg_type, sizeof(net_msg_type));
+    ptr += sizeof(net_msg_type);
+    u16 net_msg_len = htons(header->msg_len);
+    memcpy(ptr, &net_msg_len, sizeof(net_msg_len));
+    ptr += sizeof(net_msg_len);
+
     for (int i = 0; i < ele_num; i++)
     {
-        memcpy(ptr, &element[i]->type, sizeof(u16));
-        ptr += sizeof(u16);
-        memcpy(ptr, &element[i]->len, sizeof(u16));
-        ptr += sizeof(u16);
+        u16 net_ele_type = htons(element[i]->type);
+        memcpy(ptr, &net_ele_type, sizeof(net_ele_type));
+        ptr += sizeof(net_ele_type);
+        u16 net_ele_len = htons(element[i]->len);
+        memcpy(ptr, &net_ele_len, sizeof(net_ele_len));
+        ptr += sizeof(net_ele_len);
         memcpy(ptr, (u8*)element[i]->data, sizeof(u8)*element[i]->len);
         ptr += sizeof(u8)*element[i]->len;
     }
-   return buf;
+    return buf;
 }
 
 
