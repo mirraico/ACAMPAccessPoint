@@ -64,11 +64,10 @@ u8* acamp_encapsulate(acamp_header* header, acamp_element* element[], int ele_nu
 }
 
 
-APBool acamp_parse(u8* buf,
-                   acamp_header* header, acamp_element* element[], int* ele_num)
+int acamp_parse(u8* buf,
+                   acamp_header* header, acamp_element* element[], int array_len)
 {    
     u8* ptr = buf;
-    header = (acamp_header*)malloc(sizeof(acamp_header));
     memcpy(header, ptr, sizeof(acamp_header));
     header->preamble = ntohl(header->preamble);
     header->apid = ntohs(header->apid);
@@ -77,21 +76,10 @@ APBool acamp_parse(u8* buf,
     header->msg_len = ntohs(header->msg_len);
 
     ptr += sizeof(acamp_header);
-    int num = 0;
-    u8* cnt_ptr = ptr;
-    while (cnt_ptr - buf < header->msg_len)
+    int ele_cnt = 0;
+    for (int i = 0; i < array_len; i++)
     {
-        cnt_ptr += sizeof(u16);
-        u16 ele_len;
-        memcpy(&ele_len, cnt_ptr, sizeof(u16));
-        ele_len = ntohs(ele_len);
-        cnt_ptr += sizeof(u16);
-        cnt_ptr += ele_len * sizeof(u8);
-        num++;
-    }
-    element = (acamp_element**)malloc(num * sizeof(acamp_element*));
-    for (int i = 0; i < num; i++)
-    {
+        if(ptr - buf >= header->msg_len) break;
         element[i] = (acamp_element*)malloc(sizeof(acamp_element));
         u16 net_ele_type;
         memcpy(&net_ele_type, ptr, sizeof(u16));
@@ -103,7 +91,8 @@ APBool acamp_parse(u8* buf,
         ptr += sizeof(u16);
         element[i]->data = (u8*)malloc(element[i]->len * sizeof(u8));
         memcpy(element[i]->data, ptr, element[i]->len * sizeof(u8));
+        ptr += element[i]->len * sizeof(u8);
+        ele_cnt++;
     }
-    ele_num = &num;
-    return AP_TRUE;
+    return ele_cnt;
 }
