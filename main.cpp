@@ -5,7 +5,7 @@ int main(int argc,char *argv[])
 {
     /***test***/
     //udp init
-    if(argc == 2)
+    if(argc == 3)
         udp_init(argv[1], atoi(argv[2]));
     else
         udp_init("127.0.0.1", 1080);
