@@ -40,6 +40,5 @@ acamp_header* make_acamp_header(u32 preamble, u8 version,
                                 u16 msg_type, u16 msg_len);
 acamp_element* make_acamp_element(u16 type, u16 len, u8* data);
 u8* acamp_encapsulate(acamp_header* header, acamp_element* element[], int ele_num);
-APBool acamp_parse(u8* buf,
-                   acamp_header* header, acamp_element* element[], int* ele_num);
+int acamp_parse(u8* buf, acamp_header* header, acamp_element* element[], int array_len);
 #endif

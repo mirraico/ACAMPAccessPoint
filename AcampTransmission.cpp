@@ -16,3 +16,9 @@ int udp_send(u8* buf, int len)
     return sendto(udp_fd, buf, len, 0,
                   (sockaddr*)&udp_addrin,sizeof(udp_addrin));
 }
+
+int udp_recv(u8* buf, int len)
+{
+    unsigned int addrlen = sizeof(udp_addrin);
+    return recvfrom(udp_fd, buf, len, 0, (sockaddr*)&udp_addrin, &addrlen);
+}
