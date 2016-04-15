@@ -4,16 +4,16 @@
 ##团队成员修改请提交到community分支
 ##感谢团队成员贡献的代码！
 
-1. RUN:
+###1. RUN:
   1. 先运行控制器端程序。
   2. make
   3. ./ACAMPAccessPoint
 
-2. INSTALL:
-  1. 安装Qt
-  2. 创建C++工程
-  3. 删去main.c文件
-  4. 配置github. PS:随时用git status查看状态。
+###2. INSTALL:
+  ####1. 安装Qt
+  ####2. 创建C++工程
+  ####3. 删去main.c文件
+  ####4. 配置github. PS:随时用git status查看状态。
      1. 添加文件.gitignore。去掉pro,pro.user,.gitignore
      2. git init
      2. git clone git@github.com:AuyeungCarl/ACAMPAccessPoint.git //将ACAMPAccessPoint里面文件考至C++工程内。若用sudo 创建，则用chown，chgrp更改文件所属。
