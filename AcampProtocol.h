@@ -21,7 +21,7 @@ typedef struct {
     u16 msg_type;
     u16 msg_len;
 }acamp_header;
-//define HEADER_LEN 16
+#define HEADER_LEN 16
 
 /*PayLoad: 4 + len
  * -----------------------------------------
