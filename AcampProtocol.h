@@ -21,7 +21,7 @@ typedef struct {
     u16 msg_type;
     u16 msg_len;
 }acamp_header;
-#define HEADER_LEN 16
+//define HEADER_LEN 16
 
 /*PayLoad: 4 + len
  * -----------------------------------------
@@ -51,7 +51,7 @@ typedef struct {
 #define MSGTYPE_DISCONNET_RESPONSE 0x14
 #define MSGTYPE_CONFIGURATION_REQUEST 0x21
 #define MSGTYPE_CONFIGURATION_RESPONSE 0x22
-#define MSGTYPE_CONFIGURATIONMSGTYPE_AP_NAME_RESET_REQ 0x23
+#define NMSGTYPE_CONFIGURATION_RESET_REQ 0x23
 #define MSGTYPE_CONFIGURATION_RESET_RSP 0x24
 #define MSGTYPE_STATISTIC_STAT_RP 0x31
 #define MSGTYPE_STATISTIC_STAT_QUERY 0x32
