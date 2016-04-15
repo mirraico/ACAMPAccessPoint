@@ -30,8 +30,8 @@ int main(int argc,char *argv[])
 
     //recv
     u8* recv_buf = (u8*)malloc(sizeof(u8) * 1024);
-    //udp_recv(recv_buf, 1024);
-    memcpy(recv_buf, send_buf, package_len);
+    udp_recv(recv_buf, 1024);
+    //memcpy(recv_buf, send_buf, package_len);
 
     //parse
     acamp_header recv_header;
