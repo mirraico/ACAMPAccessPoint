@@ -14,6 +14,7 @@ void all_msg_element_test()
     package_len += (ELEMENT_HEADER_LEN + sizeof(u8));
 
     u32 reason_code = REASONCODE_AP_NO_RESPONE;
+    reason_code = htonl(reason_code);
     eles[1] = make_acamp_element(MSGELETYPE_REASON_CODE, sizeof(u32), (u8*)&reason_code);
     package_len += (ELEMENT_HEADER_LEN + sizeof(u32));
 
@@ -63,8 +64,10 @@ void all_msg_element_test()
     {
         u8 wlan_id = 102;
         u16 capability = 0x5555;
+        capability = htons(capability);
         u8 key_index = 1; u8 key_status = 2;
         u16 key_length = 8; u8 key[] = "ouycouyc\0";
+        key_length = htons(key_length);
         u8 group_tsc[6] = {0, 0, 0, 0, 0, 0};
         u8 qos = WLANINFO_QOS_BESTEFFORT; u8 auth_type = WLANINFO_AUTHTYPE_WEP;
         u8 suppress_ssid = WLANINFO_SUPRESS_SSID_SUPRESS;
@@ -95,6 +98,8 @@ void all_msg_element_test()
         u8 bssid_num = 5; u8 dtim_period = 8;
         u8 bssid[6] = {6, 6, 6, 6, 6, 6};
         u16 beacon_period = 30; u32 country = 86;
+        beacon_period = htons(beacon_period);
+        country = htonl(country);
 
         u8* ptr = radio_information;
         memcpy(ptr, &radio_id, sizeof(u8)); ptr += sizeof(u8);
@@ -115,6 +120,7 @@ void all_msg_element_test()
         u8 diversity = ANTENNA_DIVERSITY_ENABLED;
         u8 combiner = ANTENNA_COMBINER_RIGHTSECTORIEZD; u8 antenna_cnt = 3;
         u32 selection = ANTENNA_SELECTION_INTER;
+        selection = htonl(selection);
 
         u8* ptr = antenna;
         memcpy(ptr, &radio_id, sizeof(u8)); ptr += sizeof(u8);
@@ -132,6 +138,9 @@ void all_msg_element_test()
     {
         u8 num_level = 3;
         u16 level[3] = {100, 200, 300};
+        level[0] = htons(level[0]);
+        level[1] = htons(level[1]);
+        level[2] = htons(level[2]);
 
         u8* ptr = tx_power;
         memcpy(ptr, &radio_id, sizeof(u8)); ptr += sizeof(u8);
@@ -147,7 +156,9 @@ void all_msg_element_test()
     {
         u8 reserved = 0;
         u16 first_channel = 0; u16 channel_num = 13; u16 max_tx_power_lev = 1368;
-        u16 level[3] = {100, 200, 300};
+        first_channel = htons(first_channel);
+        channel_num = htons(channel_num);
+        max_tx_power_lev = htons(max_tx_power_lev);
 
         u8* ptr = multi_domain_cap;
         memcpy(ptr, &radio_id, sizeof(u8)); ptr += sizeof(u8);
@@ -164,6 +175,7 @@ void all_msg_element_test()
     u8 supported_rates[200]; int supported_rates_len = 0;
     {
         u16 rates = 9600;
+        rates = htons(rates);
 
         u8* ptr = supported_rates;
         memcpy(ptr, &radio_id, sizeof(u8)); ptr += sizeof(u8);
