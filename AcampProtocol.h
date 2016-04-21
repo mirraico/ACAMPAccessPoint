@@ -17,10 +17,10 @@ typedef struct {
     u8 version;
     u8 type;
     u16 apid;
-    u32 seq_num;
-    u16 msg_type;
-    u16 msg_len;
-}acamp_header;
+    u32 seqNum;
+    u16 msgType;
+    u16 msgLen;
+}APHeader;
 #define HEADER_LEN 16
 
 /*PayLoad: 4 + len
@@ -34,8 +34,15 @@ typedef struct {
    u16 type;
    u16 len;
    u8* data;
-}acamp_element;
+}APElementHeader;
 #define ELEMENT_HEADER_LEN 4
+
+typedef struct {
+    u8 *msg;
+    int offset;
+    u16 data_msgType;
+} APProtocolMessage;
+
 
 /* Preamble */
 #define PREAMBLE 0x01
@@ -60,36 +67,36 @@ typedef struct {
 #define MSGTYPE_STATION_RESPONSE 0x42
 
 /* Msg Ele Type */
-#define MSGELETYPE_RESULT_CODE 0x0001
-#define MSGELETYPE_REASON_CODE 0x0002
-#define MSGELETYPE_ASSIGNED_APID 0x0003
-#define MSGELETYPE_AP_MAC_ADDR 0x0101
-#define MSGELETYPE_AP_INET_ADDR 0x0102
-#define MSGELETYPE_AP_NAME 0x0103
-#define MSGELETYPE_AP_DESCRIPTION 0x0104
-#define MSGELETYPE_AP_LOCATION 0x0105
-#define MSGELETYPE_AP_BOARD_DATA 0x0106
-#define MSGELETYPE_AC_MAC_ADDR 0x0201
-#define MSGELETYPE_AC_INET_ADDR 0x0202
-#define MSGELETYPE_TIME_STAMP 0x0203
-#define MSGELETYPE_WLAN_INFO 0x0301
-#define MSGELETYPE_AP_RADIO_INFO 0x0302
-#define MSGELETYPE_ANTENNA 0x0303
-#define MSGELETYPE_TX_POWER 0x0304
-#define MSGELETYPE_MULTI_DOMAIN_CAP 0x0305
-#define MSGELETYPE_SUPPORTED_RATES 0x0306
-#define MSGELETYPE_ADD_MAC_ACL_ENTRY 0x0401
-#define MSGELETYPE_DEL_MAC_ACL_ENTRY 0x0402
-#define MSGELETYPE_ADD_STATION 0x0403
-#define MSGELETYPE_DEL_STATION 0x0404
-#define MSGELETYPE_STATION_EVENT 0x0501
+#define MSGELETYPE_RESULT_CODE htons(0x0001)
+#define MSGELETYPE_REASON_CODE htons(0x0002)
+#define MSGELETYPE_ASSIGNED_APID htons(0x0003)
+#define MSGELETYPE_AP_MAC_ADDR htons(0x0101)
+#define MSGELETYPE_AP_INET_ADDR htons(0x0102)
+#define MSGELETYPE_AP_NAME htons(0x0103)
+#define MSGELETYPE_AP_DESCRIPTION htons(0x0104)
+#define MSGELETYPE_AP_LOCATION htons(0x0105)
+#define MSGELETYPE_AP_BOARD_DATA htons(0x0106)
+#define MSGELETYPE_AC_MAC_ADDR htons(0x0201)
+#define MSGELETYPE_AC_INET_ADDR htons(0x0202)
+#define MSGELETYPE_TIME_STAMP htons(0x0203)
+#define MSGELETYPE_WLAN_INFO htons(0x0301)
+#define MSGELETYPE_AP_RADIO_INFO htons(0x0302)
+#define MSGELETYPE_ANTENNA htons(0x0303)
+#define MSGELETYPE_TX_POWER htons(0x0304)
+#define MSGELETYPE_MULTI_DOMAIN_CAP htons(0x0305)
+#define MSGELETYPE_SUPPORTED_RATES htons(0x0306)
+#define MSGELETYPE_ADD_MAC_ACL_ENTRY htons(0x0401)
+#define MSGELETYPE_DEL_MAC_ACL_ENTRY htons(0x0402)
+#define MSGELETYPE_ADD_STATION htons(0x0403)
+#define MSGELETYPE_DEL_STATION htons(0x0404)
+#define MSGELETYPE_STATION_EVENT htons(0x0501)
 
 /* Msg Ele Args */
 #define RESULTCODE_FAILURE 0
 #define RESULTCODE_SUCCESS 1
-#define REASONCODE_DEFAULT 0x0000
-#define REASONCODE_AC_NO_RESPONE 0x0101
-#define REASONCODE_AP_NO_RESPONE 0x0102
+#define REASONCODE_DEFAULT htons(0x0000)
+#define REASONCODE_AC_NO_RESPONE htons(0x0101)
+#define REASONCODE_AP_NO_RESPONE htons(0x0102)
 #define WLANINFO_QOS_BESTEFFORT 0
 #define WLANINFO_QOS_VIDEO 1
 #define WLANINFO_QOS_VOICE 2
@@ -109,15 +116,26 @@ typedef struct {
 #define ANTENNA_SELECTION_INTER 1
 #define ANTENNA_SELECTION_EXTER 2
 
+#define		AP_CREATE_PROTOCOL_MESSAGE(mess, size)		{ AP_CREATE_OBJECT_SIZE(((mess).msg), (size));		\
+                                    AP_ZERO_MEMORY(((mess).msg), (size));						\
+                                    (mess).offset = 0; }
+#define		AP_FREE_PROTOCOL_MESSAGE(mess)				{ AP_FREE_OBJECT(((mess).msg));								\
+                                    (mess).offset = 0; }
+
+void APProtocolStore8(APProtocolMessage *msgPtr, u8 val);
+void APProtocolStore16(APProtocolMessage *msgPtr, u16 val);
+void APProtocolStore32(APProtocolMessage *msgPtr, u32 val);
+void APProtocolStoreStr(APProtocolMessage *msgPtr, char *str);
+void APProtocolStoreMessage(APProtocolMessage *msgPtr, APProtocolMessage *msgToStorePtr);
+void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len);
+
+void APProtocolDestroyMsgElemData(void *f);
+
+APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type);
+APBool APAsembleMessage(APProtocolMessage **completeMsgPtr,
+                         int seqNum, int msgType, APProtocolMessage *msgElems, const int msgElemNum);
 
 
 
 
-
-acamp_header* make_acamp_header(u32 preamble, u8 version,
-                                u8 type, u16 apid, u32 seq_num,
-                                u16 msg_type, u16 msg_len);
-acamp_element* make_acamp_element(u16 type, u16 len, u8* data);
-u8* acamp_encapsulate(acamp_header* header, acamp_element* element[], int ele_num);
-int acamp_parse(u8* buf, acamp_header* header, acamp_element* element[], int array_len);
 #endif

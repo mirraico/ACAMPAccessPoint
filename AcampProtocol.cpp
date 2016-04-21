@@ -1,98 +1,73 @@
 #include "AcampProtocol.h"
 
-acamp_header* make_acamp_header(u32 preamble, u8 version,
-                                u8 type, u16 apid, u32 seq_num,
-                                u16 msg_type, u16 msg_len)
+void APProtocolStore8(APProtocolMessage *msgPtr, u8 val)
 {
-    acamp_header* header = (acamp_header*)malloc(sizeof(acamp_header));
-    header->preamble = preamble;
-    header->version = version;
-    header->type = type;
-    header->apid = apid;
-    header->seq_num = seq_num;
-    header->msg_type = msg_type;
-    header->msg_len = msg_len;
-    return header;
+    AP_COPY_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), &(val), 1);
+    (msgPtr->offset) += 1;
 }
 
-acamp_element* make_acamp_element(u16 type, u16 len, u8* data)
+void APProtocolStore16(APProtocolMessage *msgPtr, u16 val)
 {
-    acamp_element* element = (acamp_element*)malloc(sizeof(acamp_element));
-    element->type = type;
-    element->len = len;
-    element->data = (u8*)malloc(sizeof(u8) * len);
-    memcpy(element->data, data, len);
-    return element;
+    val = htons(val);
+    AP_COPY_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), &(val), 2);
+    (msgPtr->offset) += 2;
 }
 
-u8* acamp_encapsulate(acamp_header* header, acamp_element* element[], int ele_num)
+void APProtocolStore32(APProtocolMessage *msgPtr, u32 val)
 {
-    u8* buf= (u8*)malloc(header->msg_len * sizeof(u8));
-    u8* ptr = buf;
-    u32 net_preamble = htonl(header->preamble);
-    memcpy(ptr, &net_preamble, sizeof(net_preamble));
-    ptr += sizeof(net_preamble);
-    memcpy(ptr, &header->version, sizeof(header->version));
-    ptr += sizeof(header->version);
-    memcpy(ptr, &header->type, sizeof(header->type));
-    ptr += sizeof(header->type);
-    u16 net_apid = htons(header->apid);
-    memcpy(ptr, &net_apid, sizeof(net_apid));
-    ptr += sizeof(net_apid);
-    u32 net_seq = htonl(header->seq_num);
-    memcpy(ptr, &net_seq, sizeof(net_seq));
-    ptr += sizeof(net_seq);
-    u16 net_msg_type = htons(header->msg_type);
-    memcpy(ptr, &net_msg_type, sizeof(net_msg_type));
-    ptr += sizeof(net_msg_type);
-    u16 net_msg_len = htons(header->msg_len);
-    memcpy(ptr, &net_msg_len, sizeof(net_msg_len));
-    ptr += sizeof(net_msg_len);
+    val = htonl(val);
+    AP_COPY_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), &(val), 4);
+    (msgPtr->offset) += 4;
+}
 
-    for (int i = 0; i < ele_num; i++)
-    {
-        u16 net_ele_type = htons(element[i]->type);
-        memcpy(ptr, &net_ele_type, sizeof(net_ele_type));
-        ptr += sizeof(net_ele_type);
-        u16 net_ele_len = htons(element[i]->len);
-        memcpy(ptr, &net_ele_len, sizeof(net_ele_len));
-        ptr += sizeof(net_ele_len);
-        memcpy(ptr, (u8*)element[i]->data, sizeof(u8)*element[i]->len);
-        ptr += sizeof(u8)*element[i]->len;
-    }
-    return buf;
+void APProtocolStoreStr(APProtocolMessage *msgPtr, char *str)
+{
+    int len = strlen(str);
+    AP_COPY_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), str, len);
+    (msgPtr->offset) += len;
+}
+
+void APProtocolStoreMessage(APProtocolMessage *msgPtr, APProtocolMessage *msgToStorePtr)
+{
+    AP_COPY_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), msgToStorePtr->msg, msgToStorePtr->offset);
+    (msgPtr->offset) += msgToStorePtr->offset;
+}
+
+void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len)
+{
+    AP_COPY_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), bytes, len);
+    (msgPtr->offset) += len;
+}
+
+void APProtocolDestroyMsgElemData(void *f)
+{
+    AP_FREE_OBJECT(f);
 }
 
 
-int acamp_parse(u8* buf,
-                   acamp_header* header, acamp_element* element[], int array_len)
-{    
-    u8* ptr = buf;
-    memcpy(header, ptr, sizeof(acamp_header));
-    header->preamble = ntohl(header->preamble);
-    header->apid = ntohs(header->apid);
-    header->seq_num = ntohl(header->seq_num);
-    header->msg_type = ntohs(header->msg_type);
-    header->msg_len = ntohs(header->msg_len);
 
-    ptr += sizeof(acamp_header);
-    int ele_cnt = 0;
-    for (int i = 0; i < array_len; i++)
-    {
-        if(ptr - buf >= header->msg_len) break;
-        element[i] = (acamp_element*)malloc(sizeof(acamp_element));
-        u16 net_ele_type;
-        memcpy(&net_ele_type, ptr, sizeof(u16));
-        element[i]->type = ntohs(net_ele_type);
-        ptr += sizeof(u16);
-        u16 net_ele_len;
-        memcpy(&net_ele_len, ptr, sizeof(u16));
-        element[i]->len = ntohs(net_ele_len);
-        ptr += sizeof(u16);
-        element[i]->data = (u8*)malloc(element[i]->len * sizeof(u8));
-        memcpy(element[i]->data, ptr, element[i]->len * sizeof(u8));
-        ptr += element[i]->len * sizeof(u8);
-        ele_cnt++;
-    }
-    return ele_cnt;
+
+
+
+
+
+APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type)
+{
+    APProtocolMessage completeMsg;
+
+    if(msgPtr == NULL) return AP_FALSE;
+    AP_CREATE_PROTOCOL_MESSAGE(completeMsg, ELEMENT_HEADER_LEN+(msgPtr->offset));
+
+    APProtocolStore16(&completeMsg, type);
+    APProtocolStore16(&completeMsg, msgPtr->offset);
+
+    APProtocolStoreMessage(&completeMsg, msgPtr);
+
+    AP_FREE_PROTOCOL_MESSAGE(*msgPtr);
+
+    msgPtr->msg = completeMsg.msg;
+    msgPtr->offset = completeMsg.offset;
+    msgPtr->data_msgType = type;
+
+    return AP_TRUE;
 }
