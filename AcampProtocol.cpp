@@ -1,3 +1,4 @@
+#include "Common.h"
 #include "AcampProtocol.h"
 
 void APProtocolStore8(APProtocolMessage *msgPtr, u8 val)
@@ -39,18 +40,6 @@ void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len)
     (msgPtr->offset) += len;
 }
 
-void APProtocolDestroyMsgElemData(void *f)
-{
-    AP_FREE_OBJECT(f);
-}
-
-
-
-
-
-
-
-
 APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type)
 {
     APProtocolMessage completeMsg;
@@ -60,14 +49,85 @@ APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type)
 
     APProtocolStore16(&completeMsg, type);
     APProtocolStore16(&completeMsg, msgPtr->offset);
-
     APProtocolStoreMessage(&completeMsg, msgPtr);
 
     AP_FREE_PROTOCOL_MESSAGE(*msgPtr);
 
     msgPtr->msg = completeMsg.msg;
     msgPtr->offset = completeMsg.offset;
-    msgPtr->data_msgType = type;
+    msgPtr->type = type;
 
     return AP_TRUE;
+}
+
+APBool APAssembleMessage(APProtocolMessage *msgPtr,
+                         u32 seqNum, u16 msgType, APProtocolMessage *msgElems, const int msgElemNum)
+{
+    APProtocolMessage controlHdr, completeMsg;
+    int msgElemsLen = 0;
+    APHeaderVal controlHdrVal;
+
+    if(msgPtr == NULL || (msgElems == NULL && msgElemNum > 0))
+        return AP_FALSE;
+
+    for(int i = 0; i < msgElemNum; i++) msgElemsLen += msgElems[i].offset;
+
+    controlHdrVal.preamble = PREAMBLE;
+    controlHdrVal.version = VERSION;
+    controlHdrVal.type = TYPE_CONTROL;
+    controlHdrVal.apid = APGetAPID();
+    controlHdrVal.seqNum = seqNum;
+    controlHdrVal.msgType = msgType;
+    controlHdrVal.msgLen = HEADER_LEN + msgElemsLen;
+
+    if(!(APAssembleControlHeader(&controlHdr, &controlHdrVal))) {
+        AP_FREE_PROTOCOL_MESSAGE(controlHdr);
+        AP_FREE_PROTOCOL_AND_MESSAGE_ARRAY(msgElems, msgElemNum);
+        return AP_FALSE;
+    }
+
+    completeMsg.type = msgType;
+    AP_CREATE_PROTOCOL_MESSAGE(completeMsg, controlHdr.offset + msgElemsLen);
+    APProtocolStoreMessage(&completeMsg, &controlHdr);
+    AP_FREE_PROTOCOL_MESSAGE(controlHdr);
+
+    for(int i = 0; i < msgElemNum; i++) {
+        APProtocolStoreMessage(&completeMsg, &(msgElems[i]));
+    }
+    AP_FREE_PROTOCOL_AND_MESSAGE_ARRAY(msgElems, msgElemNum);
+
+    AP_FREE_PROTOCOL_MESSAGE(*msgPtr);
+    msgPtr->msg = completeMsg.msg;
+    msgPtr->offset = completeMsg.offset;
+    msgPtr->type = msgType;
+
+    return AP_TRUE;
+}
+
+APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr)
+{
+    if(controlHdrPtr == NULL || valPtr == NULL) return AP_FALSE;
+
+    AP_CREATE_PROTOCOL_MESSAGE(*controlHdrPtr, HEADER_LEN);
+
+    APProtocolStore32(controlHdrPtr, valPtr->preamble);
+    APProtocolStore8(controlHdrPtr, valPtr->version);
+    APProtocolStore8(controlHdrPtr, valPtr->type);
+    APProtocolStore16(controlHdrPtr, valPtr->apid);
+    APProtocolStore32(controlHdrPtr, valPtr->seqNum);
+    APProtocolStore16(controlHdrPtr, valPtr->msgType);
+    APProtocolStore16(controlHdrPtr, valPtr->msgLen);
+
+    return AP_TRUE;
+}
+
+
+APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr) {
+    if(msgPtr == NULL) return AP_FALSE;
+
+    char *name = APGetAPName();
+    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, strlen(name));
+
+    APProtocolStoreStr(msgPtr, name);
+    return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_NAME);
 }

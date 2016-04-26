@@ -1,6 +1,5 @@
-#ifndef ACAMPTRANSMISSION_H
-#define ACAMPTRANSMISSION_H
-#include "Common.h"
+#ifndef __ACAMPTRANSMISSION_H__
+#define __ACAMPTRANSMISSION_H__
 
 extern int udp_fd;
 extern sockaddr_in udp_addrin;

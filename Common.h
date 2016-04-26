@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef __COMMON_H__
+#define __COMMON_H__
 
 #include "stdio.h"
 #include <net/ethernet.h>
@@ -29,6 +29,8 @@ typedef enum  {
 #define	AP_CREATE_OBJECT_SIZE(obj_name, obj_size)	obj_name = ((u8*)malloc(obj_size));
 #define	AP_FREE_OBJECT(obj_name)		{if(obj_name){free((obj_name)); (obj_name) = NULL;}}
 #define	AP_FREE_OBJECTS_ARRAY(ar_name, ar_size)	{int _i = 0; for(_i = ((ar_size)-1); _i >= 0; _i--) {if(((ar_name)[_i]) != NULL){ free((ar_name)[_i]);}} free(ar_name); (ar_name) = NULL; }
+
+#define	AP_CREATE_ARRAY(ar_name, ar_size, ar_type)	{ar_name = (ar_type*) (malloc(sizeof(ar_type) * (ar_size)));}
 
 
 typedef u_int64_t u64;
