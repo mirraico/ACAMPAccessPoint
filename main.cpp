@@ -24,5 +24,4 @@ int main(int argc,char *argv[])
     udp_send(sendMsg.msg, sendMsg.offset);
 
     AP_FREE_PROTOCOL_MESSAGE(sendMsg);
-    AP_FREE_PROTOCOL_AND_MESSAGE_ARRAY(msgElems, msgElemCount);
 }
