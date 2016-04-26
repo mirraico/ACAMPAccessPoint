@@ -1,3 +1,4 @@
+#include "Common.h"
 #include "AcampTransmission.h"
 
 sockaddr_in udp_addrin;
