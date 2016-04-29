@@ -1,4 +1,3 @@
-#include "Common.h"
 #include "AcampProtocol.h"
 
 void APProtocolStore8(APProtocolMessage *msgPtr, u8 val)
@@ -121,6 +120,56 @@ APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *va
     return AP_TRUE;
 }
 
+u8 APProtocolRetrieve8(APProtocolMessage *msgPtr) {
+    u8 val;
+
+    AP_COPY_MEMORY(&val, &((msgPtr->msg)[(msgPtr->offset)]), 1);
+    (msgPtr->offset) += 1;
+
+    return val;
+}
+
+u16 APProtocolRetrieve16(APProtocolMessage *msgPtr) {
+    u16 val;
+
+    AP_COPY_MEMORY(&val, &((msgPtr->msg)[(msgPtr->offset)]), 2);
+    (msgPtr->offset) += 2;
+
+    return ntohs(val);
+}
+
+u32 APProtocolRetrieve32(APProtocolMessage *msgPtr) {
+    u32 val;
+
+    AP_COPY_MEMORY(&val, &((msgPtr->msg)[(msgPtr->offset)]), 4);
+    (msgPtr->offset) += 4;
+
+    return ntohl(val);
+}
+
+char* APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len) {
+    u8* str;
+
+    AP_CREATE_OBJECT_SIZE(str, (len+1));
+
+    AP_COPY_MEMORY(str, &((msgPtr->msg)[(msgPtr->offset)]), len);
+    str[len] = '\0';
+    (msgPtr->offset) += len;
+
+    return (char*)str;
+}
+
+u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len) {
+    u8* bytes;
+
+    AP_CREATE_OBJECT_SIZE(bytes, len);
+
+    AP_COPY_MEMORY(bytes, &((msgPtr->msg)[(msgPtr->offset)]), len);
+    (msgPtr->offset) += len;
+
+    return bytes;
+}
+
 
 APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr) {
     if(msgPtr == NULL) return AP_FALSE;
@@ -131,3 +180,6 @@ APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr) {
     APProtocolStoreStr(msgPtr, name);
     return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_NAME);
 }
+
+
+
