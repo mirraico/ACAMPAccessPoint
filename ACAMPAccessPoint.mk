@@ -5,7 +5,7 @@
 ## Debug
 ProjectName            :=ACAMPAccessPoint
 ConfigurationName      :=Debug
-WorkspacePath          :=/home/ouyc/Documents/Project
+WorkspacePath          :=/home/ouyc/Documents/Project/ACAMPAccessPoint
 ProjectPath            :=/home/ouyc/Documents/Project/ACAMPAccessPoint
 IntermediateDirectory  :=./Debug
 OutDir                 := $(IntermediateDirectory)
@@ -60,7 +60,7 @@ AS       := as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/AcampProtocol.cpp$(ObjectSuffix) $(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/AcampTransmission.cpp$(ObjectSuffix) $(IntermediateDirectory)/AcampAP.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/AcampAP.cpp$(ObjectSuffix) $(IntermediateDirectory)/AcampNetwork.cpp$(ObjectSuffix) $(IntermediateDirectory)/AcampProtocol.cpp$(ObjectSuffix) $(IntermediateDirectory)/AcampRegisterState.cpp$(ObjectSuffix) $(IntermediateDirectory)/APMain.cpp$(ObjectSuffix) 
 
 
 
@@ -91,6 +91,22 @@ PreBuild:
 ##
 ## Objects
 ##
+$(IntermediateDirectory)/AcampAP.cpp$(ObjectSuffix): AcampAP.cpp $(IntermediateDirectory)/AcampAP.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/ouyc/Documents/Project/ACAMPAccessPoint/AcampAP.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/AcampAP.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/AcampAP.cpp$(DependSuffix): AcampAP.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/AcampAP.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/AcampAP.cpp$(DependSuffix) -MM "AcampAP.cpp"
+
+$(IntermediateDirectory)/AcampAP.cpp$(PreprocessSuffix): AcampAP.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/AcampAP.cpp$(PreprocessSuffix) "AcampAP.cpp"
+
+$(IntermediateDirectory)/AcampNetwork.cpp$(ObjectSuffix): AcampNetwork.cpp $(IntermediateDirectory)/AcampNetwork.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/ouyc/Documents/Project/ACAMPAccessPoint/AcampNetwork.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/AcampNetwork.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/AcampNetwork.cpp$(DependSuffix): AcampNetwork.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/AcampNetwork.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/AcampNetwork.cpp$(DependSuffix) -MM "AcampNetwork.cpp"
+
+$(IntermediateDirectory)/AcampNetwork.cpp$(PreprocessSuffix): AcampNetwork.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/AcampNetwork.cpp$(PreprocessSuffix) "AcampNetwork.cpp"
+
 $(IntermediateDirectory)/AcampProtocol.cpp$(ObjectSuffix): AcampProtocol.cpp $(IntermediateDirectory)/AcampProtocol.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/ouyc/Documents/Project/ACAMPAccessPoint/AcampProtocol.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/AcampProtocol.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/AcampProtocol.cpp$(DependSuffix): AcampProtocol.cpp
@@ -99,29 +115,21 @@ $(IntermediateDirectory)/AcampProtocol.cpp$(DependSuffix): AcampProtocol.cpp
 $(IntermediateDirectory)/AcampProtocol.cpp$(PreprocessSuffix): AcampProtocol.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/AcampProtocol.cpp$(PreprocessSuffix) "AcampProtocol.cpp"
 
-$(IntermediateDirectory)/main.cpp$(ObjectSuffix): main.cpp $(IntermediateDirectory)/main.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/ouyc/Documents/Project/ACAMPAccessPoint/main.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/main.cpp$(DependSuffix): main.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/main.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/main.cpp$(DependSuffix) -MM "main.cpp"
+$(IntermediateDirectory)/AcampRegisterState.cpp$(ObjectSuffix): AcampRegisterState.cpp $(IntermediateDirectory)/AcampRegisterState.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/ouyc/Documents/Project/ACAMPAccessPoint/AcampRegisterState.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/AcampRegisterState.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/AcampRegisterState.cpp$(DependSuffix): AcampRegisterState.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/AcampRegisterState.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/AcampRegisterState.cpp$(DependSuffix) -MM "AcampRegisterState.cpp"
 
-$(IntermediateDirectory)/main.cpp$(PreprocessSuffix): main.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/main.cpp$(PreprocessSuffix) "main.cpp"
+$(IntermediateDirectory)/AcampRegisterState.cpp$(PreprocessSuffix): AcampRegisterState.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/AcampRegisterState.cpp$(PreprocessSuffix) "AcampRegisterState.cpp"
 
-$(IntermediateDirectory)/AcampTransmission.cpp$(ObjectSuffix): AcampTransmission.cpp $(IntermediateDirectory)/AcampTransmission.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/ouyc/Documents/Project/ACAMPAccessPoint/AcampTransmission.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/AcampTransmission.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/AcampTransmission.cpp$(DependSuffix): AcampTransmission.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/AcampTransmission.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/AcampTransmission.cpp$(DependSuffix) -MM "AcampTransmission.cpp"
+$(IntermediateDirectory)/APMain.cpp$(ObjectSuffix): APMain.cpp $(IntermediateDirectory)/APMain.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/ouyc/Documents/Project/ACAMPAccessPoint/APMain.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/APMain.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/APMain.cpp$(DependSuffix): APMain.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/APMain.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/APMain.cpp$(DependSuffix) -MM "APMain.cpp"
 
-$(IntermediateDirectory)/AcampTransmission.cpp$(PreprocessSuffix): AcampTransmission.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/AcampTransmission.cpp$(PreprocessSuffix) "AcampTransmission.cpp"
-
-$(IntermediateDirectory)/AcampAP.cpp$(ObjectSuffix): AcampAP.cpp $(IntermediateDirectory)/AcampAP.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/ouyc/Documents/Project/ACAMPAccessPoint/AcampAP.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/AcampAP.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/AcampAP.cpp$(DependSuffix): AcampAP.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/AcampAP.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/AcampAP.cpp$(DependSuffix) -MM "AcampAP.cpp"
-
-$(IntermediateDirectory)/AcampAP.cpp$(PreprocessSuffix): AcampAP.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/AcampAP.cpp$(PreprocessSuffix) "AcampAP.cpp"
+$(IntermediateDirectory)/APMain.cpp$(PreprocessSuffix): APMain.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/APMain.cpp$(PreprocessSuffix) "APMain.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

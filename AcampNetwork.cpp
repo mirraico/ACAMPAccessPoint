@@ -1,5 +1,13 @@
 #include "AcampNetwork.h"
 
+char gAPName[32];
+u16 gAPID;
+char gAddress[20];
+ int gPort;
+
+APSocket gSocket;
+APNetworkAddress gSockaddr;
+
 int APNetworkGetAddressSize()
 {
     return sizeof(struct sockaddr_in);

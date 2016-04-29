@@ -1,18 +1,20 @@
 #include "Common.h"
 #include "AcampProtocol.h"
+#include "AcampNetwork.h"
 
-extern char gAPName[32];
-extern u16 gAPID;
-extern char gAddress[20];
-extern int gPort;
-extern APBool APNetworkInit();
-extern APBool APNetworkSendMessage(const u8 *buf, int len);
+//extern char gAPName[32];
+//extern u16 gAPID;
+//extern char gAddress[20];
+//extern int gPort;
+
+//extern APBool APNetworkInit();
+//extern APBool APNetworkSendMessage(const u8 *buf, int len);
 
 void APInitConfiguration();
 
 int main()
 {
-	int sss = 5;
+	//int sss = 5;
 	
     APInitConfiguration();
     APNetworkInit();
