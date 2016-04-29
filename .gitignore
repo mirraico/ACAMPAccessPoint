@@ -1,8 +1,11 @@
-*.pro*
+*.pro
+*.pro.user
 *.workspace
 *.txt
 *.out
 
+.codelite
 .clang
 Debug/*
 
+.gitigonre
