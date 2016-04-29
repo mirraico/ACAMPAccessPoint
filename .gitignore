@@ -1,5 +1,6 @@
 *.pro
 *.pro.user
+*.project
 *.workspace
 *.txt
 *.out
@@ -8,4 +9,4 @@
 .clang
 Debug/*
 
-.gitigonre
+.gitignore

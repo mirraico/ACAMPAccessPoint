@@ -1,8 +1,10 @@
 #ifndef __ACAMPAP_H__
 #define __ACAMPAP_H__
 
+#include "Common.h"
+
 u16 gAPID;
-char* gAPName;
+char gAPName[32];
 
 u16 APGetAPID();
 char* APGetAPName();
