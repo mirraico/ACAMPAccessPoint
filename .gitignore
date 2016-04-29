@@ -2,9 +2,7 @@
 *.workspace
 *.txt
 *.out
-*.mk
 
-.codelite
 .clang
 Debug/*
 
