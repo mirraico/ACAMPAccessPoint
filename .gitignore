@@ -1,0 +1,9 @@
+*.pro*
+*.workspace
+*.txt
+*.out
+
+
+.clang
+Debug/*
+
