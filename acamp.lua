@@ -5,19 +5,19 @@ do
 	local proto_acamp = Proto("ACAMP", "AP Control And Management Protocol")
 
 	local msg_type = {
-		[0x0011] = "Register Request",
-		[0x0012] = "Register Response",
-		[0x0013] = "Disconnect Request",
-		[0x0014] = "Disconnect Response",
-		[0x0021] = "Configuration Request",
-		[0x0022] = "Configuration_Response",
-		[0x0023] = "Configuration Reset Request",
-		[0x0024] = "Configuration Reset Response",
-		[0x0031] = "Statistic Stat Response",
-		[0x0032] = "Statistic Stat Query",
-		[0x0033] = "Statistic Stat Reply",
-		[0x0041] = "Stat Request",
-		[0x0042] = "Stat Response"
+		[0x0101] = "Register Request",
+		[0x0102] = "Register Response",
+		[0x0103] = "Disconnect Request",
+		[0x0104] = "Disconnect Response",
+		[0x0201] = "Configuration Request",
+		[0x0202] = "Configuration_Response",
+		[0x0203] = "Configuration Reset Request",
+		[0x0204] = "Configuration Reset Response",
+		[0x0301] = "Statistic Stat Response",
+		[0x0302] = "Statistic Stat Query",
+		[0x0303] = "Statistic Stat Reply",
+		[0x0401] = "Stat Request",
+		[0x0402] = "Stat Response"
 	}
 
 <<<<<<< HEAD
