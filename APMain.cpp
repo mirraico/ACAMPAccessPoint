@@ -28,7 +28,12 @@ int main()
 		}
 	}
 	
-	/**
+	/*
+	 Local NetworkInfo Test 
+	 printf("ip: %s gateway: %s\n", gLocalAddr, gLocalDefaultGateway);
+	 */
+	 
+	/*
 	Send Test
 	
 	APProtocolMessage *msgElems;

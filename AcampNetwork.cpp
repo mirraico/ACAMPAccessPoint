@@ -10,23 +10,93 @@ int APNetworkGetAddressSize()
 	return sizeof(struct sockaddr_in);
 }
 
+int APNetworkReadNlSock(int sockFd, char *bufPtr, int seqNum, int pId)
+{
+	struct nlmsghdr *nlHdr;
+	int readLen = 0, msgLen = 0;
+	do 
+	{
+		if ((readLen = recv(sockFd, bufPtr, 8192 - msgLen, 0)) < 0) return -1;
+		nlHdr = (struct nlmsghdr *) bufPtr;
+
+		if ((NLMSG_OK(nlHdr, readLen) == 0)
+			|| (nlHdr->nlmsg_type == NLMSG_ERROR))
+			return -1;
+
+		if (nlHdr->nlmsg_type == NLMSG_DONE) {
+			break;
+		} else {
+			bufPtr += readLen;
+			msgLen += readLen;
+		}
+
+		if ((nlHdr->nlmsg_flags & NLM_F_MULTI) == 0) break;
+	} while ((nlHdr->nlmsg_seq != seqNum) || (nlHdr->nlmsg_pid != pId));
+	return msgLen;
+}
+
+void APNetworkParseRoutes(struct nlmsghdr *nlHdr)
+{
+	struct route_info {
+		struct in_addr dstAddr;
+		struct in_addr srcAddr;
+		struct in_addr gateWay;
+		char ifName[IF_NAMESIZE];
+	} rtInfo;
+	struct route_info* prtInfo = &rtInfo;
+	AP_ZERO_MEMORY(prtInfo, sizeof(route_info));
+
+	struct rtmsg *rtMsg = (struct rtmsg *) NLMSG_DATA(nlHdr);
+	if ((rtMsg->rtm_family != AF_INET) || (rtMsg->rtm_table != RT_TABLE_MAIN)) return;
+	struct rtattr *rtAttr = (struct rtattr *) RTM_RTA(rtMsg);
+	int rtLen = RTM_PAYLOAD(nlHdr);
+	for (; RTA_OK(rtAttr, rtLen); rtAttr = RTA_NEXT(rtAttr, rtLen)) {
+		switch (rtAttr->rta_type) {
+		case RTA_OIF:
+			if_indextoname(*(int *) RTA_DATA(rtAttr), prtInfo->ifName);
+			break;
+		case RTA_GATEWAY:
+			prtInfo->gateWay.s_addr= *(u_int *) RTA_DATA(rtAttr);
+			break;
+		case RTA_PREFSRC:
+			prtInfo->srcAddr.s_addr= *(u_int *) RTA_DATA(rtAttr);
+			break;
+		case RTA_DST:
+			prtInfo->dstAddr .s_addr= *(u_int *) RTA_DATA(rtAttr);
+			break;
+		}
+	}
+
+	if (prtInfo->dstAddr.s_addr == 0)
+		sprintf(gLocalDefaultGateway, (char *) inet_ntoa(prtInfo->gateWay));
+	sprintf(gLocalAddr, (char *) inet_ntoa(prtInfo->srcAddr));
+
+	return;
+}
+
 APBool APNetworkInitLocalAddr()
 {
-	int sfd, intr;
-	struct ifreq buf[16];
-	struct ifconf ifc;
-	sfd = socket (AF_INET, SOCK_DGRAM, 0);
-	if (sfd < 0) return AP_FALSE;
-	ifc.ifc_len = sizeof(buf);
-	ifc.ifc_buf = (caddr_t)buf;
-	if (ioctl(sfd, SIOCGIFCONF, (char *)&ifc)) return AP_FALSE;
-	intr = ifc.ifc_len / sizeof(struct ifreq);
-	while (intr-- > 0 && ioctl(sfd, SIOCGIFADDR, (char *)&buf[intr]));
-	close(sfd);
-	char* localaddr = inet_ntoa(((struct sockaddr_in*)(&buf[intr].ifr_addr))->sin_addr);
-	int localaddrlen = strlen(localaddr);
 	AP_ZERO_MEMORY(gLocalAddr, 20);
-	AP_COPY_MEMORY(gLocalAddr, localaddr, localaddrlen + 1);
+	AP_ZERO_MEMORY(gLocalDefaultGateway, 20);
+	char msgBuf[8192];
+	int sock, len, msgSeq = 0;
+
+	if((sock = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE)) < 0) return AP_FALSE;
+	AP_ZERO_MEMORY(msgBuf, 8192);
+
+	struct nlmsghdr *nlMsg = (struct nlmsghdr *) msgBuf;
+	nlMsg->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
+	nlMsg->nlmsg_type = RTM_GETROUTE;
+	nlMsg->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST;
+	nlMsg->nlmsg_seq = msgSeq++;
+	nlMsg->nlmsg_pid = getpid();
+
+	if (send(sock, nlMsg, nlMsg->nlmsg_len, 0) < 0)  return AP_FALSE;
+	if ((len = APNetworkReadNlSock(sock, msgBuf, msgSeq, getpid())) < 0) return AP_FALSE;
+	
+	for (; NLMSG_OK(nlMsg, len); nlMsg = NLMSG_NEXT(nlMsg, len)) 
+		APNetworkParseRoutes(nlMsg);
+	close(sock);
 	return AP_TRUE;
 }
 
@@ -36,19 +106,6 @@ APBool APNetworkInit()
 	gSockaddr.sin_addr.s_addr = inet_addr(gAddress);
 	gSockaddr.sin_port = htons(gPort);
 	gSocket = socket(AF_INET,SOCK_DGRAM,0);
-	
 	if(!APNetworkInitLocalAddr()) return AP_FALSE;
-	return AP_TRUE;
-}
-
-APBool APNetworkSendMessage(const u8 *buf, int len)
-{
-	if(buf == NULL)
-		return AP_FALSE;
-
-	if(sendto(gSocket, buf, len, 0,
-				  (sockaddr*)&gSockaddr, APNetworkGetAddressSize()) < 0)
-		return AP_FALSE;
-
 	return AP_TRUE;
 }

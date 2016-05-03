@@ -4,6 +4,9 @@
 #include "Common.h"
 #include "AcampAP.h"
 
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
+
 extern char gAddress[20];
 extern int gPort;
 
