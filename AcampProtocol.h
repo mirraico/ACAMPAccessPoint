@@ -2,12 +2,8 @@
 #define __ACAMPPROTOCOL_H__
 
 #include "Common.h"
+#include "AcampAP.h"
 
-extern u16 gAPID;
-extern char gAPName[32];
-
-__inline__ u16 APGetAPID() { return gAPID; }
-__inline__ char* APGetAPName() { return gAPName; }
 
 /*Msg Len = 16 byte + PayLoad (4 + len)*num byte
  * -----------------------------------------
@@ -19,13 +15,13 @@ __inline__ char* APGetAPName() { return gAPName; }
 |             *PayLoad                    |
 -----------------------------------------*/
 typedef struct {
-    u32 preamble;
-    u8 version;
-    u8 type;
-    u16 apid;
-    u32 seqNum;
-    u16 msgType;
-    u16 msgLen;
+	u32 preamble;
+	u8 version;
+	u8 type;
+	u16 apid;
+	u32 seqNum;
+	u16 msgType;
+	u16 msgLen;
 }APHeaderVal;
 #define HEADER_LEN 16
 #define PREAMBLE 0x00000001
@@ -49,9 +45,9 @@ typedef struct {
 
 
 typedef struct {
-    u8 *msg;
-    int offset;
-    u16 type;
+	u8 *msg;
+	int offset;
+	u16 type;
 }APProtocolMessage;
 
 
@@ -97,34 +93,34 @@ typedef struct {
 
 
 typedef enum {
-    AP_ENTER_REGISTER,
-    AP_ENTER_RUN,
-    AP_ENTER_DOWN
+	AP_ENTER_REGISTER,
+	AP_ENTER_RUN,
+	AP_ENTER_DOWN
 } APStateTransition;
 
 
 #define		AP_CREATE_PROTOCOL_MESSAGE(mess, size)		{ AP_CREATE_OBJECT_SIZE(((mess).msg), (size));\
-                                    AP_ZERO_MEMORY(((mess).msg), (size));\
-                                    (mess).offset = 0; }
+									AP_ZERO_MEMORY(((mess).msg), (size));\
+									(mess).offset = 0; }
 #define		AP_FREE_PROTOCOL_MESSAGE(mess)				{ AP_FREE_OBJECT(((mess).msg));\
-                                    (mess).msg = NULL;\
-                                    (mess).offset = 0; }
+									(mess).msg = NULL;\
+									(mess).offset = 0; }
 #define	AP_INIT_PROTOCOL_MESSAGE(mess) {(mess).msg = NULL; (mess).offset = 0;}
 #define 	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(ar_name, ar_size) 	{\
-                                            AP_CREATE_ARRAY(ar_name, ar_size, APProtocolMessage)\
-                                            int i;\
-                                            for(i=0;i<(ar_size); i++) {\
-                                                (ar_name)[i].msg = NULL;\
-                                                (ar_name)[i].offset = 0; \
-                                            }\
-                                        }
+											AP_CREATE_ARRAY(ar_name, ar_size, APProtocolMessage)\
+											int i;\
+											for(i=0;i<(ar_size); i++) {\
+												(ar_name)[i].msg = NULL;\
+												(ar_name)[i].offset = 0; \
+											}\
+										}
 #define 	AP_FREE_PROTOCOL_AND_MESSAGE_ARRAY(ar_name, ar_size) 	{\
-                                            int i;\
-                                            for(i=0;i<(ar_size); i++) {\
-                                                AP_FREE_PROTOCOL_MESSAGE((ar_name)[i]);\
-                                            }\
-                                            AP_FREE_OBJECT(ar_name);\
-                                        }
+											int i;\
+											for(i=0;i<(ar_size); i++) {\
+												AP_FREE_PROTOCOL_MESSAGE((ar_name)[i]);\
+											}\
+											AP_FREE_OBJECT(ar_name);\
+										}
 
 
 void APProtocolStore8(APProtocolMessage *msgPtr, u8 val);
@@ -136,7 +132,7 @@ void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len);
 
 APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type);
 APBool APAssembleMessage(APProtocolMessage *msgPtr,
-                         u32 seqNum, u16 msgType, APProtocolMessage msgElems[], const int msgElemNum);
+						 u32 seqNum, u16 msgType, APProtocolMessage msgElems[], const int msgElemNum);
 APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr);
 
 u8 APProtocolRetrieve8(APProtocolMessage *msgPtr);
