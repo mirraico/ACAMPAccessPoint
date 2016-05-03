@@ -3,11 +3,8 @@
 
 #include "Common.h"
 
-u16 gAPID;
-char gAPName[32];
-
-u16 APGetAPID();
-char* APGetAPName();
+extern u16 gAPID;
+extern char gAPName[32];
 
 __inline__ u16 APGetAPID() { return gAPID; }
 __inline__ char* APGetAPName() { return gAPName; }

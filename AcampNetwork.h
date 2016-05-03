@@ -9,13 +9,12 @@
 #include <netdb.h>
 #include "Common.h"
 
-char gAddress[20];
-int gPort;
+extern char gAddress[20];
+extern int gPort;
+
 typedef int APSocket;
 typedef struct sockaddr_in APNetworkAddress;
 
-APSocket gSocket;
-APNetworkAddress gSockaddr;
 
 APBool APNetworkInit();
 int APNetworkGetAddressSize();
