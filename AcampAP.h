@@ -5,6 +5,7 @@
 
 extern u16 gAPID;
 extern char gAPName[32];
+extern char gLocalAddr[20];
 
 __inline__ u16 APGetAPID() { return gAPID; }
 __inline__ char* APGetAPName() { return gAPName; }
