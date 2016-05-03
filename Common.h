@@ -17,8 +17,8 @@
 #include <sys/socket.h>
 
 typedef enum  {
-    AP_FALSE = 0,
-    AP_TRUE = 1
+	AP_FALSE = 0,
+	AP_TRUE = 1
 } APBool;
 
 #define	AP_BUFFER_SIZE					65536
@@ -27,6 +27,7 @@ typedef enum  {
 #define	AP_REPEAT_FOREVER				while(1)
 
 #define	AP_CREATE_OBJECT_SIZE(obj_name, obj_size)	obj_name = ((u8*)malloc(obj_size));
+#define	AP_CREATE_STRING_SIZE(str_name, str_size)	str_name = ((char*)malloc(str_size));
 #define	AP_FREE_OBJECT(obj_name)		{if(obj_name){free((obj_name)); (obj_name) = NULL;}}
 #define	AP_FREE_OBJECTS_ARRAY(ar_name, ar_size)	{int _i = 0; for(_i = ((ar_size)-1); _i >= 0; _i--) {if(((ar_name)[_i]) != NULL){ free((ar_name)[_i]);}} free(ar_name); (ar_name) = NULL; }
 
