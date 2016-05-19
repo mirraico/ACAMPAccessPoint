@@ -8,14 +8,12 @@
 /*Msg Len = 16 byte + PayLoad (4 + len)*num byte
  * -----------------------------------------
 0        8       16         24         32
-|             Preamble                    |
 |Version |  Type  |        APID           |
 |              Seq_Num                    |
 |  Msg Type       |           Msg Len     |
 |             *PayLoad                    |
 -----------------------------------------*/
 typedef struct {
-	u32 preamble;
 	u8 version;
 	u8 type;
 	u16 apid;
@@ -23,8 +21,7 @@ typedef struct {
 	u16 msgType;
 	u16 msgLen;
 }APHeaderVal;
-#define HEADER_LEN 16
-#define PREAMBLE 0x00000001
+#define HEADER_LEN 12
 #define VERSION 0x01
 #define TYPE_CONTROL 0x00
 
@@ -52,51 +49,23 @@ typedef struct {
 
 
 /* Msg Type */
-#define MSGTYPE_REGISTER_REQUEST 0x0101
-#define MSGTYPE_REGISTER_RESPONSE 0x0102
-#define MSGTYPE_DISCONNET_REQUEST 0x0103
-#define MSGTYPE_DISCONNET_RESPONSE 0x0104
-#define MSGTYPE_CONFIGURATION_REQUEST 0x0201
-#define MSGTYPE_CONFIGURATION_RESPONSE 0x0202
-#define MSGTYPE_CONFIGURATION_RESET_REQ 0x0203
-#define MSGTYPE_CONFIGURATION_RESET_RSP 0x0204
-#define MSGTYPE_STATISTIC_STAT_RP 0x0301
-#define MSGTYPE_STATISTIC_STAT_QUERY 0x0302
-#define MSGTYPE_STATISTIC_STAT_REPLY 0x0303
-#define MSGTYPE_STATION_REQUEST 0x0401
-#define MSGTYPE_STATION_RESPONSE 0x0402
+#define MSGTYPE_DISCOVER_REQUEST 0x03
+#define MSGTYPE_DISCOVER_RESPONSE 0x04
 
 /* Msg Ele Type */
-#define MSGELETYPE_RESULT_CODE 0x0001
-#define MSGELETYPE_REASON_CODE 0x0002
-#define MSGELETYPE_ASSIGNED_APID 0x0003
-#define MSGELETYPE_AP_MAC_ADDR 0x0101
-#define MSGELETYPE_AP_INET_ADDR 0x0102
-#define MSGELETYPE_AP_NAME 0x0103
-#define MSGELETYPE_AP_DESCRIPTION 0x0104
-#define MSGELETYPE_AP_LOCATION 0x0105
-#define MSGELETYPE_AP_BOARD_DATA 0x0106
-#define MSGELETYPE_AC_MAC_ADDR 0x0201
-#define MSGELETYPE_AC_INET_ADDR 0x0202
-#define MSGELETYPE_TIME_STAMP 0x0203
-#define MSGELETYPE_WLAN_INFO 0x0301
-#define MSGELETYPE_AP_RADIO_INFO 0x0302
-#define MSGELETYPE_ANTENNA 0x0303
-#define MSGELETYPE_TX_POWER 0x0304
-#define MSGELETYPE_MULTI_DOMAIN_CAP 0x0305
-#define MSGELETYPE_SUPPORTED_RATES 0x0306
-#define MSGELETYPE_ADD_MAC_ACL_ENTRY 0x0401
-#define MSGELETYPE_DEL_MAC_ACL_ENTRY 0x0402
-#define MSGELETYPE_ADD_STATION 0x0403
-#define MSGELETYPE_DEL_STATION 0x0404
-#define MSGELETYPE_STATION_EVENT 0x0501
-
+#define MSGELETYPE_AP_BOARD_DATA 0x0102
+#define MSGELETYPE_AP_DESCRIPTOR 0x0103
+#define MSGELETYPE_AP_NAME 0x0104
+#define MSGELETYPE_AP_RADIO_INFORMATION 0x030A
 
 typedef enum {
-	AP_ENTER_REGISTER,
-	AP_ENTER_RUN,
-	AP_ENTER_DOWN
+	AP_DISCOVERY,
+	AP_REGISTER,
+	AP_RUN,
+	AP_DOWN
 } APStateTransition;
+
+
 
 
 #define		AP_CREATE_PROTOCOL_MESSAGE(mess, size)		{ AP_CREATE_OBJECT_SIZE(((mess).msg), (size));\
@@ -129,6 +98,7 @@ void APProtocolStore32(APProtocolMessage *msgPtr, u32 val);
 void APProtocolStoreStr(APProtocolMessage *msgPtr, char *str);
 void APProtocolStoreMessage(APProtocolMessage *msgPtr, APProtocolMessage *msgToStorePtr);
 void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len);
+void APProtocolStoreVoid(APProtocolMessage *msgPtr);
 
 APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type);
 APBool APAssembleMessage(APProtocolMessage *msgPtr,
@@ -141,8 +111,9 @@ u32 APProtocolRetrieve32(APProtocolMessage *msgPtr);
 char *CWProtocolRetrieveStr(APProtocolMessage *msgPtr, int len);
 u8 *CWProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len);
 
-
-
 APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemAPBoardData(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemAPDescriptor(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemAPRadioInformation(APProtocolMessage *msgPtr) ;
 
 #endif

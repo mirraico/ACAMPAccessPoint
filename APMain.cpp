@@ -3,31 +3,47 @@
 #include "AcampNetwork.h"
 #include "AcampProtocol.h"
 
+extern APStateTransition  APEnterDiscovery();
+
 void APInitConfiguration();
 
 int main()
 {
 	APInitConfiguration();
-	APNetworkInit();
+	APNetworkInitLocalAddr();
 	
-	APStateTransition nextState = AP_ENTER_REGISTER;
+	APStateTransition nextState = AP_DISCOVERY;
 
-	AP_REPEAT_FOREVER
+	//AP_REPEAT_FOREVER
 	{
 		switch(nextState)
 		{
-			case AP_ENTER_REGISTER:
-				//nextState = APEnterRegister();
+			case AP_DISCOVERY:
+ 				nextState = APEnterDiscovery();
 				break;
-			case AP_ENTER_RUN:
-				//nextState = APEnterRun();
+			case AP_REGISTER:
 				break;
-			case AP_ENTER_DOWN:
-				//nextState = APEnterDown();
+			case AP_RUN:
+				break;
+			case AP_DOWN:
 				break;
 		}
 	}
-	
+
+	return 0;
+}
+
+void APInitConfiguration()
+{
+	strcpy(gControllerAddr,"127.0.0.1\0");
+	strcpy(gAPName,"TESTAP\0");
+	strcpy(gAPBoardData,"TESTBOARDDATA\0");
+	strcpy(gAPDescriptor,"DESCRIPTOR\0");
+	gAPID = 12345;
+}
+
+void APTest()
+{
 	/*
 	 Local NetworkInfo Test 
 	 printf("ip: %s gateway: %s\n", gLocalAddr, gLocalDefaultGateway);
@@ -49,15 +65,4 @@ int main()
 
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
 	*/
-
-	return 0;
-}
-
-void APInitConfiguration()
-{
-	strcpy(gAddress,"127.0.0.1\0");
-	gPort = 1080;
-	
-	strcpy(gAPName,"TESTAP\0");
-	gAPID = 12345;
 }

@@ -39,6 +39,11 @@ void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len)
 	(msgPtr->offset) += len;
 }
 
+void APProtocolStoreVoid(APProtocolMessage *msgPtr)
+{
+	(msgPtr->offset) += 0;
+}
+
 APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type)
 {
 	APProtocolMessage completeMsg;
@@ -71,7 +76,6 @@ APBool APAssembleMessage(APProtocolMessage *msgPtr,
 
 	for(int i = 0; i < msgElemNum; i++) msgElemsLen += msgElems[i].offset;
 
-	controlHdrVal.preamble = PREAMBLE;
 	controlHdrVal.version = VERSION;
 	controlHdrVal.type = TYPE_CONTROL;
 	controlHdrVal.apid = APGetAPID();
@@ -109,7 +113,6 @@ APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *va
 
 	AP_CREATE_PROTOCOL_MESSAGE(*controlHdrPtr, HEADER_LEN);
 
-	APProtocolStore32(controlHdrPtr, valPtr->preamble);
 	APProtocolStore8(controlHdrPtr, valPtr->version);
 	APProtocolStore8(controlHdrPtr, valPtr->type);
 	APProtocolStore16(controlHdrPtr, valPtr->apid);
@@ -170,6 +173,25 @@ u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len) {
 	return bytes;
 }
 
+APBool APAssembleMsgElemAPBoardData(APProtocolMessage *msgPtr) {
+	if(msgPtr == NULL) return AP_FALSE;
+	
+	char *boardData = APGetAPBoardData();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, strlen(boardData));
+	
+	APProtocolStoreStr(msgPtr, boardData);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_BOARD_DATA);
+}
+
+APBool APAssembleMsgElemAPDescriptor(APProtocolMessage *msgPtr) {
+	if(msgPtr == NULL) return AP_FALSE;
+	
+	char *descriptor = APGetAPDescriptor();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, strlen(descriptor));
+	
+	APProtocolStoreStr(msgPtr, descriptor);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_DESCRIPTOR);
+}
 
 APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr) {
 	if(msgPtr == NULL) return AP_FALSE;
@@ -181,5 +203,9 @@ APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr) {
 	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_NAME);
 }
 
-
+APBool APAssembleMsgElemAPRadioInformation(APProtocolMessage *msgPtr) {
+	if(msgPtr == NULL) return AP_FALSE;
+	APProtocolStoreVoid(msgPtr);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_RADIO_INFORMATION);
+}
 
