@@ -7,18 +7,29 @@
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 
-extern char gAddress[20];
-extern int gPort;
-
 typedef int APSocket;
 typedef struct sockaddr_in APNetworkAddress;
 
+extern APSocket gSocket;
+extern APSocket gSocketBroad;
+extern APNetworkAddress gServerSockaddr;
+extern char gControllerAddr[20];
+extern int gPort;
 
 APBool APNetworkInit();
+APBool APNetworkInitBroad();
 int APNetworkGetAddressSize();
 APBool APNetworkInitLocalAddr();
-APBool APNetworkSendMessage(const u8 *buf, int len);
-
+APBool APNetworkSendUnconnected(APSocket sock, 
+					APNetworkAddress *addrPtr,
+					const u8 *buf,
+					int len);
+APBool APNetworkSendToServerUnconnected(
+					const u8 *buf,
+					int len);
+APBool APNetworkSendToBroadUnconnected(
+					const u8 *buf,
+					int len);
 
 #define		APNetworkCloseSocket(x)		{ shutdown(SHUT_RDWR, x); close(x); }
 

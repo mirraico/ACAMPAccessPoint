@@ -1,16 +1,17 @@
 #include "AcampNetwork.h"
 
-char gAddress[20];
-int gPort;
-APSocket gSocket;
-APNetworkAddress gSockaddr;
+char gControllerAddr[20];
+int gPort = 6606;
+APSocket gSocket = -1;
+APSocket gSocketBroad = -1;
+APNetworkAddress gServerSockaddr;
 
 int APNetworkGetAddressSize()
 {
 	return sizeof(struct sockaddr_in);
 }
 
-int APNetworkReadNlSock(int sockFd, char *bufPtr, int seqNum, int pId)
+int APNetworkReadNlSock(int sockFd, char *bufPtr, unsigned int seqNum, unsigned int pId)
 {
 	struct nlmsghdr *nlHdr;
 	int readLen = 0, msgLen = 0;
@@ -102,10 +103,49 @@ APBool APNetworkInitLocalAddr()
 
 APBool APNetworkInit()
 {
-	gSockaddr.sin_family = AF_INET;
-	gSockaddr.sin_addr.s_addr = inet_addr(gAddress);
-	gSockaddr.sin_port = htons(gPort);
-	gSocket = socket(AF_INET,SOCK_DGRAM,0);
-	if(!APNetworkInitLocalAddr()) return AP_FALSE;
+	gServerSockaddr.sin_family = AF_INET;
+	gServerSockaddr.sin_addr.s_addr = inet_addr(gControllerAddr);
+	gServerSockaddr.sin_port = htons(gPort);
+	gSocket = socket(AF_INET, SOCK_DGRAM, 0);
+	return AP_TRUE;
+}
+
+APBool APNetworkInitBroad()
+{
+	gSocketBroad = socket(AF_INET, SOCK_DGRAM, 0);
+	if(gSocketBroad < 0) return AP_FALSE;
+	const int opt = 1;
+	int nb = setsockopt(gSocketBroad, SOL_SOCKET, SO_BROADCAST, (char *)&opt, sizeof(opt));
+	if(nb < 0) return AP_FALSE;
+	return AP_TRUE;
+}
+
+APBool APNetworkSendUnconnected(APSocket sock, 
+				      APNetworkAddress *addrPtr,
+				      const u8 *buf,
+				      int len) {
+
+	if(buf == NULL || addrPtr == NULL) 
+		return AP_FALSE;
+
+	while(sendto(sock, buf, len, 0, (struct sockaddr*)addrPtr, APNetworkGetAddressSize()) < 0) {
+		if(errno == EINTR) continue;
+	}
+	return AP_TRUE;
+}
+
+APBool APNetworkSendToBroadUnconnected(
+					const u8 *buf,
+					int len) {
+	if(gSocketBroad < 0 && !APNetworkInitBroad()) return AP_FALSE;
+	APNetworkAddress broadAddr;
+	AP_ZERO_MEMORY(&broadAddr, sizeof(broadAddr));
+	broadAddr.sin_family = AF_INET;
+	broadAddr.sin_addr.s_addr = inet_addr("255.255.255.255");
+	broadAddr.sin_port = htons(gPort);
+	
+	if(sendto(gSocketBroad, buf, len, 0, (struct sockaddr*)&broadAddr, sizeof(sockaddr)) < 0) {
+		return AP_FALSE;
+	}
 	return AP_TRUE;
 }
