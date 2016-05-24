@@ -4,8 +4,18 @@
 #include "AcampProtocol.h"
 
 extern APStateTransition  APEnterDiscovery();
+extern APStateTransition  APEnterRegister();
 
 void APInitConfiguration();
+/********Carl   - 05/ 2016    ********************/
+//待讨论： 
+//1. AcmpAP.h与AcampProtocol.h的功能重复？？？
+//2. log 文件？？
+//3.  extern的语句
+//4. sprint??
+//5. Networking.c 文件 
+//5. 各状态输入输出的问题。
+
 
 int main()
 {
@@ -22,6 +32,7 @@ int main()
  				nextState = APEnterDiscovery();
 				break;
 			case AP_REGISTER:
+			   nextState = APEnterRegister();
 				break;
 			case AP_RUN:
 				break;

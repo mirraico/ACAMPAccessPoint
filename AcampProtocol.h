@@ -91,7 +91,8 @@ typedef enum {
 											AP_FREE_OBJECT(ar_name);\
 										}
 
-
+/*___________________________________________________________________________*/
+/* *******************************__PROTYPES__*******************************/
 void APProtocolStore8(APProtocolMessage *msgPtr, u8 val);
 void APProtocolStore16(APProtocolMessage *msgPtr, u16 val);
 void APProtocolStore32(APProtocolMessage *msgPtr, u32 val);
