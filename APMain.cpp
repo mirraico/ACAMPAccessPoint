@@ -10,24 +10,6 @@ int main()
 	APInitConfiguration();
 	APNetworkInit();
 	
-	/**
-	Send Test
-	*/
-	APProtocolMessage *msgElems;
-	int msgElemCount = 1;
-	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
-	APAssembleMsgElemAPName(&(msgElems[0]));
-
-	APProtocolMessage sendMsg;
-	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
-	APAssembleMessage(&sendMsg, 12345, MSGTYPE_CONFIGURATION_REQUEST, msgElems, msgElemCount);
-
-	APNetworkSendMessage(sendMsg.msg, sendMsg.offset);
-
-	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
-	
-	
-/** FSM unfinished
 	APStateTransition nextState = AP_ENTER_REGISTER;
 
 	AP_REPEAT_FOREVER
@@ -45,7 +27,29 @@ int main()
 				break;
 		}
 	}
-*/
+	
+	/*
+	 Local NetworkInfo Test 
+	 printf("ip: %s gateway: %s\n", gLocalAddr, gLocalDefaultGateway);
+	 */
+	 
+	/*
+	Send Test
+	
+	APProtocolMessage *msgElems;
+	int msgElemCount = 1;
+	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
+	APAssembleMsgElemAPName(&(msgElems[0]));
+
+	APProtocolMessage sendMsg;
+	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+	APAssembleMessage(&sendMsg, 12345, MSGTYPE_CONFIGURATION_REQUEST, msgElems, msgElemCount);
+
+	APNetworkSendMessage(sendMsg.msg, sendMsg.offset);
+
+	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+	*/
+
 	return 0;
 }
 
