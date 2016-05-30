@@ -1,9 +1,10 @@
-#include "AcampProtocol.h"
+#include "AcampRegisterState.h"
+
 
 
 APStateTransition  APEnterRegister()
 {
-     	
+         	
 	
 	
 	

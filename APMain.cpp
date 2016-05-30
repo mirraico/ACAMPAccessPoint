@@ -1,10 +1,10 @@
 #include "Common.h"
-#include "AcampAP.h"
+//#include "AcampAP.h"
 #include "AcampNetwork.h"
-#include "AcampProtocol.h"
-
+//#include "AcampProtocol.h"
+#include "AcampRegisterState.h"
 extern APStateTransition  APEnterDiscovery();
-extern APStateTransition  APEnterRegister();
+//extern APStateTransition  APEnterRegister();
 
 void APInitConfiguration();
 /********Carl   - 05/ 2016    ********************/
@@ -14,7 +14,7 @@ void APInitConfiguration();
 //3.  extern的语句
 //4. sprint??
 //5. Networking.c 文件 
-//5. 各状态输入输出的问题。
+
 
 
 int main()
