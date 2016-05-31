@@ -106,14 +106,12 @@ APBool APNetworkInit()
 	if(gSocket >= 0) APNetworkCloseSocket(gSocket);
 	gSocket = socket(AF_INET, SOCK_DGRAM, 0);
 	if(gSocket < 0) return AP_FALSE;
-	
 	if(gSocketBroad >= 0) APNetworkCloseSocket(gSocketBroad);
 	gSocketBroad = socket(AF_INET, SOCK_DGRAM, 0);
 	if(gSocketBroad < 0) return AP_FALSE;
 	const int opt = 1;
 	int nb = setsockopt(gSocketBroad, SOL_SOCKET, SO_BROADCAST, (char *)&opt, sizeof(opt));
 	if(nb < 0) return AP_FALSE;
-	
 	return AP_TRUE;
 }
 
@@ -151,7 +149,6 @@ APBool APNetworkSendToBroadUnconnected(
 					int len) {
 	if(buf == NULL) 
 		return AP_FALSE;
-		
 	APNetworkAddress broadAddr;
 	AP_ZERO_MEMORY(&broadAddr, sizeof(broadAddr));
 	broadAddr.sin_family = AF_INET;
