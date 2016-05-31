@@ -63,7 +63,7 @@ APBool interactiveTestConfigurationRequest(APProtocolMessage *messagesPtr)
 	   )
 	{
 		int i;
-		for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
+		for(i = 0; i < k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
 		AP_FREE_OBJECT(msgElems);
 		return AP_FALSE;
 	}
@@ -89,7 +89,7 @@ APBool interactiveTestConfigurationReport(APProtocolMessage *messagesPtr)
 	   )
 	{
 		int i;
-		for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
+		for(i = 0; i < k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
 		AP_FREE_OBJECT(msgElems);
 		return AP_FALSE;
 	}
