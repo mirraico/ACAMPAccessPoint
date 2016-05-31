@@ -31,10 +31,10 @@ extern char gAPDescriptor[128];
 extern u8 gAPIPAddr[4];
 extern u8 gAPMacAddr[6];
 
-extern u8 gCntlName[32];
-extern u8 gCntlDescriptor[128];
-extern u8 gCntlIPAddr[4]; 
-extern u8 gCntlMacAddr[6];
+extern u8 gControllerName[32];
+extern u8 gControllerDescriptor[128];
+extern u8 gControllerIPAddr[4]; 
+extern u8 gControllerMacAddr[6];
 
 extern u8 gSSID[32];
 extern u8 gChannel;

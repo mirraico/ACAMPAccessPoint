@@ -10,10 +10,10 @@ char gAPDescriptor[128];
 u8 gAPIPAddr[4];
 u8 gAPMacAddr[6];
 
-u8 gCntlName[32];
-u8 gCntlDescriptor[128];
-u8 gCntlIPAddr[4]; 
-u8 gCntlMacAddr[6];
+u8 gControllerName[32];
+u8 gControllerDescriptor[128];
+u8 gControllerIPAddr[4]; 
+u8 gControllerMacAddr[6];
 
 u8 gSSID[32];
 u8 gChannel;
