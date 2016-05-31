@@ -21,6 +21,7 @@ APBool APParseDiscoveryResponseMessage(u8 *msg,
 		return AP_FALSE;
 	*seqNumPtr = header.seqNum;
 	
+    bool foundAC = false;
 	while((msgLen - completeMsg.offset) > 0) {
 		u16 elemType = 0;
 		u16 elemLen = 0;
@@ -39,6 +40,7 @@ APBool APParseDiscoveryResponseMessage(u8 *msg,
 			case MSGELETYPE_CONTROLLER_IP_ADDRESS:
 				if(!APParseMsgElemControllerIPAddr(&completeMsg, elemLen))
 					return AP_FALSE;
+                foundAC = true;
 				break;
 			case MSGELETYPE_CONTROLLER_MAC_ADDRESS:
 				if(!APParseMsgElemControllerMACAddr(&completeMsg, elemLen))
@@ -50,7 +52,8 @@ APBool APParseDiscoveryResponseMessage(u8 *msg,
 		}
 	}
 	if(msgLen != completeMsg.offset) return AP_FALSE;
-	
+    if(!foundAC) return AP_FALSE;
+    APNetworkInitControllerAddr();
 	return AP_TRUE;
 }
 
@@ -58,22 +61,97 @@ APBool APReceiveDiscoveryResponse()
 {
 	u8 buffer[AP_BUFFER_SIZE];
 	int readBytes; APNetworkAddress controllerAddr;
-	if(!APNetworkReceiveUnconnected(buffer, AP_BUFFER_SIZE - 1, &readBytes, &controllerAddr)) {
+    if(!APNetworkReceiveFromBroadUnconnected(buffer, AP_BUFFER_SIZE - 1, &readBytes, &controllerAddr)) {
 		return AP_FALSE;
 	}
 	u32 seqNum;
 	if(!APParseDiscoveryResponseMessage(buffer, readBytes, &seqNum)) {
 		return AP_FALSE;
-	}
+    }
 	return AP_TRUE;
 }
 
-APBool interactiveTestDiscoveryRequest(APProtocolMessage *messagesPtr) 
+APBool APParseRegisterResponseMessage(u8 *msg,
+                       int msgLen,
+                       u32 *seqNumPtr)
+{
+    if(msg == NULL || seqNumPtr == NULL)
+        return AP_FALSE;
+    APHeaderVal header;
+    APProtocolMessage completeMsg;
+    completeMsg.msg = (u8*)msg;
+    completeMsg.offset = 0;
+
+    if(!APParseControlHeader(&completeMsg, &header)) return AP_FALSE;
+    if(header.msgType != MSGTYPE_REGISTER_RESPONSE)
+        return AP_FALSE;
+    *seqNumPtr = header.seqNum;
+
+    bool getAPID = false;
+    while((msgLen - completeMsg.offset) > 0) {
+        u16 elemType = 0;
+        u16 elemLen = 0;
+        if(!APParseFormatMsgElement(&completeMsg, &elemType, &elemLen)) {
+            return AP_FALSE;
+        }
+        switch(elemType) {
+            case MSGELETYPE_RESULT_CODE:
+                int res;
+                if(!APParseMsgElemResultCode(&completeMsg, elemLen, &res) || res)
+                    return AP_FALSE;
+                break;
+            case MSGELETYPE_ASSIGNED_APID:
+                if(!APParseMsgElemAssignedAPID(&completeMsg, elemLen))
+                    return AP_FALSE;
+                getAPID = true;
+                break;
+            case MSGELETYPE_CONTROLLER_NAME:
+                if(!APParseMsgElemControllerName(&completeMsg, elemLen))
+                    return AP_FALSE;
+                break;
+            case MSGELETYPE_CONTROLLER_DESCRIPTOR:
+                if(!APParseMsgElemControllerDescriptor(&completeMsg, elemLen))
+                    return AP_FALSE;
+                break;
+            case MSGELETYPE_CONTROLLER_IP_ADDRESS:
+                if(!APParseMsgElemControllerIPAddr(&completeMsg, elemLen))
+                    return AP_FALSE;
+                getAPID = true;
+                break;
+            case MSGELETYPE_CONTROLLER_MAC_ADDRESS:
+                if(!APParseMsgElemControllerMACAddr(&completeMsg, elemLen))
+                    return AP_FALSE;
+                break;
+            default:
+                return AP_FALSE;
+                break;
+        }
+    }
+    if(msgLen != completeMsg.offset) return AP_FALSE;
+    if(!getAPID) return AP_FALSE;
+    return AP_TRUE;
+}
+
+APBool APReceiveRegisterResponse()
+{
+    u8 buffer[AP_BUFFER_SIZE];
+    int readBytes; APNetworkAddress controllerAddr;
+    if(!APNetworkReceiveFromBroadUnconnected(buffer, AP_BUFFER_SIZE - 1, &readBytes, &controllerAddr)) {
+        return AP_FALSE;
+    }
+    u32 seqNum;
+    if(!APParseRegisterResponseMessage(buffer, readBytes, &seqNum)) {
+        return AP_FALSE;
+    }
+    return AP_TRUE;
+}
+
+APBool APAssembleDiscoveryRequest(APProtocolMessage *messagesPtr)
 {
 	if(messagesPtr == NULL) return AP_FALSE;
 	
 	APProtocolMessage *msgElems;
-	int msgElemCount = 0, k = 0;
+    int msgElemCount = 0;
 	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
 	
 	return APAssembleMessage (messagesPtr, 
@@ -84,7 +162,7 @@ APBool interactiveTestDiscoveryRequest(APProtocolMessage *messagesPtr)
 	);
 }
 
-APBool interactiveTestRegisterRequest(APProtocolMessage *messagesPtr) 
+APBool APAssembleRegisterRequest(APProtocolMessage *messagesPtr)
 {
 	if(messagesPtr == NULL) return AP_FALSE;
 	
@@ -113,78 +191,30 @@ APBool interactiveTestRegisterRequest(APProtocolMessage *messagesPtr)
 	);
 }
 
-APBool interactiveTestConfigurationRequest(APProtocolMessage *messagesPtr) 
-{
-	if(messagesPtr == NULL) return AP_FALSE;
-	
-	APProtocolMessage *msgElems;
-	int msgElemCount = 1, k = 0;
-	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
-	
-	if(
-	   (!(APAssembleMsgElemAPDescriptor(&(msgElems[k++]))))	
-	   )
-	{
-		int i;
-		for(i = 0; i < k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
-		AP_FREE_OBJECT(msgElems);
-		return AP_FALSE;
-	}
-	
-	return APAssembleMessage (messagesPtr, 
-				 15432,
-				 MSGTYPE_CONFIGURATION_REQUEST,
-				 msgElems,
-				 msgElemCount
-	);
-}
-
-APBool interactiveTestConfigurationReport(APProtocolMessage *messagesPtr) 
-{
-	if(messagesPtr == NULL) return AP_FALSE;
-	
-	APProtocolMessage *msgElems;
-	int msgElemCount = 1, k = 0;
-	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
-	
-	if(
-	   (!(APAssembleMsgElemAPDescriptor(&(msgElems[k++]))))	
-	   )
-	{
-		int i;
-		for(i = 0; i < k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
-		AP_FREE_OBJECT(msgElems);
-		return AP_FALSE;
-	}
-	
-	return APAssembleMessage (messagesPtr, 
-				 15432,
-				 MSGTYPE_CONFIGURATION_REPORT,
-				 msgElems,
-				 msgElemCount
-	);
-}
-
 void interactiveTest()
 {
+    //init
 	APNetworkInit();
 	APNetworkInitLocalAddr();
 	APInitConfiguration();
-	
+
+    //discover
 	APProtocolMessage sendMsg;
-	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
-	interactiveTestDiscoveryRequest(&sendMsg);
-	APNetworkSendToBroadUnconnected(sendMsg);
+    AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+    APAssembleDiscoveryRequest(&sendMsg);
+    APNetworkSendToBroadUnconnected(sendMsg);
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
-	
-	APReceiveDiscoveryResponse();
-	//strcpy(gControllerAddr, "192.168.1.1\0");
-	APNetworkInitControllerAddr();
-	
+
+    APReceiveDiscoveryResponse();
+
+    //register
 	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
-	interactiveTestRegisterRequest(&sendMsg);
+    APAssembleRegisterRequest(&sendMsg);
 	APNetworkSendUnconnected(sendMsg);
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+
+    APReceiveRegisterResponse();
+
 //	/*
 //	recvfrom(gSocket, buffer, 1024, 0, (struct sockaddr*)&controllerSockAddr, &controllerSockAddrLen) ;
 //	APNetworkInitControllerAddr(controllerSockAddr);

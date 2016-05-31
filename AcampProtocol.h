@@ -53,9 +53,9 @@ typedef struct {
 #define MSGTYPE_DISCOVER_REQUEST 0x03
 #define MSGTYPE_DISCOVER_RESPONSE 0x04
 #define MSGTYPE_REGISTER_REQUEST 0x11
-#define MSGTYPE_REGISTER_REAPONSE 0x12
+#define MSGTYPE_REGISTER_RESPONSE 0x12
 #define MSGTYPE_UNREGISTER_REQUEST 0x13
-#define MSGTYPE_UNREGISTER_REAPONSE 0x14
+#define MSGTYPE_UNREGISTER_RESPONSE 0x14
 #define MSGTYPE_CONFIGURATION_REQUEST  0x21
 #define MSGTYPE_CONFIGURATION_DELIVER 0x22
 #define MSGTYPE_CONFIGURATION_REPORT 0x23
@@ -160,5 +160,7 @@ APBool APParseMsgElemControllerName(APProtocolMessage *msgPtr, int elemLen);
 APBool APParseMsgElemControllerDescriptor(APProtocolMessage *msgPtr, int elemLen);
 APBool APParseMsgElemControllerIPAddr(APProtocolMessage *msgPtr, int elemLen);
 APBool APParseMsgElemControllerMACAddr(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemResultCode(APProtocolMessage *msgPtr, int elemLen, int *result);
+APBool APParseMsgElemAssignedAPID(APProtocolMessage *msgPtr, int elemLen);
 
 #endif

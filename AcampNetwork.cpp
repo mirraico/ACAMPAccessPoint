@@ -157,7 +157,7 @@ APBool APNetworkSendToBroadUnconnected(APProtocolMessage sendMsg) {
 	APNetworkAddress broadAddr;
 	AP_ZERO_MEMORY(&broadAddr, sizeof(broadAddr));
 	broadAddr.sin_family = AF_INET;
-	broadAddr.sin_addr.s_addr = inet_addr("255.255.255.255");
+    broadAddr.sin_addr.s_addr = inet_addr("255.255.255.255");
 	broadAddr.sin_port = htons(gPort);
 	if(sendto(gSocketBroad, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&broadAddr, APNetworkGetAddressSize()) < 0) {
 		return AP_FALSE;
@@ -167,10 +167,18 @@ APBool APNetworkSendToBroadUnconnected(APProtocolMessage sendMsg) {
 
 APBool APNetworkReceiveUnconnected(u8* buffer,
 					 int bufferLen, int* readLenPtr, APNetworkAddress* addrPtr) {
-						 
-	unsigned int  addrLen = sizeof(APNetworkAddress);
-	if(buffer == NULL || readLenPtr == NULL) 
-		return AP_FALSE;
-	*readLenPtr = recvfrom(gSocket, buffer, bufferLen, 0, (struct sockaddr*)addrPtr, &addrLen);
+    if(buffer == NULL || readLenPtr == NULL)
+        return AP_FALSE;
+    unsigned int  addrLen = sizeof(APNetworkAddress);
+    *readLenPtr = recvfrom(gSocket, (char*)buffer, bufferLen, 0, (struct sockaddr*)addrPtr, &addrLen);
 	return AP_TRUE;
+}
+
+APBool APNetworkReceiveFromBroadUnconnected(u8* buffer,
+                     int bufferLen, int* readLenPtr, APNetworkAddress* addrPtr) {
+    if(buffer == NULL || readLenPtr == NULL)
+        return AP_FALSE;
+    unsigned int  addrLen = sizeof(APNetworkAddress);
+    *readLenPtr = recvfrom(gSocketBroad, (char*)buffer, bufferLen, 0, (struct sockaddr*)addrPtr, &addrLen);
+    return AP_TRUE;
 }

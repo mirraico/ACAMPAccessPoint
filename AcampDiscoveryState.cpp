@@ -1,6 +1,6 @@
 #include "AcampProtocol.h"
 #include "AcampNetwork.h"
-
+/*
 int gAPMaxDiscoveries = 10;
 int gAPDiscoveryCount;
 int gAPDiscoveryInterval = 5;
@@ -58,3 +58,4 @@ APBool APAssembleDiscoveryRequest(APProtocolMessage *messagesPtr)
 				 msgElemCount
 	);
 }
+*/

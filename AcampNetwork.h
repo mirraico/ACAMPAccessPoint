@@ -28,6 +28,8 @@ APBool APNetworkSendToBroadUnconnected(
 					APProtocolMessage sendMsg);
 APBool APNetworkReceiveUnconnected(u8* buffer,
 					 int bufferLen, int* readLenPtr, APNetworkAddress* addrPtr);
+APBool APNetworkReceiveFromBroadUnconnected(u8* buffer,
+                     int bufferLen, int* readLenPtr, APNetworkAddress* addrPtr);
 
 #define		APNetworkCloseSocket(x)		{ shutdown(SHUT_RDWR, x); close(x); x=-1;}
 

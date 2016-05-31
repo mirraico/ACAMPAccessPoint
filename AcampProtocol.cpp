@@ -280,3 +280,19 @@ APBool APParseMsgElemControllerMACAddr(APProtocolMessage *msgPtr, int elemLen)
 	}
 	return AP_TRUE;
 }
+
+APBool APParseMsgElemResultCode(APProtocolMessage *msgPtr, int elemLen, int *result)
+{
+    if(msgPtr == NULL) return AP_FALSE;
+    if(elemLen != 2) return AP_FALSE;
+    *result = APProtocolRetrieve16(msgPtr);
+    return AP_TRUE;
+}
+
+APBool APParseMsgElemAssignedAPID(APProtocolMessage *msgPtr, int elemLen)
+{
+    if(msgPtr == NULL) return AP_FALSE;
+    if(elemLen != 2) return AP_FALSE;
+    gAPID = APProtocolRetrieve16(msgPtr);
+    return AP_TRUE;
+}
