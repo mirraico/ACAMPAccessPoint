@@ -193,9 +193,3 @@ APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr) {
 	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_NAME);
 }
 
-APBool APAssembleMsgElemAPRadioInformation(APProtocolMessage *msgPtr) {
-	if(msgPtr == NULL) return AP_FALSE;
-	APProtocolStoreVoid(msgPtr);
-	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_RADIO_INFORMATION);
-}
-

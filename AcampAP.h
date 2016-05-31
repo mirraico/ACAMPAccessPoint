@@ -62,6 +62,7 @@ __inline__ u16 APGetAPID() { return gAPID; }
 __inline__ char* APGetLocalAddr() { return gLocalAddr; }
 __inline__ char* APGetLocalDefaultGateway() { return gLocalDefaultGateway; }
 __inline__ char* APGetAPName() { return gAPName; }
+__inline__ char* APGetAPDescriptor() { return gAPDescriptor; }
 
 #endif // ACAMPAP_H
 

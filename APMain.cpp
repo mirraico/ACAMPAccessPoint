@@ -31,9 +31,9 @@ APBool interactiveTestRegisterRequest(APProtocolMessage *messagesPtr)
 	
 	if(
 	   (!(APAssembleMsgElemAPName(&(msgElems[k++])))) ||
-	   (!(APAssembleMsgElemAPDescriptor(&(msgElems[k++]))))	 ||
-	   (!(APAssembleMsgElemAPIPAddress(&(msgElems[k++]))))
-	   (!(APAssembleMsgElemAPMACAddress(&(msgElems[k++]))))
+	   (!(APAssembleMsgElemAPDescriptor(&(msgElems[k++]))))	
+	   //(!(APAssembleMsgElemAPIPAddress(&(msgElems[k++]))))
+	  // (!(APAssembleMsgElemAPMACAddress(&(msgElems[k++]))))
 	   )
 	{
 		int i;
@@ -55,13 +55,11 @@ APBool interactiveTestConfigurationRequest(APProtocolMessage *messagesPtr)
 	if(messagesPtr == NULL) return AP_FALSE;
 	
 	APProtocolMessage *msgElems;
-	int msgElemCount = 3, k = 0;
+	int msgElemCount = 1, k = 0;
 	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
 	
 	if(
-	   (!(APAssembleMsgElemAPBoardData(&(msgElems[k++])))) ||
-	   (!(APAssembleMsgElemAPDescriptor(&(msgElems[k++]))))	 ||
-	   (!(APAssembleMsgElemAPRadioInformation(&(msgElems[k++]))))
+	   (!(APAssembleMsgElemAPDescriptor(&(msgElems[k++]))))	
 	   )
 	{
 		int i;
@@ -83,13 +81,11 @@ APBool interactiveTestConfigurationReport(APProtocolMessage *messagesPtr)
 	if(messagesPtr == NULL) return AP_FALSE;
 	
 	APProtocolMessage *msgElems;
-	int msgElemCount = 3, k = 0;
+	int msgElemCount = 1, k = 0;
 	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
 	
 	if(
-	   (!(APAssembleMsgElemAPBoardData(&(msgElems[k++])))) ||
-	   (!(APAssembleMsgElemAPDescriptor(&(msgElems[k++]))))	 ||
-	   (!(APAssembleMsgElemAPRadioInformation(&(msgElems[k++]))))
+	   (!(APAssembleMsgElemAPDescriptor(&(msgElems[k++]))))	
 	   )
 	{
 		int i;
@@ -180,7 +176,6 @@ void APInitConfiguration()
 {
 	strcpy(gControllerAddr,"127.0.0.1\0");
 	strcpy(gAPName,"TESTAP\0");
-	strcpy(gAPBoardData,"TESTBOARDDATA\0");
 	strcpy(gAPDescriptor,"DESCRIPTOR\0");
 	gAPID = 12345;
 }

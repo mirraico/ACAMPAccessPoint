@@ -40,13 +40,11 @@ APBool APAssembleDiscoveryRequest(APProtocolMessage *messagesPtr)
 	if(messagesPtr == NULL) return AP_FALSE;
 	
 	APProtocolMessage *msgElems;
-	int msgElemCount = 3, k = 0;
+	int msgElemCount = 1, k = 0;
 	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
 	
 	if(
-	   (!(APAssembleMsgElemAPBoardData(&(msgElems[k++])))) ||
-	   (!(APAssembleMsgElemAPDescriptor(&(msgElems[k++]))))	 ||
-	   (!(APAssembleMsgElemAPRadioInformation(&(msgElems[k++]))))
+	   (!(APAssembleMsgElemAPDescriptor(&(msgElems[k++]))))	
 	   )
 	{
 		int i;
