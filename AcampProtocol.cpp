@@ -173,16 +173,6 @@ u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len) {
 	return bytes;
 }
 
-APBool APAssembleMsgElemAPBoardData(APProtocolMessage *msgPtr) {
-	if(msgPtr == NULL) return AP_FALSE;
-	
-	char *boardData = APGetAPBoardData();
-	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, strlen(boardData));
-	
-	APProtocolStoreStr(msgPtr, boardData);
-	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_BOARD_DATA);
-}
-
 APBool APAssembleMsgElemAPDescriptor(APProtocolMessage *msgPtr) {
 	if(msgPtr == NULL) return AP_FALSE;
 	

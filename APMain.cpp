@@ -156,13 +156,12 @@ int main()
 	APNetworkInitLocalAddr();
 	
 	APStateTransition nextState = AP_DISCOVERY;
-
 	//AP_REPEAT_FOREVER
 	{
 		switch(nextState)
 		{
 			case AP_DISCOVERY:
- 				nextState = APEnterDiscovery();
+				nextState = APEnterDiscovery();
 				break;
 			case AP_REGISTER:
 				break;
@@ -200,13 +199,10 @@ void APTest()
 	int msgElemCount = 1;
 	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
 	APAssembleMsgElemAPName(&(msgElems[0]));
-
 	APProtocolMessage sendMsg;
 	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
 	APAssembleMessage(&sendMsg, 12345, MSGTYPE_CONFIGURATION_REQUEST, msgElems, msgElemCount);
-
 	APNetworkSendMessage(sendMsg.msg, sendMsg.offset);
-
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
 	*/
 }
