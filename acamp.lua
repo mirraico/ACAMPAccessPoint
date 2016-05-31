@@ -83,7 +83,7 @@ do
 		local v_header = buffer(0, 12)
 		local v_element = buffer(12, v_buffer_len - 12)
 
-		local v_apid = buffer(6, 2)
+		local v_apid = buffer(2, 2)
 		local t = tree:add(proto_acamp, buffer(0, v_buffer_len), "AP Control And Management Protocol, APID: " .. v_apid:uint())
 		local th = t.add(t, v_header, "ACAMP Header")
 		local tes
