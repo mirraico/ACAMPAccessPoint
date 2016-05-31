@@ -173,6 +173,28 @@ u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len) {
 	return bytes;
 }
 
+APBool APParseControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr) {
+	if(controlHdrPtr == NULL|| valPtr == NULL) return AP_FALSE;
+	
+	valPtr->version = APProtocolRetrieve8(controlHdrPtr);
+	valPtr->type = APProtocolRetrieve8(controlHdrPtr);
+	valPtr->apid = APProtocolRetrieve16(controlHdrPtr);
+	valPtr->seqNum = APProtocolRetrieve32(controlHdrPtr);
+	valPtr->msgType = APProtocolRetrieve16(controlHdrPtr);
+	valPtr->msgLen = APProtocolRetrieve16(controlHdrPtr);
+	
+	return AP_TRUE;
+}
+
+APBool APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len)
+{
+	if(len == NULL || type == NULL) return AP_FALSE;
+	*type = APProtocolRetrieve16(msgPtr);
+	*len = APProtocolRetrieve16(msgPtr);
+	if(*len == 0) return AP_FALSE;
+	return AP_TRUE;
+}
+
 APBool APAssembleMsgElemAPDescriptor(APProtocolMessage *msgPtr) {
 	if(msgPtr == NULL) return AP_FALSE;
 	

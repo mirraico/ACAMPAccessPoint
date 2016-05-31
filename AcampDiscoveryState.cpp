@@ -6,8 +6,6 @@ int gAPDiscoveryCount;
 int gAPDiscoveryInterval = 5;
 
 APBool APAssembleDiscoveryRequest(APProtocolMessage *messagesPtr);
-APBool APAssembleMessage(APProtocolMessage *msgPtr,
-						 u32 seqNum, u16 msgType, APProtocolMessage msgElems[], const int msgElemNum);
 
 APStateTransition  APEnterDiscovery()
 {

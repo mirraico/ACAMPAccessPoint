@@ -148,6 +148,8 @@ u16 APProtocolRetrieve16(APProtocolMessage *msgPtr);
 u32 APProtocolRetrieve32(APProtocolMessage *msgPtr);
 char *CWProtocolRetrieveStr(APProtocolMessage *msgPtr, int len);
 u8 *CWProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len);
+APBool APParseControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr);
+APBool APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len);
 
 APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr);
 APBool APAssembleMsgElemAPDescriptor(APProtocolMessage *msgPtr);

@@ -5,6 +5,55 @@
 
 void APInitConfiguration();
 
+APBool APParseDiscoveryResponseMessage(char *msg, 
+				       int msgLen,
+					   u32 *seqNumPtr) 
+{
+	if(msg == NULL || seqNumPtr == NULL) 
+		return AP_FALSE;
+	APHeaderVal header;
+	APProtocolMessage completeMsg;
+	completeMsg.msg = (u8*)msg;
+	completeMsg.offset = 0;
+	
+	if(!APParseControlHeader(&completeMsg, &header)) return AP_FALSE;
+	if(header.msgType != MSGTYPE_DISCOVER_RESPONSE)
+		return AP_FALSE;
+	*seqNumPtr = header.seqNum;
+	
+	while((msgLen - completeMsg.offset) > 0) {
+		u16 eleType = 0;
+		u16 eleLen = 0;
+		if(!APParseFormatMsgElem(&completeMsg, &eleType, &eleLen)) {
+			return AP_FALSE;
+		}
+		switch(eleType) {
+			case MSGELETYPE_CONTROLLER_NAME:
+//				if(!APParseControllerName(&completeMsg, elemLen))
+//					return AP_FALSE;
+				break;
+			case MSGELETYPE_CONTROLLER_DESCRIPTOR:
+//				if(!APParseControllerDescriptor(&completeMsg, elemLen))
+//					return AP_FALSE;
+				break; 
+			case MSGELETYPE_CONTROLLER_IP_ADDRESS:
+//				if(!APParseControllerIPAddress(&completeMsg, elemLen))
+//					return AP_FALSE;
+				break;
+			case MSGELETYPE_CONTROLLER_MAC_ADDRESS:
+//				if(!APParseControllerMACAddress(&completeMsg, elemLen))
+//					return AP_FALSE;
+				break;
+			default:
+				return AP_FALSE;
+				break;
+		}
+	}
+	if(msgLen != completeMsg.offset) return AP_FALSE;
+	
+	return AP_TRUE;
+}
+
 APBool interactiveTestDiscoveryRequest(APProtocolMessage *messagesPtr) 
 {
 	if(messagesPtr == NULL) return AP_FALSE;
