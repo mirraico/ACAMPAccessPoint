@@ -4,11 +4,11 @@ char gControllerAddr[20];
 int gPort = 6606;
 APSocket gSocket = -1;
 APSocket gSocketBroad = -1;
-APNetworkAddress gServerSockaddr;
+APNetworkAddress gControllerSockaddr;
 
 int APNetworkGetAddressSize()
 {
-	return sizeof(struct sockaddr_in);
+	return sizeof(struct sockaddr);
 }
 
 int APNetworkReadNlSock(int sockFd, char *bufPtr, unsigned int seqNum, unsigned int pId)
@@ -103,32 +103,44 @@ APBool APNetworkInitLocalAddr()
 
 APBool APNetworkInit()
 {
-	gServerSockaddr.sin_family = AF_INET;
-	gServerSockaddr.sin_addr.s_addr = inet_addr(gControllerAddr);
-	gServerSockaddr.sin_port = htons(gPort);
+	if(gSocket >= 0) APNetworkCloseSocket(gSocket);
 	gSocket = socket(AF_INET, SOCK_DGRAM, 0);
-	return AP_TRUE;
-}
-
-APBool APNetworkInitBroad()
-{
+	if(gSocket < 0) return AP_FALSE;
+	
+	if(gSocketBroad >= 0) APNetworkCloseSocket(gSocketBroad);
 	gSocketBroad = socket(AF_INET, SOCK_DGRAM, 0);
 	if(gSocketBroad < 0) return AP_FALSE;
 	const int opt = 1;
 	int nb = setsockopt(gSocketBroad, SOL_SOCKET, SO_BROADCAST, (char *)&opt, sizeof(opt));
 	if(nb < 0) return AP_FALSE;
+	
 	return AP_TRUE;
 }
 
-APBool APNetworkSendUnconnected(APSocket sock, 
-				      APNetworkAddress *addrPtr,
+APBool APNetworkInitControllerAddr()
+{
+	AP_ZERO_MEMORY(&gControllerSockaddr, sizeof(gControllerSockaddr));
+	gControllerSockaddr.sin_family = AF_INET;
+	gControllerSockaddr.sin_addr.s_addr = inet_addr(gControllerAddr);
+	gControllerSockaddr.sin_port = htons(gPort);
+	
+	return AP_TRUE;
+}
+
+APBool APNetworkInitControllerAddr(APNetworkAddress addr)
+{
+	AP_ZERO_MEMORY(&gControllerSockaddr, sizeof(gControllerSockaddr));
+	gControllerSockaddr = addr;
+	
+	return AP_TRUE;
+}
+
+APBool APNetworkSendUnconnected( 
 				      const u8 *buf,
 				      int len) {
-
-	if(buf == NULL || addrPtr == NULL) 
+	if(buf == NULL) 
 		return AP_FALSE;
-
-	while(sendto(sock, buf, len, 0, (struct sockaddr*)addrPtr, APNetworkGetAddressSize()) < 0) {
+	while(sendto(gSocket, buf, len, 0, (struct sockaddr*)&gControllerSockaddr, APNetworkGetAddressSize()) < 0) {
 		if(errno == EINTR) continue;
 	}
 	return AP_TRUE;
@@ -137,14 +149,15 @@ APBool APNetworkSendUnconnected(APSocket sock,
 APBool APNetworkSendToBroadUnconnected(
 					const u8 *buf,
 					int len) {
-	if(gSocketBroad < 0 && !APNetworkInitBroad()) return AP_FALSE;
+	if(buf == NULL) 
+		return AP_FALSE;
+		
 	APNetworkAddress broadAddr;
 	AP_ZERO_MEMORY(&broadAddr, sizeof(broadAddr));
 	broadAddr.sin_family = AF_INET;
 	broadAddr.sin_addr.s_addr = inet_addr("255.255.255.255");
 	broadAddr.sin_port = htons(gPort);
-	
-	if(sendto(gSocketBroad, buf, len, 0, (struct sockaddr*)&broadAddr, sizeof(sockaddr)) < 0) {
+	if(sendto(gSocketBroad, buf, len, 0, (struct sockaddr*)&broadAddr, APNetworkGetAddressSize()) < 0) {
 		return AP_FALSE;
 	}
 	return AP_TRUE;

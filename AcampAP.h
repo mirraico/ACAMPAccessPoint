@@ -5,8 +5,8 @@
 
 extern u16 gAPID;
 extern char gAPName[32];
-extern char gAPBoardData[64];
 extern char gAPDescriptor[128];
+extern u32 gAPIPAddress;
 extern char gLocalAddr[20];
 extern char gLocalDefaultGateway[20];
 

@@ -12,25 +12,21 @@ typedef struct sockaddr_in APNetworkAddress;
 
 extern APSocket gSocket;
 extern APSocket gSocketBroad;
-extern APNetworkAddress gServerSockaddr;
+extern APNetworkAddress gControllerSockaddr;
 extern char gControllerAddr[20];
 extern int gPort;
 
 APBool APNetworkInit();
-APBool APNetworkInitBroad();
+APBool APNetworkInitControllerAddr();
+APBool APNetworkInitControllerAddr(APNetworkAddress addr);
 int APNetworkGetAddressSize();
-APBool APNetworkInitLocalAddr();
-APBool APNetworkSendUnconnected(APSocket sock, 
-					APNetworkAddress *addrPtr,
+APBool APNetworkSendUnconnected(
 					const u8 *buf,
-					int len);
-APBool APNetworkSendToServerUnconnected(
-					const u8 *buf,
-					int len);
+					int len) ;
 APBool APNetworkSendToBroadUnconnected(
 					const u8 *buf,
 					int len);
 
-#define		APNetworkCloseSocket(x)		{ shutdown(SHUT_RDWR, x); close(x); }
+#define		APNetworkCloseSocket(x)		{ shutdown(SHUT_RDWR, x); close(x); x=-1;}
 
 #endif
