@@ -69,16 +69,16 @@ void APNetworkParseRoutes(struct nlmsghdr *nlHdr)
 	}
 
 	if (prtInfo->dstAddr.s_addr == 0)
-		sprintf(gLocalDefaultGateway, (char *) inet_ntoa(prtInfo->gateWay));
-	sprintf(gLocalAddr, (char *) inet_ntoa(prtInfo->srcAddr));
+		gAPDefaultGateway = ntohl((prtInfo->gateWay).s_addr);
+		//sprintf(gAPDefaultGateway, (char *) inet_ntoa(prtInfo->gateWay));
+	//sprintf(gLocalAddr, (char *) inet_ntoa(prtInfo->srcAddr));
+	gAPIPAddr = ntohl((prtInfo->srcAddr).s_addr);
 
 	return;
 }
 
 APBool APNetworkInitLocalAddr()
 {
-	AP_ZERO_MEMORY(gLocalAddr, 20);
-	AP_ZERO_MEMORY(gLocalDefaultGateway, 20);
 	char msgBuf[8192];
 	int sock, len, msgSeq = 0;
 
@@ -98,6 +98,15 @@ APBool APNetworkInitLocalAddr()
 	for (; NLMSG_OK(nlMsg, len); nlMsg = NLMSG_NEXT(nlMsg, len)) 
 		APNetworkParseRoutes(nlMsg);
 	close(sock);
+	
+	//mac
+	struct ifreq ifr;
+	sock = socket(AF_INET, SOCK_DGRAM, 0);
+	strcpy(ifr.ifr_name, "eth0");
+	if(!ioctl(sock, SIOCGIFHWADDR, &ifr)) {
+		memcpy(gAPMacAddr, ifr.ifr_hwaddr.sa_data, 6);
+	}
+	else return AP_FALSE;
 	return AP_TRUE;
 }
 
@@ -133,28 +142,24 @@ APBool APNetworkInitControllerAddr(APNetworkAddress addr)
 	return AP_TRUE;
 }
 
-APBool APNetworkSendUnconnected( 
-				      const u8 *buf,
-				      int len) {
-	if(buf == NULL) 
+APBool APNetworkSendUnconnected(APProtocolMessage sendMsg) {
+	if(sendMsg.msg == NULL) 
 		return AP_FALSE;
-	while(sendto(gSocket, buf, len, 0, (struct sockaddr*)&gControllerSockaddr, APNetworkGetAddressSize()) < 0) {
+	while(sendto(gSocket, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&gControllerSockaddr, APNetworkGetAddressSize()) < 0) {
 		if(errno == EINTR) continue;
 	}
 	return AP_TRUE;
 }
 
-APBool APNetworkSendToBroadUnconnected(
-					const u8 *buf,
-					int len) {
-	if(buf == NULL) 
+APBool APNetworkSendToBroadUnconnected(APProtocolMessage sendMsg) {
+	if(sendMsg.msg == NULL) 
 		return AP_FALSE;
 	APNetworkAddress broadAddr;
 	AP_ZERO_MEMORY(&broadAddr, sizeof(broadAddr));
 	broadAddr.sin_family = AF_INET;
 	broadAddr.sin_addr.s_addr = inet_addr("255.255.255.255");
 	broadAddr.sin_port = htons(gPort);
-	if(sendto(gSocketBroad, buf, len, 0, (struct sockaddr*)&broadAddr, APNetworkGetAddressSize()) < 0) {
+	if(sendto(gSocketBroad, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&broadAddr, APNetworkGetAddressSize()) < 0) {
 		return AP_FALSE;
 	}
 	return AP_TRUE;

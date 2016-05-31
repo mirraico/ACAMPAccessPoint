@@ -3,6 +3,7 @@
 
 #include "Common.h"
 #include "AcampAP.h"
+#include "AcampProtocol.h"
 
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
@@ -17,15 +18,14 @@ extern char gControllerAddr[20];
 extern int gPort;
 
 APBool APNetworkInit();
+APBool APNetworkInitLocalAddr();
 APBool APNetworkInitControllerAddr();
 APBool APNetworkInitControllerAddr(APNetworkAddress addr);
 int APNetworkGetAddressSize();
 APBool APNetworkSendUnconnected(
-					const u8 *buf,
-					int len) ;
+					APProtocolMessage sendMsg) ;
 APBool APNetworkSendToBroadUnconnected(
-					const u8 *buf,
-					int len);
+					APProtocolMessage sendMsg);
 
 #define		APNetworkCloseSocket(x)		{ shutdown(SHUT_RDWR, x); close(x); x=-1;}
 

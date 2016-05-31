@@ -1,14 +1,12 @@
 #include "AcampAP.h"
 
-
-u16 gAPID;
-char gLocalAddr[20];
-char gLocalDefaultGateway[20];
+u16 gAPID = 0;
 
 char gAPName[32];
 char gAPDescriptor[128];
-u8 gAPIPAddr[4];
+u32 gAPIPAddr;
 u8 gAPMacAddr[6];
+u32 gAPDefaultGateway;
 
 u8 gControllerName[32];
 u8 gControllerDescriptor[128];

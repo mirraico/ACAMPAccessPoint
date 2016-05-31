@@ -26,7 +26,7 @@ APBool interactiveTestRegisterRequest(APProtocolMessage *messagesPtr)
 	if(messagesPtr == NULL) return AP_FALSE;
 	
 	APProtocolMessage *msgElems;
-	int msgElemCount = 4, k = 0;
+	int msgElemCount = 2, k = 0;
 	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
 	
 	if(
@@ -37,7 +37,7 @@ APBool interactiveTestRegisterRequest(APProtocolMessage *messagesPtr)
 	   )
 	{
 		int i;
-		for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
+		for(i = 0; i < k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
 		AP_FREE_OBJECT(msgElems);
 		return AP_FALSE;
 	}
@@ -105,10 +105,13 @@ APBool interactiveTestConfigurationReport(APProtocolMessage *messagesPtr)
 void interactiveTest()
 {
 	APNetworkInit();
+	APNetworkInitLocalAddr();
+	APInitConfiguration();
+	
 	APProtocolMessage sendMsg;
 	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
 	interactiveTestDiscoveryRequest(&sendMsg);
-	APNetworkSendToBroadUnconnected(sendMsg.msg, sendMsg.offset);
+	APNetworkSendToBroadUnconnected(sendMsg);
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
 	
 	char buffer[1024]; 
@@ -118,13 +121,12 @@ void interactiveTest()
 	recvfrom(gSocket, buffer, 1024, 0, (struct sockaddr*)&controllerSockAddr, &controllerSockAddrLen) ;
 	APNetworkInitControllerAddr(controllerSockAddr);
 	*/
-	strcpy(gControllerAddr,"192.168.1.1\0");
+	strcpy(gControllerAddr, "192.168.1.1\0");
 	APNetworkInitControllerAddr();
 	
-	APNetworkInit();
 	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
 	interactiveTestRegisterRequest(&sendMsg);
-	APNetworkSendUnconnected(sendMsg.msg, sendMsg.offset);
+	APNetworkSendUnconnected(sendMsg);
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
 	/*
 	recvfrom(gSocket, buffer, 1024, 0, (struct sockaddr*)&controllerSockAddr, &controllerSockAddrLen) ;
@@ -132,7 +134,7 @@ void interactiveTest()
 	*/
 	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
 	interactiveTestConfigurationRequest(&sendMsg);
-	APNetworkSendUnconnected(sendMsg.msg, sendMsg.offset);
+	APNetworkSendUnconnected(sendMsg);
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
 	/*
 	recvfrom(gSocket, buffer, 1024, 0, (struct sockaddr*)&controllerSockAddr, &controllerSockAddrLen) ;
@@ -140,12 +142,17 @@ void interactiveTest()
 	*/
 	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
 	interactiveTestConfigurationReport(&sendMsg);
-	APNetworkSendUnconnected(sendMsg.msg, sendMsg.offset);
+	APNetworkSendUnconnected(sendMsg);
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
 }
 
 int main()
 {
+//	APNetworkInitLocalAddr();
+//	printf("IP:  %u.%u.%u.%u\n", (u8)(gAPIPAddr >> 24), (u8)(gAPIPAddr >> 16),  (u8)(gAPIPAddr >> 8),  (u8)(gAPIPAddr >> 0));
+//	printf("MAC:  %u:%u:%u:%u:%u:%u\n", gAPMacAddr[0], gAPMacAddr[1], gAPMacAddr[2], gAPMacAddr[3], gAPMacAddr[4], gAPMacAddr[5]);
+//	printf("IP:  %u.%u.%u.%u\n", (u8)(gAPDefaultGateway >> 24), (u8)(gAPDefaultGateway >> 16),  (u8)(gAPDefaultGateway >> 8),  (u8)(gAPDefaultGateway >> 0));
+	
 	interactiveTest();
 	/*
 	APInitConfiguration();
@@ -174,10 +181,8 @@ int main()
 
 void APInitConfiguration()
 {
-	strcpy(gControllerAddr,"127.0.0.1\0");
-	strcpy(gAPName,"TESTAP\0");
-	strcpy(gAPDescriptor,"DESCRIPTOR\0");
-	gAPID = 12345;
+	strcpy(gAPName, "AP-NAME\0");
+	strcpy(gAPDescriptor, "AP-DESCRIPTOR\0");
 }
 
 void APTest()

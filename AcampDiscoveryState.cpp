@@ -25,7 +25,7 @@ APStateTransition  APEnterDiscovery()
 			return AP_DISCOVERY;
 		}
 		
-		APNetworkSendToBroadUnconnected(sendMsg.msg, sendMsg.offset);
+		APNetworkSendToBroadUnconnected(sendMsg);
 
 		AP_FREE_PROTOCOL_MESSAGE(sendMsg);
 		
@@ -48,7 +48,7 @@ APBool APAssembleDiscoveryRequest(APProtocolMessage *messagesPtr)
 	   )
 	{
 		int i;
-		for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
+		for(i = 0; i < k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
 		AP_FREE_OBJECT(msgElems);
 		return AP_FALSE;
 	}

@@ -23,13 +23,12 @@ typedef struct
 }Timers;
 
 extern u16 gAPID;
-extern char gLocalAddr[20];
-extern char gLocalDefaultGateway[20];
 
 extern char gAPName[32];
 extern char gAPDescriptor[128];
-extern u8 gAPIPAddr[4];
+extern u32 gAPIPAddr;
 extern u8 gAPMacAddr[6];
+extern u32 gAPDefaultGateway;
 
 extern u8 gControllerName[32];
 extern u8 gControllerDescriptor[128];
@@ -59,8 +58,6 @@ extern u8 gDelSTAMAC[6];
 extern u32 gStateDescriptor;
 
 __inline__ u16 APGetAPID() { return gAPID; }
-__inline__ char* APGetLocalAddr() { return gLocalAddr; }
-__inline__ char* APGetLocalDefaultGateway() { return gLocalDefaultGateway; }
 __inline__ char* APGetAPName() { return gAPName; }
 __inline__ char* APGetAPDescriptor() { return gAPDescriptor; }
 

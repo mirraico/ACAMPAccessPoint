@@ -150,8 +150,6 @@ char *CWProtocolRetrieveStr(APProtocolMessage *msgPtr, int len);
 u8 *CWProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len);
 
 APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr);
-APBool APAssembleMsgElemAPBoardData(APProtocolMessage *msgPtr);
 APBool APAssembleMsgElemAPDescriptor(APProtocolMessage *msgPtr);
-APBool APAssembleMsgElemAPRadioInformation(APProtocolMessage *msgPtr) ;
 
 #endif
