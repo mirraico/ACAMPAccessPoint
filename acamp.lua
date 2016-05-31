@@ -6,7 +6,22 @@ do
 	local proto_acamp = Proto("ACAMP", "AP Control And Management Protocol")
 
 	local msg_type = {
-		[0x0003] = "Discover Request"
+		[0x0001] = "Keep Alive Request",
+		[0x0002] = "Keep Alive Response",
+		[0x0003] = "Discover Request",
+		[0x0004] = "Discover Response",
+		[0x0011] = "Register Request",
+		[0x0012] = "Register Reponse",
+		[0x0013] = "Unregister Request",
+		[0x0014] = "Unregister Response",
+		[0x0021] = "Configuration Request",
+		[0x0022] = "Configuration Deliver",
+		[0x0023] = "Configuration Report",
+		[0x0024] = "Station Configuration Deliver",
+		[0x0031] = "Statistic Request",
+		[0x0032] = "Statistic Report",
+		[0x0041] = "State Request",
+		[0x0042] = "State Report"
 	}
 
 	local msg_ele_type = {
@@ -42,7 +57,9 @@ do
 		local v_apid = buffer(6, 2)
 		local t = tree:add(proto_acamp, buffer(0, v_buffer_len), "AP Control And Management Protocol, APID: " .. v_apid:uint())
 		local th = t.add(t, v_header, "ACAMP Header")
-		local tes = t.add(t, v_element, "ACAMP Elements")
+		if v_buffer_len > 12 then
+			local tes = t.add(t, v_element, "ACAMP Elements")
+		end
 
 		th:add(f_acamp_version, v_header(0, 1))
 		th:add(f_acamp_type, v_header(1, 1))
@@ -51,6 +68,9 @@ do
 		th:add(f_acamp_msg_type, v_header(8, 2))
 		th:add(f_acamp_msg_len, v_header(10, 2))
 		
+		local v_msg_type = v_header(8, 2)
+		pinfo.cols.info:set(msg_type[v_msg_type:uint()])
+
 		local p_ele = 0
 		while p_ele < v_element:len() do
 			local v_element_type = v_element(p_ele, 2)
