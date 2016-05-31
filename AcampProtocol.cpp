@@ -123,7 +123,8 @@ APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *va
 	return AP_TRUE;
 }
 
-u8 APProtocolRetrieve8(APProtocolMessage *msgPtr) {
+u8 APProtocolRetrieve8(APProtocolMessage *msgPtr) 
+{
 	u8 val;
 
 	AP_COPY_MEMORY(&val, &((msgPtr->msg)[(msgPtr->offset)]), 1);
@@ -132,7 +133,8 @@ u8 APProtocolRetrieve8(APProtocolMessage *msgPtr) {
 	return val;
 }
 
-u16 APProtocolRetrieve16(APProtocolMessage *msgPtr) {
+u16 APProtocolRetrieve16(APProtocolMessage *msgPtr) 
+{
 	u16 val;
 
 	AP_COPY_MEMORY(&val, &((msgPtr->msg)[(msgPtr->offset)]), 2);
@@ -141,7 +143,8 @@ u16 APProtocolRetrieve16(APProtocolMessage *msgPtr) {
 	return ntohs(val);
 }
 
-u32 APProtocolRetrieve32(APProtocolMessage *msgPtr) {
+u32 APProtocolRetrieve32(APProtocolMessage *msgPtr) 
+{
 	u32 val;
 
 	AP_COPY_MEMORY(&val, &((msgPtr->msg)[(msgPtr->offset)]), 4);
@@ -150,7 +153,8 @@ u32 APProtocolRetrieve32(APProtocolMessage *msgPtr) {
 	return ntohl(val);
 }
 
-char* APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len) {
+char* APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len) 
+{
 	u8* str;
 
 	AP_CREATE_OBJECT_SIZE(str, (len+1));
@@ -162,7 +166,8 @@ char* APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len) {
 	return (char*)str;
 }
 
-u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len) {
+u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len) 
+{
 	u8* bytes;
 
 	AP_CREATE_OBJECT_SIZE(bytes, len);
@@ -173,7 +178,8 @@ u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len) {
 	return bytes;
 }
 
-APBool APParseControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr) {
+APBool APParseControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr) 
+{
 	if(controlHdrPtr == NULL|| valPtr == NULL) return AP_FALSE;
 	
 	valPtr->version = APProtocolRetrieve8(controlHdrPtr);
@@ -186,7 +192,7 @@ APBool APParseControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPt
 	return AP_TRUE;
 }
 
-APBool APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len)
+APBool APParseFormatMsgElement(APProtocolMessage *msgPtr, u16 *type, u16 *len)
 {
 	if(len == NULL || type == NULL) return AP_FALSE;
 	*type = APProtocolRetrieve16(msgPtr);
@@ -195,17 +201,8 @@ APBool APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len)
 	return AP_TRUE;
 }
 
-APBool APAssembleMsgElemAPDescriptor(APProtocolMessage *msgPtr) {
-	if(msgPtr == NULL) return AP_FALSE;
-	
-	char *descriptor = APGetAPDescriptor();
-	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, strlen(descriptor));
-	
-	APProtocolStoreStr(msgPtr, descriptor);
-	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_DESCRIPTOR);
-}
-
-APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr) {
+APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr) 
+{
 	if(msgPtr == NULL) return AP_FALSE;
 
 	char *name = APGetAPName();
@@ -215,3 +212,71 @@ APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr) {
 	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_NAME);
 }
 
+APBool APAssembleMsgElemAPDescriptor(APProtocolMessage *msgPtr) 
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	
+	char *descriptor = APGetAPDescriptor();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, strlen(descriptor));
+	
+	APProtocolStoreStr(msgPtr, descriptor);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_DESCRIPTOR);
+}
+
+APBool APAssembleMsgElemAPIPAddr(APProtocolMessage *msgPtr)
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	
+	u32 ipAddr = APGetAPIPAddr();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, 4);
+	
+	APProtocolStore32(msgPtr, ipAddr);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_IP_ADDRESS);
+}
+
+APBool APAssembleMsgElemAPMACAddr(APProtocolMessage *msgPtr)
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	
+	u8* macAddr = APGetAPMACAddr();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, 6);
+	
+	for(int i = 0; i < 6; i ++) {
+		APProtocolStore8(msgPtr, macAddr[i]);
+	}
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_MAC_ADDRESS);
+}
+
+APBool APParseMsgElemControllerName(APProtocolMessage *msgPtr, int elemLen) 
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(gControllerName != NULL) AP_FREE_OBJECT(gControllerName);
+	gControllerName = APProtocolRetrieveStr(msgPtr, elemLen);
+	return AP_TRUE;
+}
+
+APBool APParseMsgElemControllerDescriptor(APProtocolMessage *msgPtr, int elemLen) 
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(gControllerDescriptor != NULL) AP_FREE_OBJECT(gControllerDescriptor);
+	gControllerDescriptor = APProtocolRetrieveStr(msgPtr, elemLen);
+	return AP_TRUE;
+}
+
+APBool APParseMsgElemControllerIPAddr(APProtocolMessage *msgPtr, int elemLen) 
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(elemLen != 4) return AP_FALSE;
+	gControllerIPAddr = APProtocolRetrieve32(msgPtr);
+	return AP_TRUE;
+}
+
+APBool APParseMsgElemControllerMACAddr(APProtocolMessage *msgPtr, int elemLen) 
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(elemLen != 6) return AP_FALSE;
+	for(int i = 0; i < 6; i++) {
+		gControllerMacAddr[i] = APProtocolRetrieve8(msgPtr);
+	}
+	return AP_TRUE;
+}

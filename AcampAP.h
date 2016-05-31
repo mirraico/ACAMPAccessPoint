@@ -27,12 +27,12 @@ extern u16 gAPID;
 extern char gAPName[32];
 extern char gAPDescriptor[128];
 extern u32 gAPIPAddr;
-extern u8 gAPMacAddr[6];
+extern u8 gAPMACAddr[6];
 extern u32 gAPDefaultGateway;
 
-extern u8 gControllerName[32];
-extern u8 gControllerDescriptor[128];
-extern u8 gControllerIPAddr[4]; 
+extern char* gControllerName;
+extern char* gControllerDescriptor;
+extern u32 gControllerIPAddr; 
 extern u8 gControllerMacAddr[6];
 
 extern u8 gSSID[32];
@@ -60,6 +60,8 @@ extern u32 gStateDescriptor;
 __inline__ u16 APGetAPID() { return gAPID; }
 __inline__ char* APGetAPName() { return gAPName; }
 __inline__ char* APGetAPDescriptor() { return gAPDescriptor; }
+__inline__ u32 APGetAPIPAddr() { return gAPIPAddr; }
+__inline__ u8* APGetAPMACAddr() { return gAPMACAddr; }
 
 #endif // ACAMPAP_H
 

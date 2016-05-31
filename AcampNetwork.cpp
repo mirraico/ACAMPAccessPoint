@@ -104,7 +104,7 @@ APBool APNetworkInitLocalAddr()
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
 	strcpy(ifr.ifr_name, "eth0");
 	if(!ioctl(sock, SIOCGIFHWADDR, &ifr)) {
-		memcpy(gAPMacAddr, ifr.ifr_hwaddr.sa_data, 6);
+		memcpy(gAPMACAddr, ifr.ifr_hwaddr.sa_data, 6);
 	}
 	else return AP_FALSE;
 	return AP_TRUE;
@@ -162,5 +162,15 @@ APBool APNetworkSendToBroadUnconnected(APProtocolMessage sendMsg) {
 	if(sendto(gSocketBroad, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&broadAddr, APNetworkGetAddressSize()) < 0) {
 		return AP_FALSE;
 	}
+	return AP_TRUE;
+}
+
+APBool APNetworkReceiveUnconnected(u8* buffer,
+					 int bufferLen, int* readLenPtr, APNetworkAddress* addrPtr) {
+						 
+	unsigned int  addrLen = sizeof(APNetworkAddress);
+	if(buffer == NULL || readLenPtr == NULL) 
+		return AP_FALSE;
+	*readLenPtr = recvfrom(gSocket, buffer, bufferLen, 0, (struct sockaddr*)addrPtr, &addrLen);
 	return AP_TRUE;
 }

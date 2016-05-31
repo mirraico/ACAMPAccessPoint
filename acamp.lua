@@ -25,10 +25,39 @@ do
 	}
 
 	local msg_ele_type = {
-		[0x0102] = "AP Board Data", 
-		[0x0103] = "AP Description", 
-		[0x0104] = "AP Name", 
-		[0x030A] = "AP Radio Information"
+		[0x0001] = "Result Code",
+		[0x0002] = "Reason Code",
+		[0x0003] = "Assigned APID",
+		[0x0004] = "Controller Name",
+		[0x0005] = "Controller Descriptor",
+		[0x0006] = "Controlelr IP Address",
+		[0x0007] = "Controller Mac Address",
+		[0x0008] = "AP Name",
+		[0x0009] = "AP Descriptor",
+		[0x000a] = "AP IP Address",
+		[0x000b] = "AP Mac Address",
+		[0x0101] = "SSID",
+		[0x0102] = "Channel",
+		[0x0103] = "Hardware Mode",
+		[0x0104] = "Suppress SSID",
+		[0x0105] = "Security Setting",
+		[0x0201] = "WPA Version",
+		[0x0202] = "WPA Passphrase",
+		[0x0203] = "WPA Key Management",
+		[0x0204] = "WPA Pairwise",
+		[0x0205] = "WPA Group Rekey",
+		[0x0301] = "WEP Default Key",
+		[0x0302] = "WEP Key",
+		[0x0401] = "MAC ACL Mode",
+		[0x0402] = "MAC Accept List",
+		[0x0403] = "MAC Deny List",
+		[0x0501] = "Country Code",
+		[0x0502] = "Enable Dot11d",
+		[0x0601] = "Add Station",
+		[0x0602] = "Delete Station",
+		[0x0701] = "State Descriptor",
+		[0x0702] = "Timers",
+		[0x0801] = "Flow Statistic"
 	}
 
 	local f_acamp_version = ProtoField.uint8("ACAMP.Version", "Version", base.DEC)
@@ -57,8 +86,9 @@ do
 		local v_apid = buffer(6, 2)
 		local t = tree:add(proto_acamp, buffer(0, v_buffer_len), "AP Control And Management Protocol, APID: " .. v_apid:uint())
 		local th = t.add(t, v_header, "ACAMP Header")
+		local tes
 		if v_buffer_len > 12 then
-			local tes = t.add(t, v_element, "ACAMP Elements")
+			tes = t.add(t, v_element, "ACAMP Elements")
 		end
 
 		th:add(f_acamp_version, v_header(0, 1))

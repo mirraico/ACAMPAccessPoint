@@ -5,12 +5,12 @@ u16 gAPID = 0;
 char gAPName[32];
 char gAPDescriptor[128];
 u32 gAPIPAddr;
-u8 gAPMacAddr[6];
+u8 gAPMACAddr[6];
 u32 gAPDefaultGateway;
 
-u8 gControllerName[32];
-u8 gControllerDescriptor[128];
-u8 gControllerIPAddr[4]; 
+char* gControllerName;
+char* gControllerDescriptor;
+u32 gControllerIPAddr; 
 u8 gControllerMacAddr[6];
 
 u8 gSSID[32];

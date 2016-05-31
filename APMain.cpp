@@ -5,7 +5,7 @@
 
 void APInitConfiguration();
 
-APBool APParseDiscoveryResponseMessage(char *msg, 
+APBool APParseDiscoveryResponseMessage(u8 *msg, 
 				       int msgLen,
 					   u32 *seqNumPtr) 
 {
@@ -22,27 +22,27 @@ APBool APParseDiscoveryResponseMessage(char *msg,
 	*seqNumPtr = header.seqNum;
 	
 	while((msgLen - completeMsg.offset) > 0) {
-		u16 eleType = 0;
-		u16 eleLen = 0;
-		if(!APParseFormatMsgElem(&completeMsg, &eleType, &eleLen)) {
+		u16 elemType = 0;
+		u16 elemLen = 0;
+		if(!APParseFormatMsgElement(&completeMsg, &elemType, &elemLen)) {
 			return AP_FALSE;
 		}
-		switch(eleType) {
+		switch(elemType) {
 			case MSGELETYPE_CONTROLLER_NAME:
-//				if(!APParseControllerName(&completeMsg, elemLen))
-//					return AP_FALSE;
+				if(!APParseMsgElemControllerName(&completeMsg, elemLen))
+					return AP_FALSE;
 				break;
 			case MSGELETYPE_CONTROLLER_DESCRIPTOR:
-//				if(!APParseControllerDescriptor(&completeMsg, elemLen))
-//					return AP_FALSE;
+				if(!APParseMsgElemControllerDescriptor(&completeMsg, elemLen))
+					return AP_FALSE;
 				break; 
 			case MSGELETYPE_CONTROLLER_IP_ADDRESS:
-//				if(!APParseControllerIPAddress(&completeMsg, elemLen))
-//					return AP_FALSE;
+				if(!APParseMsgElemControllerIPAddr(&completeMsg, elemLen))
+					return AP_FALSE;
 				break;
 			case MSGELETYPE_CONTROLLER_MAC_ADDRESS:
-//				if(!APParseControllerMACAddress(&completeMsg, elemLen))
-//					return AP_FALSE;
+				if(!APParseMsgElemControllerMACAddr(&completeMsg, elemLen))
+					return AP_FALSE;
 				break;
 			default:
 				return AP_FALSE;
@@ -51,6 +51,20 @@ APBool APParseDiscoveryResponseMessage(char *msg,
 	}
 	if(msgLen != completeMsg.offset) return AP_FALSE;
 	
+	return AP_TRUE;
+}
+
+APBool APReceiveDiscoveryResponse()
+{
+	u8 buffer[AP_BUFFER_SIZE];
+	int readBytes; APNetworkAddress controllerAddr;
+	if(!APNetworkReceiveUnconnected(buffer, AP_BUFFER_SIZE - 1, &readBytes, &controllerAddr)) {
+		return AP_FALSE;
+	}
+	u32 seqNum;
+	if(!APParseDiscoveryResponseMessage(buffer, readBytes, &seqNum)) {
+		return AP_FALSE;
+	}
 	return AP_TRUE;
 }
 
@@ -75,15 +89,15 @@ APBool interactiveTestRegisterRequest(APProtocolMessage *messagesPtr)
 	if(messagesPtr == NULL) return AP_FALSE;
 	
 	APProtocolMessage *msgElems;
-	int msgElemCount = 2, k = 0;
+	int msgElemCount = 4, k = 0;
 	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
 	
 	if(
-	   (!(APAssembleMsgElemAPName(&(msgElems[k++])))) ||
-	   (!(APAssembleMsgElemAPDescriptor(&(msgElems[k++]))))	
-	   //(!(APAssembleMsgElemAPIPAddress(&(msgElems[k++]))))
-	  // (!(APAssembleMsgElemAPMACAddress(&(msgElems[k++]))))
-	   )
+		(!(APAssembleMsgElemAPName(&(msgElems[k++])))) ||
+		(!(APAssembleMsgElemAPDescriptor(&(msgElems[k++])))) ||
+		(!(APAssembleMsgElemAPIPAddr(&(msgElems[k++])))) ||
+		(!(APAssembleMsgElemAPMACAddr(&(msgElems[k++]))))
+		)
 	{
 		int i;
 		for(i = 0; i < k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
@@ -92,7 +106,7 @@ APBool interactiveTestRegisterRequest(APProtocolMessage *messagesPtr)
 	}
 	
 	return APAssembleMessage (messagesPtr, 
-				 15432,
+				 15433,
 				 MSGTYPE_REGISTER_REQUEST,
 				 msgElems,
 				 msgElemCount
@@ -163,36 +177,30 @@ void interactiveTest()
 	APNetworkSendToBroadUnconnected(sendMsg);
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
 	
-	char buffer[1024]; 
-	bzero(buffer, 1024); 
-	struct sockaddr_in controllerSockAddr; unsigned int controllerSockAddrLen = sizeof(controllerSockAddr); 
-	/*
-	recvfrom(gSocket, buffer, 1024, 0, (struct sockaddr*)&controllerSockAddr, &controllerSockAddrLen) ;
-	APNetworkInitControllerAddr(controllerSockAddr);
-	*/
-	strcpy(gControllerAddr, "192.168.1.1\0");
+	APReceiveDiscoveryResponse();
+	//strcpy(gControllerAddr, "192.168.1.1\0");
 	APNetworkInitControllerAddr();
 	
 	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
 	interactiveTestRegisterRequest(&sendMsg);
 	APNetworkSendUnconnected(sendMsg);
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
-	/*
-	recvfrom(gSocket, buffer, 1024, 0, (struct sockaddr*)&controllerSockAddr, &controllerSockAddrLen) ;
-	APNetworkInitControllerAddr(controllerSockAddr);
-	*/
-	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
-	interactiveTestConfigurationRequest(&sendMsg);
-	APNetworkSendUnconnected(sendMsg);
-	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
-	/*
-	recvfrom(gSocket, buffer, 1024, 0, (struct sockaddr*)&controllerSockAddr, &controllerSockAddrLen) ;
-	APNetworkInitControllerAddr(controllerSockAddr);
-	*/
-	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
-	interactiveTestConfigurationReport(&sendMsg);
-	APNetworkSendUnconnected(sendMsg);
-	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+//	/*
+//	recvfrom(gSocket, buffer, 1024, 0, (struct sockaddr*)&controllerSockAddr, &controllerSockAddrLen) ;
+//	APNetworkInitControllerAddr(controllerSockAddr);
+//	*/
+//	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+//	interactiveTestConfigurationRequest(&sendMsg);
+//	APNetworkSendUnconnected(sendMsg);
+//	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+//	/*
+//	recvfrom(gSocket, buffer, 1024, 0, (struct sockaddr*)&controllerSockAddr, &controllerSockAddrLen) ;
+//	APNetworkInitControllerAddr(controllerSockAddr);
+//	*/
+//	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+//	interactiveTestConfigurationReport(&sendMsg);
+//	APNetworkSendUnconnected(sendMsg);
+//	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
 }
 
 int main()

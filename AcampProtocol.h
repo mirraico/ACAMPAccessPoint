@@ -146,12 +146,19 @@ APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *va
 u8 APProtocolRetrieve8(APProtocolMessage *msgPtr);
 u16 APProtocolRetrieve16(APProtocolMessage *msgPtr);
 u32 APProtocolRetrieve32(APProtocolMessage *msgPtr);
-char *CWProtocolRetrieveStr(APProtocolMessage *msgPtr, int len);
-u8 *CWProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len);
+char *APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len);
+u8 *APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len);
 APBool APParseControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr);
-APBool APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len);
+APBool APParseFormatMsgElement(APProtocolMessage *msgPtr, u16 *type, u16 *len);
 
 APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr);
 APBool APAssembleMsgElemAPDescriptor(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemAPIPAddr(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemAPMACAddr(APProtocolMessage *msgPtr);
+
+APBool APParseMsgElemControllerName(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemControllerDescriptor(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemControllerIPAddr(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemControllerMACAddr(APProtocolMessage *msgPtr, int elemLen);
 
 #endif
