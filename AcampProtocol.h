@@ -155,6 +155,15 @@ APBool APAssembleMsgElemAPName(APProtocolMessage *msgPtr);
 APBool APAssembleMsgElemAPDescriptor(APProtocolMessage *msgPtr);
 APBool APAssembleMsgElemAPIPAddr(APProtocolMessage *msgPtr);
 APBool APAssembleMsgElemAPMACAddr(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemSSID(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemChannel(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemHardwareMode(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemSuppressSSID(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemSecuritySetting(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemWPAVersion(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemWPAPassphrase(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemWPAKeyManagement(APProtocolMessage *msgPtr);
+APBool APAssembleMsgElemWPAPairwise(APProtocolMessage *msgPtr);
 
 APBool APParseMsgElemControllerName(APProtocolMessage *msgPtr, int elemLen);
 APBool APParseMsgElemControllerDescriptor(APProtocolMessage *msgPtr, int elemLen);

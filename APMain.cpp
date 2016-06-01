@@ -146,6 +146,53 @@ APBool APReceiveRegisterResponse()
     return AP_TRUE;
 }
 
+APBool APParseConfigurationDeliverMessage(u8 *msg,
+                       int msgLen,
+                       u32 *seqNumPtr)
+{
+    if(msg == NULL || seqNumPtr == NULL)
+        return AP_FALSE;
+    APHeaderVal header;
+    APProtocolMessage completeMsg;
+    completeMsg.msg = (u8*)msg;
+    completeMsg.offset = 0;
+
+    if(!APParseControlHeader(&completeMsg, &header)) return AP_FALSE;
+    if(header.msgType != MSGTYPE_CONFIGURATION_DELIVER)
+        return AP_FALSE;
+    *seqNumPtr = header.seqNum;
+
+    while((msgLen - completeMsg.offset) > 0) {
+        u16 elemType = 0;
+        u16 elemLen = 0;
+        if(!APParseFormatMsgElement(&completeMsg, &elemType, &elemLen)) {
+            return AP_FALSE;
+        }
+        switch(elemType) {
+            default:
+                return AP_FALSE;
+                break;
+        }
+    }
+    if(msgLen != completeMsg.offset) return AP_FALSE;
+    return AP_TRUE;
+}
+
+APBool APReceiveConfigurationDeliver()
+{
+    u8 buffer[AP_BUFFER_SIZE];
+    int readBytes; APNetworkAddress controllerAddr;
+    if(!APNetworkReceiveUnconnected(buffer, AP_BUFFER_SIZE - 1, &readBytes, &controllerAddr)) {
+        return AP_FALSE;
+    }
+    u32 seqNum;
+    if(!APParseConfigurationDeliverMessage(buffer, readBytes, &seqNum)) {
+        return AP_FALSE;
+    }
+    return AP_TRUE;
+}
+
+
 APBool APAssembleDiscoveryRequest(APProtocolMessage *messagesPtr)
 {
 	if(messagesPtr == NULL) return AP_FALSE;
@@ -191,6 +238,74 @@ APBool APAssembleRegisterRequest(APProtocolMessage *messagesPtr)
 	);
 }
 
+APBool APAssembleConfigurationRequest(APProtocolMessage *messagesPtr)
+{
+    if(messagesPtr == NULL) return AP_FALSE;
+
+    APProtocolMessage *msgElems;
+    int msgElemCount = 9, k = 0;
+    AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
+
+    if(
+        (!(APAssembleMsgElemSSID(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemChannel(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemHardwareMode(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemSuppressSSID(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemSecuritySetting(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemWPAVersion(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemWPAPassphrase(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemWPAKeyManagement(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemWPAPairwise(&(msgElems[k++]))))
+        )
+    {
+        int i;
+        for(i = 0; i < k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
+        AP_FREE_OBJECT(msgElems);
+        return AP_FALSE;
+    }
+
+    return APAssembleMessage (messagesPtr,
+                 15434,
+                 MSGTYPE_CONFIGURATION_REQUEST,
+                 msgElems,
+                 msgElemCount
+    );
+}
+
+APBool APAssembleConfigurationReport(APProtocolMessage *messagesPtr)
+{
+    if(messagesPtr == NULL) return AP_FALSE;
+
+    APProtocolMessage *msgElems;
+    int msgElemCount = 9, k = 0;
+    AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
+
+    if(
+        (!(APAssembleMsgElemSSID(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemChannel(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemHardwareMode(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemSuppressSSID(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemSecuritySetting(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemWPAVersion(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemWPAPassphrase(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemWPAKeyManagement(&(msgElems[k++])))) ||
+        (!(APAssembleMsgElemWPAPairwise(&(msgElems[k++]))))
+        )
+    {
+        int i;
+        for(i = 0; i < k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
+        AP_FREE_OBJECT(msgElems);
+        return AP_FALSE;
+    }
+
+    return APAssembleMessage (messagesPtr,
+                 15434,
+                 MSGTYPE_CONFIGURATION_REPORT,
+                 msgElems,
+                 msgElemCount
+    );
+}
+
 void interactiveTest()
 {
     //init
@@ -215,22 +330,18 @@ void interactiveTest()
 
     APReceiveRegisterResponse();
 
-//	/*
-//	recvfrom(gSocket, buffer, 1024, 0, (struct sockaddr*)&controllerSockAddr, &controllerSockAddrLen) ;
-//	APNetworkInitControllerAddr(controllerSockAddr);
-//	*/
-//	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
-//	interactiveTestConfigurationRequest(&sendMsg);
-//	APNetworkSendUnconnected(sendMsg);
-//	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
-//	/*
-//	recvfrom(gSocket, buffer, 1024, 0, (struct sockaddr*)&controllerSockAddr, &controllerSockAddrLen) ;
-//	APNetworkInitControllerAddr(controllerSockAddr);
-//	*/
-//	AP_INIT_PROTOCOL_MESSAGE(sendMsg);
-//	interactiveTestConfigurationReport(&sendMsg);
-//	APNetworkSendUnconnected(sendMsg);
-//	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+    //configurate
+    AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+    APAssembleConfigurationRequest(&sendMsg);
+    APNetworkSendUnconnected(sendMsg);
+    AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+
+    APReceiveConfigurationDeliver();
+
+    AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+    APAssembleConfigurationReport(&sendMsg);
+    APNetworkSendUnconnected(sendMsg);
+    AP_FREE_PROTOCOL_MESSAGE(sendMsg);
 }
 
 int main()

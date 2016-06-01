@@ -13,13 +13,13 @@ char* gControllerDescriptor;
 u32 gControllerIPAddr; 
 u8 gControllerMacAddr[6];
 
-u8 gSSID[32];
+char* gSSID;
 u8 gChannel;
 u8 gHwMode;
 u8 gSuppressSSID;
 u8 gSecuritySetting;
 u8 gWPAVersion;
-u8 gWPAPasswd[63];
+char* gWPAPasswd;
 u8 gWPAKeyManagement;
 u8 gWPAPairwise;
 u8 gWPARekey[4];

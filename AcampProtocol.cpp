@@ -247,6 +247,100 @@ APBool APAssembleMsgElemAPMACAddr(APProtocolMessage *msgPtr)
 	return APAssembleMsgElem(msgPtr, MSGELETYPE_AP_MAC_ADDRESS);
 }
 
+APBool APAssembleMsgElemSSID(APProtocolMessage *msgPtr)
+{
+    if(msgPtr == NULL) return AP_FALSE;
+
+    char *ssid = APGetSSID();
+    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, strlen(ssid));
+
+    APProtocolStoreStr(msgPtr, ssid);
+    return APAssembleMsgElem(msgPtr, MSGELETYPE_SSID);
+}
+
+APBool APAssembleMsgElemChannel(APProtocolMessage *msgPtr)
+{
+    if(msgPtr == NULL) return AP_FALSE;
+
+    u8 channel = APGetChannel();
+
+    APProtocolStore8(msgPtr, channel);
+    return APAssembleMsgElem(msgPtr, MSGELETYPE_CHANNEL);
+}
+
+APBool APAssembleMsgElemHardwareMode(APProtocolMessage *msgPtr)
+{
+    if(msgPtr == NULL) return AP_FALSE;
+
+    u8 hwMode = APGetHwMode();
+
+    APProtocolStore8(msgPtr, hwMode);
+    return APAssembleMsgElem(msgPtr, MSGELETYPE_HW_MODE);
+}
+
+APBool APAssembleMsgElemSuppressSSID(APProtocolMessage *msgPtr)
+{
+    if(msgPtr == NULL) return AP_FALSE;
+
+    u8 suppressSSID = APGetSuppressSSID();
+
+    APProtocolStore8(msgPtr, suppressSSID);
+    return APAssembleMsgElem(msgPtr, MSGELETYPE_SUPPRESS_SSID);
+}
+
+APBool APAssembleMsgElemSecuritySetting(APProtocolMessage *msgPtr)
+{
+    if(msgPtr == NULL) return AP_FALSE;
+
+    u8 securitySetting = APGetSecuritySetting();
+
+    APProtocolStore8(msgPtr, securitySetting);
+    return APAssembleMsgElem(msgPtr, MSGELETYPE_SECURITY_SETTING);
+}
+
+APBool APAssembleMsgElemWPAVersion(APProtocolMessage *msgPtr)
+{
+    if(msgPtr == NULL) return AP_FALSE;
+
+    u8 wpaVersion = APGetWPAVersion();
+
+    APProtocolStore8(msgPtr, wpaVersion);
+    return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_VERSION);
+}
+
+APBool APAssembleMsgElemWPAPassphrase(APProtocolMessage *msgPtr)
+{
+    if(msgPtr == NULL) return AP_FALSE;
+
+    char *wpaPasswd = APGetWPAPasswd();
+    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, strlen(wpaPasswd));
+
+    APProtocolStoreStr(msgPtr, wpaPasswd);
+    return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_PASSPHRASE);
+}
+
+APBool APAssembleMsgElemWPAKeyManagement(APProtocolMessage *msgPtr)
+{
+    if(msgPtr == NULL) return AP_FALSE;
+
+    u8 wpaKeyManagement = APGetWPAKeyManagement();
+
+    APProtocolStore8(msgPtr, wpaKeyManagement);
+    return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_KEY_MANAGEMENT);
+}
+
+APBool APAssembleMsgElemWPAPairwise(APProtocolMessage *msgPtr)
+{
+    if(msgPtr == NULL) return AP_FALSE;
+
+    u8 wpaPairwise = APGetWPAPairwise();
+
+    APProtocolStore8(msgPtr, wpaPairwise);
+    return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_PAIRWISE);
+}
+
+
+
 APBool APParseMsgElemControllerName(APProtocolMessage *msgPtr, int elemLen) 
 {
 	if(msgPtr == NULL) return AP_FALSE;
