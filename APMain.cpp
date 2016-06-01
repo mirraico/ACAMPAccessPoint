@@ -381,6 +381,18 @@ void APInitConfiguration()
 {
 	strcpy(gAPName, "AP-NAME\0");
 	strcpy(gAPDescriptor, "AP-DESCRIPTOR\0");
+	
+	AP_CREATE_STRING_SIZE(gSSID, 11);
+	strcpy(gSSID, "xiangzi123\0");
+	gChannel = 7;
+	gHwMode = 2 ;
+	gSuppressSSID = 0;
+	gSecuritySetting = 4;
+	gWPAVersion = 2;	
+	AP_CREATE_STRING_SIZE(gWPAPasswd, 9);
+	strcpy(gWPAPasswd, "12345678\0");
+	gWPAKeyManagement = 15;
+	gWPAPairwise = 1;
 }
 
 void APTest()
