@@ -249,101 +249,101 @@ APBool APAssembleMsgElemAPMACAddr(APProtocolMessage *msgPtr)
 
 APBool APAssembleMsgElemSSID(APProtocolMessage *msgPtr)
 {
-    if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return AP_FALSE;
 
-    char *ssid = APGetSSID();
-    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, strlen(ssid));
+	char *ssid = APGetSSID();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, strlen(ssid));
 
-    APProtocolStoreStr(msgPtr, ssid);
-    return APAssembleMsgElem(msgPtr, MSGELETYPE_SSID);
+	APProtocolStoreStr(msgPtr, ssid);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_SSID);
 }
 
 APBool APAssembleMsgElemChannel(APProtocolMessage *msgPtr)
 {
-    if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return AP_FALSE;
 
-    u8 channel = APGetChannel();
-    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(channel));
+	u8 channel = APGetChannel();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(channel));
 
-    APProtocolStore8(msgPtr, channel);
-    return APAssembleMsgElem(msgPtr, MSGELETYPE_CHANNEL);
+	APProtocolStore8(msgPtr, channel);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_CHANNEL);
 }
 
 APBool APAssembleMsgElemHardwareMode(APProtocolMessage *msgPtr)
 {
-    if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return AP_FALSE;
 
-    u8 hwMode = APGetHwMode();
-    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(hwMode));
+	u8 hwMode = APGetHwMode();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(hwMode));
 
-    APProtocolStore8(msgPtr, hwMode);
-    return APAssembleMsgElem(msgPtr, MSGELETYPE_HW_MODE);
+	APProtocolStore8(msgPtr, hwMode);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_HW_MODE);
 }
 
 APBool APAssembleMsgElemSuppressSSID(APProtocolMessage *msgPtr)
 {
-    if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return AP_FALSE;
 
-    u8 suppressSSID = APGetSuppressSSID();
-    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(suppressSSID));
+	u8 suppressSSID = APGetSuppressSSID();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(suppressSSID));
 
-    APProtocolStore8(msgPtr, suppressSSID);
-    return APAssembleMsgElem(msgPtr, MSGELETYPE_SUPPRESS_SSID);
+	APProtocolStore8(msgPtr, suppressSSID);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_SUPPRESS_SSID);
 }
 
 APBool APAssembleMsgElemSecuritySetting(APProtocolMessage *msgPtr)
 {
-    if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return AP_FALSE;
 
-    u8 securitySetting = APGetSecuritySetting();
-    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(securitySetting));
+	u8 securitySetting = APGetSecuritySetting();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(securitySetting));
 
-    APProtocolStore8(msgPtr, securitySetting);
-    return APAssembleMsgElem(msgPtr, MSGELETYPE_SECURITY_SETTING);
+	APProtocolStore8(msgPtr, securitySetting);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_SECURITY_SETTING);
 }
 
 APBool APAssembleMsgElemWPAVersion(APProtocolMessage *msgPtr)
 {
-    if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return AP_FALSE;
 
-    u8 wpaVersion = APGetWPAVersion();
-    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(wpaVersion));
+	u8 wpaVersion = APGetWPAVersion();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(wpaVersion));
 
-    APProtocolStore8(msgPtr, wpaVersion);
-    return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_VERSION);
+	APProtocolStore8(msgPtr, wpaVersion);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_VERSION);
 }
 
 APBool APAssembleMsgElemWPAPassphrase(APProtocolMessage *msgPtr)
 {
-    if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return AP_FALSE;
 
-    char *wpaPasswd = APGetWPAPasswd();
-    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, strlen(wpaPasswd));
+	char *wpaPasswd = APGetWPAPasswd();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, strlen(wpaPasswd));
 
-    APProtocolStoreStr(msgPtr, wpaPasswd);
-    return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_PASSPHRASE);
+	APProtocolStoreStr(msgPtr, wpaPasswd);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_PASSPHRASE);
 }
 
 APBool APAssembleMsgElemWPAKeyManagement(APProtocolMessage *msgPtr)
 {
-    if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return AP_FALSE;
 
-    u8 wpaKeyManagement = APGetWPAKeyManagement();
-    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(wpaKeyManagement));
+	u8 wpaKeyManagement = APGetWPAKeyManagement();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(wpaKeyManagement));
 
-    APProtocolStore8(msgPtr, wpaKeyManagement);
-    return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_KEY_MANAGEMENT);
+	APProtocolStore8(msgPtr, wpaKeyManagement);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_KEY_MANAGEMENT);
 }
 
 APBool APAssembleMsgElemWPAPairwise(APProtocolMessage *msgPtr)
 {
-    if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return AP_FALSE;
 
-    u8 wpaPairwise = APGetWPAPairwise();
-    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(wpaPairwise));
+	u8 wpaPairwise = APGetWPAPairwise();
+	AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(wpaPairwise));
 
-    APProtocolStore8(msgPtr, wpaPairwise);
-    return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_PAIRWISE);
+	APProtocolStore8(msgPtr, wpaPairwise);
+	return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_PAIRWISE);
 }
 
 
@@ -384,16 +384,16 @@ APBool APParseMsgElemControllerMACAddr(APProtocolMessage *msgPtr, int elemLen)
 
 APBool APParseMsgElemResultCode(APProtocolMessage *msgPtr, int elemLen, int *result)
 {
-    if(msgPtr == NULL) return AP_FALSE;
-    if(elemLen != 2) return AP_FALSE;
-    *result = APProtocolRetrieve16(msgPtr);
-    return AP_TRUE;
+	if(msgPtr == NULL) return AP_FALSE;
+	if(elemLen != 2) return AP_FALSE;
+	*result = APProtocolRetrieve16(msgPtr);
+	return AP_TRUE;
 }
 
 APBool APParseMsgElemAssignedAPID(APProtocolMessage *msgPtr, int elemLen)
 {
-    if(msgPtr == NULL) return AP_FALSE;
-    if(elemLen != 2) return AP_FALSE;
-    gAPID = APProtocolRetrieve16(msgPtr);
-    return AP_TRUE;
+	if(msgPtr == NULL) return AP_FALSE;
+	if(elemLen != 2) return AP_FALSE;
+	gAPID = APProtocolRetrieve16(msgPtr);
+	return AP_TRUE;
 }
