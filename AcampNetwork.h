@@ -13,9 +13,9 @@ typedef struct sockaddr_in APNetworkAddress;
 
 extern APSocket gSocket;
 extern APSocket gSocketBroad;
-extern APNetworkAddress gControllerSockaddr;
-extern char gControllerAddr[20];
-extern int gPort;
+extern APNetworkAddress gNetworkControllerSockaddr;
+extern u32 gNetworkControllerAddr;
+extern int gNetworkPort;
 
 APBool APNetworkInit();
 APBool APNetworkInitLocalAddr();

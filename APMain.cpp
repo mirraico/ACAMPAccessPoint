@@ -52,7 +52,8 @@ APBool APParseDiscoveryResponseMessage(u8 *msg,
 		}
 	}
 	if(msgLen != completeMsg.offset) return AP_FALSE;
-    if(!foundAC) return AP_FALSE;
+    if(!foundAC || gControllerIPAddr == 0) return AP_FALSE;
+	gNetworkControllerAddr = gControllerIPAddr;
     APNetworkInitControllerAddr();
 	return AP_TRUE;
 }
@@ -136,7 +137,7 @@ APBool APReceiveRegisterResponse()
 {
     u8 buffer[AP_BUFFER_SIZE];
     int readBytes; APNetworkAddress controllerAddr;
-    if(!APNetworkReceiveFromBroadUnconnected(buffer, AP_BUFFER_SIZE - 1, &readBytes, &controllerAddr)) {
+    if(!APNetworkReceiveUnconnected(buffer, AP_BUFFER_SIZE - 1, &readBytes, &controllerAddr)) {
         return AP_FALSE;
     }
     u32 seqNum;

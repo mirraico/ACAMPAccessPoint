@@ -263,6 +263,7 @@ APBool APAssembleMsgElemChannel(APProtocolMessage *msgPtr)
     if(msgPtr == NULL) return AP_FALSE;
 
     u8 channel = APGetChannel();
+    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(channel));
 
     APProtocolStore8(msgPtr, channel);
     return APAssembleMsgElem(msgPtr, MSGELETYPE_CHANNEL);
@@ -273,6 +274,7 @@ APBool APAssembleMsgElemHardwareMode(APProtocolMessage *msgPtr)
     if(msgPtr == NULL) return AP_FALSE;
 
     u8 hwMode = APGetHwMode();
+    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(hwMode));
 
     APProtocolStore8(msgPtr, hwMode);
     return APAssembleMsgElem(msgPtr, MSGELETYPE_HW_MODE);
@@ -283,6 +285,7 @@ APBool APAssembleMsgElemSuppressSSID(APProtocolMessage *msgPtr)
     if(msgPtr == NULL) return AP_FALSE;
 
     u8 suppressSSID = APGetSuppressSSID();
+    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(suppressSSID));
 
     APProtocolStore8(msgPtr, suppressSSID);
     return APAssembleMsgElem(msgPtr, MSGELETYPE_SUPPRESS_SSID);
@@ -293,6 +296,7 @@ APBool APAssembleMsgElemSecuritySetting(APProtocolMessage *msgPtr)
     if(msgPtr == NULL) return AP_FALSE;
 
     u8 securitySetting = APGetSecuritySetting();
+    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(securitySetting));
 
     APProtocolStore8(msgPtr, securitySetting);
     return APAssembleMsgElem(msgPtr, MSGELETYPE_SECURITY_SETTING);
@@ -303,6 +307,7 @@ APBool APAssembleMsgElemWPAVersion(APProtocolMessage *msgPtr)
     if(msgPtr == NULL) return AP_FALSE;
 
     u8 wpaVersion = APGetWPAVersion();
+    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(wpaVersion));
 
     APProtocolStore8(msgPtr, wpaVersion);
     return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_VERSION);
@@ -324,6 +329,7 @@ APBool APAssembleMsgElemWPAKeyManagement(APProtocolMessage *msgPtr)
     if(msgPtr == NULL) return AP_FALSE;
 
     u8 wpaKeyManagement = APGetWPAKeyManagement();
+    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(wpaKeyManagement));
 
     APProtocolStore8(msgPtr, wpaKeyManagement);
     return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_KEY_MANAGEMENT);
@@ -334,6 +340,7 @@ APBool APAssembleMsgElemWPAPairwise(APProtocolMessage *msgPtr)
     if(msgPtr == NULL) return AP_FALSE;
 
     u8 wpaPairwise = APGetWPAPairwise();
+    AP_CREATE_PROTOCOL_MESSAGE(*msgPtr, sizeof(wpaPairwise));
 
     APProtocolStore8(msgPtr, wpaPairwise);
     return APAssembleMsgElem(msgPtr, MSGELETYPE_WPA_PAIRWISE);
