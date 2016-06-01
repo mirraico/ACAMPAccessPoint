@@ -2,8 +2,11 @@
 #include "AcampAP.h"
 #include "AcampNetwork.h"
 #include "AcampProtocol.h"
+#include <pthread.h>
 
 void APInitConfiguration();
+
+pthread_t tid;
 
 APBool APParseDiscoveryResponseMessage(u8 *msg, 
 					   int msgLen,
@@ -343,6 +346,72 @@ APBool APAssembleConfigurationReport(APProtocolMessage *messagesPtr)
 	);
 }
 
+APBool APAssembleKeepAliveRequest(APProtocolMessage *messagesPtr)
+{
+	if(messagesPtr == NULL) return AP_FALSE;
+	
+	APProtocolMessage *msgElems;
+	int msgElemCount = 0;
+	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
+	
+	return APAssembleMessage (messagesPtr, 
+				 15432,
+				 MSGTYPE_KEEP_ALIVE_REQUEST,
+				 msgElems,
+				 msgElemCount
+	);
+}
+
+APBool APAssembleStatisticReport(APProtocolMessage *messagesPtr)
+{
+	if(messagesPtr == NULL) return AP_FALSE;
+	
+	APProtocolMessage *msgElems;
+	int msgElemCount = 0;
+	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
+	
+	return APAssembleMessage(messagesPtr, 
+				 15432,
+				 MSGTYPE_STATISTIC_REPORT,
+				 msgElems,
+				 msgElemCount
+	);
+}
+
+APBool APAssembleUnregisterResponse(APProtocolMessage *messagesPtr)
+{
+	if(messagesPtr == NULL) return AP_FALSE;
+	
+	APProtocolMessage *msgElems;
+	int msgElemCount = 0;
+	AP_CREATE_PROTOCOL_ARRAY_AND_INIT(msgElems,  msgElemCount);
+	
+	return APAssembleMessage(messagesPtr, 
+				 15432,
+				 MSGTYPE_UNREGISTER_RESPONSE,
+				 msgElems,
+				 msgElemCount
+	);
+}
+
+void *echo_func(void *arg) 
+{
+	APProtocolMessage sendMsg;
+	AP_REPEAT_FOREVER {
+		sleep(15);
+		AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+		APAssembleStatisticReport(&sendMsg);
+		APNetworkSendUnconnected(sendMsg);
+		AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+		sleep(15);
+		AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+		APAssembleKeepAliveRequest(&sendMsg);
+		APNetworkSendUnconnected(sendMsg);
+		AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+	}
+	pthread_exit(NULL); 
+}
+
 void interactiveTest()
 {
 	//init
@@ -380,12 +449,51 @@ void interactiveTest()
 	APNetworkSendUnconnected(sendMsg);
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
 	
+	//echo pthread
+	if (pthread_create(&tid, NULL, echo_func, NULL) != 0) {
+		 printf("Create thread error!\n");
+		 exit(1);
+	 }
+	
 	AP_REPEAT_FOREVER {
-		APReceiveConfigurationDeliver();
-		AP_INIT_PROTOCOL_MESSAGE(sendMsg);
-		APAssembleConfigurationReport(&sendMsg);
-		APNetworkSendUnconnected(sendMsg);
-		AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+		u8 buffer[AP_BUFFER_SIZE];
+		int readBytes; APNetworkAddress controllerAddr;
+		APNetworkReceiveUnconnected(buffer, AP_BUFFER_SIZE - 1, &readBytes, &controllerAddr);
+
+		APHeaderVal header;
+		APProtocolMessage completeMsg;
+		completeMsg.msg = (u8*)buffer;
+		completeMsg.offset = 0;
+
+		APParseControlHeader(&completeMsg, &header);
+		switch(header.msgType) {
+			case MSGTYPE_CONFIGURATION_DELIVER:
+				AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+				APAssembleConfigurationReport(&sendMsg);
+				APNetworkSendUnconnected(sendMsg);
+				AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+				break;
+			case MSGTYPE_CONFIGURATION_REQUEST:
+				AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+				APAssembleConfigurationReport(&sendMsg);
+				APNetworkSendUnconnected(sendMsg);
+				AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+				break;
+			case MSGTYPE_STATISTIC_REQUEST:
+				AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+				APAssembleStatisticReport(&sendMsg);
+				APNetworkSendUnconnected(sendMsg);
+				AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+				break;
+			case MSGTYPE_UNREGISTER_REQUEST:
+				AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+				APAssembleUnregisterResponse(&sendMsg);
+				APNetworkSendUnconnected(sendMsg);
+				AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+				break;
+			default:
+				break;
+		}
 	}
 }
 

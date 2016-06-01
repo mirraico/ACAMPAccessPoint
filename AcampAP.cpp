@@ -1,4 +1,5 @@
 #include "AcampAP.h"
+#include <pthread.h>
 
 u16 gAPID = 0;
 

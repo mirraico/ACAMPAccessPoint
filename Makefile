@@ -1,5 +1,5 @@
 all: AcampAP.o AcampNetwork.o AcampProtocol.o APMain.o
-	g++ AcampAP.o AcampNetwork.o AcampProtocol.o APMain.o -o ACAMPAccessPoint
+	g++ AcampAP.o AcampNetwork.o AcampProtocol.o APMain.o -o ACAMPAccessPoint -lpthread
 AcampAP: AcampAP.cpp AcampAP.h
 	g++ -c AcampAP.cpp
 AcampNetwork: AcampNetwork.cpp AcampNetwork.h
@@ -7,6 +7,6 @@ AcampNetwork: AcampNetwork.cpp AcampNetwork.h
 AcampProtocol: AcampProtocol.cpp AcampProtocol.h
 	g++ -c AcampProtocol.cpp
 APMain: APMain.cpp
-	g++ -c APMain.cpp
+	g++ -c APMain.cpp -lpthread
 clean:
 	rm -f *.o ACAMPAccessPoint
