@@ -170,6 +170,42 @@ APBool APParseConfigurationDeliverMessage(u8 *msg,
 			return AP_FALSE;
 		}
 		switch(elemType) {
+			case MSGELETYPE_SSID:
+				if(!APParseMsgElemSSID(&completeMsg, elemLen))
+					return AP_FALSE;
+				break;
+			case MSGELETYPE_CHANNEL:
+				if(!APParseMsgElemChannel(&completeMsg, elemLen))
+					return AP_FALSE;
+				break;
+			case MSGELETYPE_HW_MODE:
+				if(!APParseMsgElemHardwareMode(&completeMsg, elemLen))
+					return AP_FALSE;
+				break;
+			case MSGELETYPE_SUPPRESS_SSID:
+				if(!APParseMsgElemSuppressSSID(&completeMsg, elemLen))
+					return AP_FALSE;
+				break;
+			case MSGELETYPE_SECURITY_SETTING:
+				if(!APParseMsgElemSecuritySetting(&completeMsg, elemLen))
+					return AP_FALSE;
+				break;
+			case MSGELETYPE_WPA_VERSION:
+				if(!APParseMsgElemWPAVersion(&completeMsg, elemLen))
+					return AP_FALSE;
+				break;
+			case MSGELETYPE_WPA_PASSPHRASE:
+				if(!APParseMsgElemWPAPassphrase(&completeMsg, elemLen))
+					return AP_FALSE;
+				break;
+			case MSGELETYPE_WPA_KEY_MANAGEMENT:
+				if(!APParseMsgElemWPAKeyManagement(&completeMsg, elemLen))
+					return AP_FALSE;
+				break;
+			case MSGELETYPE_WPA_PAIRWISE:
+				if(!APParseMsgElemWPAPairwise(&completeMsg, elemLen))
+					return AP_FALSE;
+				break;
 			default:
 				return AP_FALSE;
 				break;
@@ -343,6 +379,14 @@ void interactiveTest()
 	APAssembleConfigurationReport(&sendMsg);
 	APNetworkSendUnconnected(sendMsg);
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+	
+	AP_REPEAT_FOREVER {
+		APReceiveConfigurationDeliver();
+		AP_INIT_PROTOCOL_MESSAGE(sendMsg);
+		APAssembleConfigurationReport(&sendMsg);
+		APNetworkSendUnconnected(sendMsg);
+		AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+	}
 }
 
 int main()

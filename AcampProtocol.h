@@ -171,5 +171,14 @@ APBool APParseMsgElemControllerIPAddr(APProtocolMessage *msgPtr, int elemLen);
 APBool APParseMsgElemControllerMACAddr(APProtocolMessage *msgPtr, int elemLen);
 APBool APParseMsgElemResultCode(APProtocolMessage *msgPtr, int elemLen, int *result);
 APBool APParseMsgElemAssignedAPID(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemSSID(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemChannel(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemHardwareMode(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemSuppressSSID(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemSecuritySetting(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemWPAVersion(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemWPAPassphrase(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemWPAKeyManagement(APProtocolMessage *msgPtr, int elemLen);
+APBool APParseMsgElemWPAPairwise(APProtocolMessage *msgPtr, int elemLen);
 
 #endif

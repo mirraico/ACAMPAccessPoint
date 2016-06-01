@@ -397,3 +397,75 @@ APBool APParseMsgElemAssignedAPID(APProtocolMessage *msgPtr, int elemLen)
 	gAPID = APProtocolRetrieve16(msgPtr);
 	return AP_TRUE;
 }
+
+APBool APParseMsgElemSSID(APProtocolMessage *msgPtr, int elemLen)
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(gSSID != NULL) AP_FREE_OBJECT(gSSID);
+	gSSID = APProtocolRetrieveStr(msgPtr, elemLen);
+	return AP_TRUE;
+}
+
+APBool APParseMsgElemChannel(APProtocolMessage *msgPtr, int elemLen)
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(elemLen != 1) return AP_FALSE;
+	gChannel = APProtocolRetrieve8(msgPtr);
+	return AP_TRUE;
+}
+
+APBool APParseMsgElemHardwareMode(APProtocolMessage *msgPtr, int elemLen)
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(elemLen != 1) return AP_FALSE;
+	gHwMode = APProtocolRetrieve8(msgPtr);
+	return AP_TRUE;
+}
+
+APBool APParseMsgElemSuppressSSID(APProtocolMessage *msgPtr, int elemLen)
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(elemLen != 1) return AP_FALSE;
+	gSuppressSSID = APProtocolRetrieve8(msgPtr);
+	return AP_TRUE;
+}
+
+APBool APParseMsgElemSecuritySetting(APProtocolMessage *msgPtr, int elemLen)
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(elemLen != 1) return AP_FALSE;
+	gSecuritySetting = APProtocolRetrieve8(msgPtr);
+	return AP_TRUE;
+}
+
+APBool APParseMsgElemWPAVersion(APProtocolMessage *msgPtr, int elemLen)
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(elemLen != 1) return AP_FALSE;
+	gWPAVersion = APProtocolRetrieve8(msgPtr);
+	return AP_TRUE;
+}
+
+APBool APParseMsgElemWPAPassphrase(APProtocolMessage *msgPtr, int elemLen)
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(gWPAPasswd != NULL) AP_FREE_OBJECT(gWPAPasswd);
+	gWPAPasswd = APProtocolRetrieveStr(msgPtr, elemLen);
+	return AP_TRUE;
+}
+
+APBool APParseMsgElemWPAKeyManagement(APProtocolMessage *msgPtr, int elemLen)
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(elemLen != 1) return AP_FALSE;
+	gWPAKeyManagement = APProtocolRetrieve8(msgPtr);
+	return AP_TRUE;
+}
+
+APBool APParseMsgElemWPAPairwise(APProtocolMessage *msgPtr, int elemLen)
+{
+	if(msgPtr == NULL) return AP_FALSE;
+	if(elemLen != 1) return AP_FALSE;
+	gWPAPairwise = APProtocolRetrieve8(msgPtr);
+	return AP_TRUE;
+}
