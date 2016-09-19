@@ -2,9 +2,11 @@
 #define __ACAMPNETWORK_H__
 
 #include "Common.h"
-#include "AcampAP.h"
 #include "AcampProtocol.h"
 
+/*
+for getting local network info
+ */
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 
@@ -13,24 +15,20 @@ typedef struct sockaddr_in APNetworkAddress;
 
 extern APSocket gSocket;
 extern APSocket gSocketBroad;
-extern APNetworkAddress gNetworkControllerSockaddr;
-extern u32 gNetworkControllerAddr;
-extern int gNetworkPort;
+extern APNetworkAddress gControllerSockaddr;
 
 APBool APNetworkInit();
 APBool APNetworkInitLocalAddr();
 APBool APNetworkInitControllerAddr();
-APBool APNetworkInitControllerAddr(APNetworkAddress addr);
-int APNetworkGetAddressSize();
-APBool APNetworkSendUnconnected(
-					APProtocolMessage sendMsg) ;
-APBool APNetworkSendToBroadUnconnected(
-					APProtocolMessage sendMsg);
-APBool APNetworkReceiveUnconnected(u8* buffer,
-					 int bufferLen, int* readLenPtr, APNetworkAddress* addrPtr);
-APBool APNetworkReceiveFromBroadUnconnected(u8* buffer,
-					 int bufferLen, int* readLenPtr, APNetworkAddress* addrPtr);
+void APNetworkCloseSocket(APSocket s);
 
-#define		APNetworkCloseSocket(x)		{ shutdown(SHUT_RDWR, x); close(x); x=-1;}
+APBool APNetworkSend(
+					APProtocolMessage sendMsg) ;
+APBool APNetworkSendToBroad(
+					APProtocolMessage sendMsg);
+APBool APNetworkReceive(u8* buffer,
+					 int bufferLen, int* readLenPtr);
+APBool APNetworkReceiveFromBroad(u8* buffer,
+					 int bufferLen, int* readLenPtr);
 
 #endif

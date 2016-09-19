@@ -4,6 +4,8 @@
 #include "Common.h"
 
 
+#define PROTOCOL_PORT 6606
+
 /*
 msg
 msg len = 16 byte + payload(4 + len)*num byte
@@ -117,10 +119,9 @@ typedef enum {
 
 
 /**
- * AP_INIT_PROTOCOL_MESSAGE
  * initialize APProtocolMessage structure, including memory allocation and clear, for required size
- * @param APProtocolMessage mess, a not initialized value
- * @param int size, required size
+ * @param  mess  [a not initialized value]
+ * @param  size  [required size]
  */
 #define		AP_INIT_PROTOCOL_MESSAGE(mess, size) {\
 							AP_CREATE_OBJECT_SIZE(((mess).msg), (size));\
@@ -128,9 +129,8 @@ typedef enum {
 							(mess).offset = 0; }
 
 /**
- * AP_FREE_PROTOCOL_MESSAGE
  * free APProtocolMessage structure, including releasing memory
- * @param APProtocolMessage mess, value that need to be freed
+ * @param  mess  [value that need to be freed]
  */
 #define		AP_FREE_PROTOCOL_MESSAGE(mess) {\
  							AP_FREE_OBJECT(((mess).msg));\
@@ -138,10 +138,9 @@ typedef enum {
 							(mess).offset = 0; }
 
 /**
- * AP_CREATE_PROTOCOL_ARRAY
  * create a array of APProtocolMessage structure, but not include memory allocation. commonly used in msg element
- * @param APProtocolMessage *ar_name, name for array
- * @param int ar_size, required size for array
+ * @param  ar_name  [name for array]
+ * @param  ar_size  [required size for array]
  */
 #define 	AP_CREATE_PROTOCOL_ARRAY(ar_name, ar_size) {\
 							AP_CREATE_ARRAY(ar_name, ar_size, APProtocolMessage)\
@@ -152,10 +151,9 @@ typedef enum {
 							}\ }
 
 /**
- * AP_FREE_ARRAY_AND_PROTOCOL
  * free a array of APProtocolMessage structure, it's worth mentioning that this action includes releasing memory
- * @param APProtocolMessage *ar_name, the name of array
- * @param int ar_size, the size of array
+ * @param  ar_name  [name for array]
+ * @param  ar_size  [size of array]
  */
 #define 	AP_FREE_ARRAY_AND_PROTOCOL_MESSAGE(ar_name, ar_size) {\
 							int i;\

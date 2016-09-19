@@ -1,10 +1,10 @@
 #include "AcampProtocol.h"
 
+
 /**
- * APProtocolStore8
  * store a 8-bit value into a initialized APProtocolMessage
- * @param APProtocolMessage *msgPtr, a initialized APProtocolMessage and there is space left
- * @param u8 val, value you want to store
+ * @param msgPtr [a initialized APProtocolMessage and there is space left]
+ * @param val    [value you want to store]
  */
 void APProtocolStore8(APProtocolMessage *msgPtr, u8 val)
 {
@@ -13,10 +13,9 @@ void APProtocolStore8(APProtocolMessage *msgPtr, u8 val)
 }
 
 /**
- * APProtocolStore16
  * store a 16-bit value into a initialized APProtocolMessage
- * @param APProtocolMessage *msgPtr, a initialized APProtocolMessage and there is space left
- * @param u16 val, value you want to store
+ * @param msgPtr [a initialized APProtocolMessage and there is space left]
+ * @param val    [value you want to store]
  */
 void APProtocolStore16(APProtocolMessage *msgPtr, u16 val)
 {
@@ -26,10 +25,9 @@ void APProtocolStore16(APProtocolMessage *msgPtr, u16 val)
 }
 
 /**
- * APProtocolStore32
  * store a 32-bit value into a initialized APProtocolMessage
- * @param APProtocolMessage *msgPtr, a initialized APProtocolMessage and there is space left
- * @param u32 val, value you want to store
+ * @param msgPtr [a initialized APProtocolMessage and there is space left]
+ * @param val    [value you want to store]
  */
 void APProtocolStore32(APProtocolMessage *msgPtr, u32 val)
 {
@@ -39,10 +37,9 @@ void APProtocolStore32(APProtocolMessage *msgPtr, u32 val)
 }
 
 /**
- * APProtocolStore1Str
  * store a string into a initialized APProtocolMessage
- * @param APProtocolMessage *msgPtr, a initialized APProtocolMessage and there is space left
- * @param char *str, value you want to store, a standard string must end with '\0'
+ * @param msgPtr [a initialized APProtocolMessage and there is space left]
+ * @param str    [value you want to store, a standard string must end with '\0']
  */
 void APProtocolStoreStr(APProtocolMessage *msgPtr, char *str)
 {
@@ -52,10 +49,9 @@ void APProtocolStoreStr(APProtocolMessage *msgPtr, char *str)
 }
 
 /**
- * APProtocolStore1Message
  * store content in another APProtocolMessage into a initialized APProtocolMessage
- * @param APProtocolMessage *msgPtr, a initialized APProtocolMessage and there is space left
- * @param APProtocolMessage *msgToStorePtr, another APProtocolMessage you want to use
+ * @param msgPtr        [a initialized APProtocolMessage and there is space left]
+ * @param msgToStorePtr [another APProtocolMessage you want to use]
  */
 void APProtocolStoreMessage(APProtocolMessage *msgPtr, APProtocolMessage *msgToStorePtr)
 {
@@ -64,11 +60,10 @@ void APProtocolStoreMessage(APProtocolMessage *msgPtr, APProtocolMessage *msgToS
 }
 
 /**
- * APProtocolStore1RawBytes
  * store raw bytes into a initialized APProtocolMessage
- * @param APProtocolMessage *msgPtr, a initialized APProtocolMessage and there is space left
- * @param u8 *bytes, value you want to store
- * @param int len, size of raw bytes
+ * @param msgPtr [a initialized APProtocolMessage and there is space left]
+ * @param bytes  [value you want to store]
+ * @param len    [size of raw bytes]
  */
 void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len)
 {
@@ -77,10 +72,9 @@ void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len)
 }
 
 /**
- * APProtocolStore1Reserved
  * store reserved value into a initialized APProtocolMessage
- * @param APProtocolMessage *msgPtr, a initialized APProtocolMessage and there is space left
- * @param int len, size of reserved space
+ * @param msgPtr      [a initialized APProtocolMessage and there is space left]
+ * @param reservedLen [size of reserved space]
  */
 void APProtocolStoreReserved(APProtocolMessage *msgPtr, int reservedLen)
 {
@@ -92,11 +86,10 @@ void APProtocolStoreReserved(APProtocolMessage *msgPtr, int reservedLen)
 }
 
 /**
- * APAssembleMsgElem
  * assemble a formatted msg element by the element content and type
- * @param APProtocolMessage *msgPtr, the element content, which is preserved in a unformatted APProtocolMessage. after this action, it will transform a formatted msg element
- * @param u16 type, the type of msg elem
- * @return APBool, whether the operation is success or not
+ * @param  msgPtr [the element content, which is preserved in a unformatted APProtocolMessage. after this action, it will transform a formatted msg element]
+ * @param  type   [the type of msg elem]
+ * @return        [whether the operation is success or not]
  */
 APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type)
 {
@@ -119,15 +112,14 @@ APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type)
 }
 
 /**
- * APAssembleControlMessage
  * assemble a formatted msg that can be send
- * @param APProtocolMessage *msgPtr, a APAssembleMessage type value, which will output a formatted msg
- * @param u16 apid, apid that will be used in message header
- * @param u32 seqNum, seq num that will be used in message header
- * @param u16 msgType, the type of msg
- * @param APProtocolMessage *msgElems, a array of msgElems, which will be used in msg
- * @param int msgElemNum, count of msgElems
- * @return APBool, whether the operation is success or not
+ * @param  msgPtr     [a APAssembleMessage type value, which will output a formatted msg]
+ * @param  apid       [apid that will be used in message header]
+ * @param  seqNum     [seq num that will be used in message header]
+ * @param  msgType    [the type of msg]
+ * @param  msgElems   [a array of msgElems, which will be used in msg]
+ * @param  msgElemNum [count of msgElems]
+ * @return            [whether the operation is success or not]
  */
 APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
 						 u16 msgType, APProtocolMessage *msgElems, int msgElemNum)
@@ -172,11 +164,10 @@ APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
 }
 
 /**
- * APAssembleControlHeader
  * assemble a msg header
- * @param APProtocolMessage *controlHdrPtr, a APAssembleMessage type value, which will output a formatted msg header
- * @param APHeaderVal *valPtr, header info
- * @return APBool, whether the operation is success or not
+ * @param  controlHdrPtr [a APAssembleMessage type value, which will output a formatted msg header]
+ * @param  valPtr        [header info]
+ * @return               [whether the operation is success or not]
  */
 APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr)
 {
@@ -196,10 +187,9 @@ APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *va
 }
 
 /**
- * APProtocolRetrieve8
  * get a 8-bit value from APProtocolMessage
- * @param APProtocolMessage *msgPtr, a APProtocolMessage that include value
- * @return u8, u8 value
+ * @param  msgPtr [a APProtocolMessage that include value]
+ * @return        [u8 value]
  */
 u8 APProtocolRetrieve8(APProtocolMessage *msgPtr) {
 	u8 val;
@@ -211,10 +201,9 @@ u8 APProtocolRetrieve8(APProtocolMessage *msgPtr) {
 }
 
 /**
- * APProtocolRetrieve16
  * get a 16-bit value from APProtocolMessage
- * @param APProtocolMessage *msgPtr, a APProtocolMessage that include value
- * @return u16, u16 value
+ * @param  msgPtr [a APProtocolMessage that include value]
+ * @return        [u16 value]
  */
 u16 APProtocolRetrieve16(APProtocolMessage *msgPtr) {
 	u16 val;
@@ -226,10 +215,9 @@ u16 APProtocolRetrieve16(APProtocolMessage *msgPtr) {
 }
 
 /**
- * APProtocolRetrieve32
  * get a 32-bit value from APProtocolMessage
- * @param APProtocolMessage *msgPtr, a APProtocolMessage that include value
- * @return u32, u32 value
+ * @param  msgPtr [a APProtocolMessage that include value]
+ * @return        [u32 value]
  */
 u32 APProtocolRetrieve32(APProtocolMessage *msgPtr) {
 	u32 val;
@@ -241,11 +229,10 @@ u32 APProtocolRetrieve32(APProtocolMessage *msgPtr) {
 }
 
 /**
- * APProtocolRetrieveStr
  * get a string from APProtocolMessage
- * @param APProtocolMessage *msgPtr, a APProtocolMessage that include value
- * @param int len, length of string
- * @return char*, a standard string that end with '\0'
+ * @param  msgPtr [a APProtocolMessage that include value]
+ * @param  len    [length of string]
+ * @return        [a standard string that end with '\0']
  */
 char* APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len) {
 	u8* str;
@@ -260,11 +247,10 @@ char* APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len) {
 }
 
 /**
- * APProtocolRetrieveRawBytes
  * get raw bytes from APProtocolMessage
- * @param APProtocolMessage *msgPtr, a APProtocolMessage that include value
- * @param int len, size of raw bytes
- * @return u8*, an array that include raw bytes
+ * @param  msgPtr [a APProtocolMessage that include value]
+ * @param  len    [size of raw bytes]
+ * @return        [an array that include raw bytes]
  */
 u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len) {
 	u8* bytes;
