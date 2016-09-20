@@ -1,7 +1,7 @@
 #ifndef __ACAMPPROTOCOL_H__
 #define __ACAMPPROTOCOL_H__
 
-#include "Common.h"
+#include "common.h"
 
 
 #define PROTOCOL_PORT 6606

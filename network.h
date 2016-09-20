@@ -1,8 +1,8 @@
 #ifndef __ACAMPNETWORK_H__
 #define __ACAMPNETWORK_H__
 
-#include "Common.h"
-#include "AcampProtocol.h"
+#include "common.h"
+#include "protocol.h"
 
 /*
 for getting local network info

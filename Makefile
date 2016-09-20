@@ -1,10 +1,10 @@
-all: AcampProtocol.o AcampNetwork.o APMain.o
-	gcc AcampProtocol.o AcampNetwork.o APMain.o -o ACAMPAccessPoint
-AcampProtocol: AcampProtocol.c AcampProtocol.h
-	gcc -c AcampProtocol.c
-AcampNetwork: AcampNetwork.c AcampNetwork.h
-	gcc -c AcampNetwork.c
-APMain: APMain.c
-	gcc -c APMain.c
+all: protocol.o network.o main.o
+	gcc protocol.o network.o main.o -o ACAMPAccessPoint
+protocol: protocol.c protocol.h
+	gcc -c protocol.c
+network: network.c network.h
+	gcc -c network.c
+main: main.c
+	gcc -c main.c
 clean:
 	rm -f *.o ACAMPAccessPoint

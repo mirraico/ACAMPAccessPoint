@@ -1,4 +1,4 @@
-#include "AcampNetwork.h"
+#include "network.h"
 
 APSocket gSocket = -1;
 APSocket gSocketBroad = -1;
