@@ -18,9 +18,9 @@ develop分支为旧版本向协议2.0版本过渡的分支，现已不再使用
 感谢团队成员贡献的代码  
 
 #### 运行
-1. 先运行控制器端ACAMP代理。
+1. 运行控制器端ACAMP代理
 2. make
-3. ./ACAMPAccessPoint
+3. ./AP
 
 #### github相关
 1. 安装github
