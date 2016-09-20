@@ -1,7 +1,7 @@
 #CFLAGS = -g
 
 all: protocol.o network.o ap.o main.o
-	gcc protocol.o network.o ap.o main.o -o ACAMPAccessPoint
+	gcc protocol.o network.o ap.o main.o -o AP
 protocol: protocol.c protocol.h
 	gcc -c protocol.c
 network: network.c network.h
@@ -11,4 +11,4 @@ ap: ap.c ap.h
 main: main.c
 	gcc -g -c main.c
 clean:
-	rm -f *.o ACAMPAccessPoint
+	rm -f *.o AP
