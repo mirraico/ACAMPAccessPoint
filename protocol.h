@@ -1,5 +1,5 @@
-#ifndef __ACAMPPROTOCOL_H__
-#define __ACAMPPROTOCOL_H__
+#ifndef __PROTOCOL_H__
+#define __PROTOCOL_H__
 
 #include "common.h"
 
@@ -117,9 +117,18 @@ typedef enum {
 	AP_RUN
 } APStateTransition;
 
+/**
+ * initialize APProtocolMessage structure, without any msg
+ * after an APProtocolMessage being created, AP_INIT_PROTOCOL or AP_INIT_PROTOCOL_MESSAGE must be called immediately
+ * @param  mess  [a not initialized value]
+ */
+#define		AP_INIT_PROTOCOL(mess) {\
+							(mess).msg = NULL;\
+							(mess).offset = 0; }
 
 /**
  * initialize APProtocolMessage structure, including memory allocation and clear, for required size
+ * after an APProtocolMessage being created, AP_INIT_PROTOCOL or AP_INIT_PROTOCOL_MESSAGE must be called immediately
  * @param  mess  [a not initialized value]
  * @param  size  [required size]
  */
@@ -130,6 +139,7 @@ typedef enum {
 
 /**
  * free APProtocolMessage structure, including releasing memory
+ * before an APProtocolMessage, that is local value, being destoryed, this function must be called
  * @param  mess  [value that need to be freed]
  */
 #define		AP_FREE_PROTOCOL_MESSAGE(mess) {\
@@ -148,7 +158,7 @@ typedef enum {
 							for(i=0;i<(ar_size); i++) {\
 								(ar_name)[i].msg = NULL;\
 								(ar_name)[i].offset = 0;\
-							}\ }
+							} }
 
 /**
  * free a array of APProtocolMessage structure, it's worth mentioning that this action includes releasing memory
@@ -173,14 +183,14 @@ void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len);
 void APProtocolStoreReserved(APProtocolMessage *msgPtr, int reservedLen);
 
 APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type);
-APBool APAssembleMessage(APProtocolMessage *msgPtr,
-						 u32 seqNum, u16 msgType, APProtocolMessage msgElems[], const int msgElemNum);
+APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
+						 u16 msgType, APProtocolMessage *msgElems, int msgElemNum);
 APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr);
 
 u8 APProtocolRetrieve8(APProtocolMessage *msgPtr);
 u16 APProtocolRetrieve16(APProtocolMessage *msgPtr);
 u32 APProtocolRetrieve32(APProtocolMessage *msgPtr);
-char *CWProtocolRetrieveStr(APProtocolMessage *msgPtr, int len);
-u8 *CWProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len);
+char *APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len);
+u8 *APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len);
 
 #endif

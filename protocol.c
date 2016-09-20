@@ -72,17 +72,13 @@ void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len)
 }
 
 /**
- * store reserved value into a initialized APProtocolMessage
+ * store reserved value, that is 0, into a initialized APProtocolMessage
  * @param msgPtr      [a initialized APProtocolMessage and there is space left]
  * @param reservedLen [size of reserved space]
  */
 void APProtocolStoreReserved(APProtocolMessage *msgPtr, int reservedLen)
 {
-	u8* reserved;
-	AP_CREATE_OBJECT_SIZE(reserved, reservedLen);
-	AP_ZERO_MEMORY(reserved, reservedLen);
-	APProtocolStoreRawBytes(msgPtr, reserved, reservedLen);
-	AP_FREE_OBJECT(reserved);
+	AP_ZERO_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), reservedLen);
 }
 
 /**
@@ -127,8 +123,9 @@ APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
 	APProtocolMessage controlHdr, completeMsg;
 	int msgElemsLen = 0, i;
 	APHeaderVal controlHdrVal;
+	AP_INIT_PROTOCOL(controlHdr);
 
-	if(msgElems == NULL && msgElemNum > 0)
+	if(msgPtr == NULL || (msgElems == NULL && msgElemNum > 0))
 		return AP_FALSE;
 
 	for(i = 0; i < msgElemNum; i++) msgElemsLen += msgElems[i].offset;

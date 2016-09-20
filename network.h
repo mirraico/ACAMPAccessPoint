@@ -1,5 +1,5 @@
-#ifndef __ACAMPNETWORK_H__
-#define __ACAMPNETWORK_H__
+#ifndef __NETWORK_H__
+#define __NETWORK_H__
 
 #include "common.h"
 #include "protocol.h"
@@ -13,17 +13,14 @@ for getting local network info
 typedef int APSocket;
 typedef struct sockaddr_in APNetworkAddress;
 
-extern APSocket gSocket;
-extern APSocket gSocketBroad;
-extern APNetworkAddress gControllerSockaddr;
 
 APBool APNetworkInit();
-APBool APNetworkInitLocalAddr();
-APBool APNetworkInitControllerAddr();
+APBool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGateway);
+APBool APNetworkInitControllerAddr(u32 controllerAddr);
 void APNetworkCloseSocket(APSocket s);
 
 APBool APNetworkSend(
-					APProtocolMessage sendMsg) ;
+					APProtocolMessage sendMsg);
 APBool APNetworkSendToBroad(
 					APProtocolMessage sendMsg);
 APBool APNetworkReceive(u8* buffer,
