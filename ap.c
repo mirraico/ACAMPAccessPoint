@@ -1,0 +1,67 @@
+#include "ap.h"
+
+u32 gSeqNum;
+
+u16 gAPID;
+u8 gDiscoveryType;
+u8 gRegisteredService;
+
+char* gControllerName;
+char* gControllerDescriptor;
+u32 gControllerIPAddr; 
+u8 gControllerMACAddr[6];
+
+char gAPName[32];
+char gAPDescriptor[128];
+u32 gAPIPAddr;
+u8 gAPMACAddr[6];
+u32 gAPDefaultGateway;
+
+char* gSSID;
+u8 gChannel;
+u8 gHardwareMode;
+u8 gSuppressSSID;
+u8 gSecuritySetting;
+
+__inline__ u32 APGetSeqNum() { return gSeqNum; }
+
+__inline__ u16 APGetAPID() { return gAPID; }
+__inline__ u8 APGetDiscoveryType() { return gDiscoveryType; }
+__inline__ u8 APGetRegisteredService() { return gRegisteredService; }
+
+__inline__ char* APGetControllerName() { return gControllerName; }
+__inline__ char* APGetControllerDescriptor() { return gControllerDescriptor; }
+__inline__ u32 APGetControllerIPAddr() { return gControllerIPAddr; }
+__inline__ u8* APGetControllerMACAddr() { return gControllerMACAddr; }
+
+__inline__ char* APGetAPName() { return gAPName; }
+__inline__ char* APGetAPDescriptor() { return gAPDescriptor; }
+__inline__ u32 APGetAPIPAddr() { return gAPIPAddr; }
+__inline__ u8* APGetAPMACAddr() { return gAPMACAddr; }
+__inline__ u32 APGetAPDefaultGateway() { return gAPDefaultGateway; }
+
+__inline__ char* APGetSSID() { return gSSID; }
+__inline__ u8 APGetChannel() { return gChannel; }
+__inline__ u8 APGetHardwareMode() { return gHardwareMode; }
+__inline__ u8 APGetSuppressSSID() { return gSuppressSSID; }
+__inline__ u8 APGetSecuritySetting() { return gSecuritySetting; }
+
+
+/**
+ * init ap, including seqnum, apid, etc
+ */
+void APInit()
+{
+	srand((int)time(NULL));
+
+	gSeqNum = rand();
+	gAPID = 0;
+}
+
+/**
+ * init ap name, descriptor, and all configuration from files
+ */
+void APInitConfiguration()
+{
+
+}

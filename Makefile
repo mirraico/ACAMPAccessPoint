@@ -1,12 +1,14 @@
-all: AcampAP.o AcampNetwork.o AcampProtocol.o APMain.o
-	g++ AcampAP.o AcampNetwork.o AcampProtocol.o APMain.o -o ACAMPAccessPoint
-AcampAP: AcampAP.cpp AcampAP.h
-	g++ -c AcampAP.cpp
-AcampNetwork: AcampNetwork.cpp AcampNetwork.h
-	g++ -c AcampNetwork.cpp
-AcampProtocol: AcampProtocol.cpp AcampProtocol.h
-	g++ -c AcampProtocol.cpp
-APMain: APMain.cpp
-	g++ -c APMain.cpp
+#CFLAGS = -g
+
+all: protocol.o network.o ap.o main.o
+	gcc protocol.o network.o ap.o main.o -o AP
+protocol: protocol.c protocol.h
+	gcc -c protocol.c
+network: network.c network.h
+	gcc -c network.c
+ap: ap.c ap.h
+	gcc -c ap.c
+main: main.c
+	gcc -g -c main.c
 clean:
-	rm -f *.o ACAMPAccessPoint
+	rm -f *.o AP
