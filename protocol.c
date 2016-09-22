@@ -79,6 +79,7 @@ void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len)
 void APProtocolStoreReserved(APProtocolMessage *msgPtr, int reservedLen)
 {
 	AP_ZERO_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), reservedLen);
+	(msgPtr->offset) += reservedLen;
 }
 
 /**
