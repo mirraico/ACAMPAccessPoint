@@ -33,7 +33,9 @@ typedef enum  {
 
 #define	AP_CREATE_ARRAY(ar_name, ar_size, ar_type)	{ar_name = (ar_type*) (malloc(sizeof(ar_type) * (ar_size)));}
 #define	AP_CREATE_STRING_ERR(str_name, str_length, on_err)	{str_name = (char*) (malloc(sizeof(char) * ((str_length)+1) ) ); if(!(str_name)) {on_err}}
+#define	AP_CREATE_OBJECT_ERR(obj_name, obj_type, on_err)	{obj_name = (obj_type*) (malloc(sizeof(obj_type))); if(!(obj_name)) {on_err}}
 
+#define	AP_RANDOM_INT(min, max) { (min) + (rand() % ((max)-(min))); }
 
 typedef u_int64_t u64;
 typedef u_int32_t u32;

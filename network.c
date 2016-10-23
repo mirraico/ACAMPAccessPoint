@@ -1,4 +1,5 @@
 #include "network.h"
+#include "error.h"
 
 APSocket gSocket = -1;
 APSocket gSocketBroad = -1;
@@ -85,14 +86,11 @@ void APNetworkParseRoutes(struct nlmsghdr *nlHdr, u32* localIP, u32* localDefaul
 }
 
 /**
- * init singlecast and broadcast socket
+ * init broadcast socket
  * @return [whether the operation is success or not]
  */
-APBool APNetworkInit()
+APBool APNetworkInitBroadcast()
 {
-	if(gSocket >= 0) APNetworkCloseSocket(gSocket);
-	gSocket = socket(AF_INET, SOCK_DGRAM, 0);
-	if(gSocket < 0) return AP_FALSE;
 	if(gSocketBroad >= 0) APNetworkCloseSocket(gSocketBroad);
 	gSocketBroad = socket(AF_INET, SOCK_DGRAM, 0);
 	if(gSocketBroad < 0) return AP_FALSE;
@@ -144,12 +142,16 @@ APBool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGatew
 }
 
 /**
- * use controller's ip address to init sockaddr_in construction
+ * use controller's ip address to init sockaddr_in construction & singlecast socket
  * @param  controllerAddr [controller's ip address]
  * @return                [whether the operation is success or not]
  */
 APBool APNetworkInitControllerAddr(u32 controllerAddr)
 {
+	if(gSocket >= 0) APNetworkCloseSocket(gSocket);
+	gSocket = socket(AF_INET, SOCK_DGRAM, 0);
+	if(gSocket < 0) return AP_FALSE;
+
 	AP_ZERO_MEMORY(&gControllerSockaddr, sizeof(gControllerSockaddr));
 	gControllerSockaddr.sin_family = AF_INET;
 	gControllerSockaddr.sin_addr.s_addr = htonl(controllerAddr);
@@ -236,5 +238,36 @@ APBool APNetworkReceiveFromBroad(u8* buffer,
 		return AP_FALSE;
 	unsigned int  addrLen = sizeof(APNetworkAddress);
 	*readLenPtr = recvfrom(gSocketBroad, (char*)buffer, bufferLen, 0, (struct sockaddr*)&gControllerSockaddr, &addrLen);
+	return AP_TRUE;
+}
+
+/**
+ * wrapper for select to implement timer
+ * @param  sock     [selected socket]
+ * @param  timeout  [timeout]
+ * @return            [whether the operation is success or not]
+ */
+APBool APNetworkTimedPollRead(APSocket sock, struct timeval *timeout) {
+	int r;
+	
+	fd_set fset;
+	
+	if(timeout == NULL) return AP_FALSE;
+	
+	FD_ZERO(&fset);
+	FD_SET(sock, &fset);
+
+	if((r = select(sock+1, &fset, NULL, NULL, timeout)) == 0) 
+	{
+		return APErrorRaise(AP_ERROR_TIME_EXPIRED, NULL);
+	} 
+	else if (r < 0) 
+	{
+		if(errno == EINTR)
+		{
+			return APErrorRaise(AP_ERROR_INTERRUPTED, NULL);
+		}
+	}
+
 	return AP_TRUE;
 }

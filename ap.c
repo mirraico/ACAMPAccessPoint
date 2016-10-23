@@ -150,6 +150,26 @@ void APInit()
 
 	gSeqNum = rand();
 	gAPID = 0;
+
+	gDiscoveryType = -1;
+	gRegisteredService = -1;
+
+	gControllerName = NULL;
+	gControllerDescriptor = NULL;
+	gControllerIPAddr = -1; 
+	gControllerMACAddr[0] = -1;
+
+	gAPName = NULL;
+	gAPDescriptor = NULL;
+	gAPIPAddr = -1;
+	gAPMACAddr[0] = -1;
+	gAPDefaultGateway = -1;
+
+	gSSID = NULL;
+	gChannel = -1;
+	gHardwareMode = -1;
+	gSuppressSSID = -1;
+	gSecuritySetting = -1;
 }
 
 /**

@@ -13,8 +13,10 @@ for getting local network info
 typedef int APSocket;
 typedef struct sockaddr_in APNetworkAddress;
 
+extern APSocket gSocket;
+extern APSocket gSocketBroad;
 
-APBool APNetworkInit();
+APBool APNetworkInitBroadcast();
 APBool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGateway);
 APBool APNetworkInitControllerAddr(u32 controllerAddr);
 void APNetworkCloseSocket(APSocket s);
