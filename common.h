@@ -32,6 +32,7 @@ typedef enum  {
 #define	AP_FREE_OBJECTS_ARRAY(ar_name, ar_size)		{int _i = 0; for(_i = ((ar_size)-1); _i >= 0; _i--) {if(((ar_name)[_i]) != NULL){ free((ar_name)[_i]);}} free(ar_name); (ar_name) = NULL; }
 
 #define	AP_CREATE_ARRAY(ar_name, ar_size, ar_type)	{ar_name = (ar_type*) (malloc(sizeof(ar_type) * (ar_size)));}
+#define	AP_CREATE_STRING_ERR(str_name, str_length, on_err)	{str_name = (char*) (malloc(sizeof(char) * ((str_length)+1) ) ); if(!(str_name)) {on_err}}
 
 
 typedef u_int64_t u64;

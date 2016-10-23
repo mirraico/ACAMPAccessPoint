@@ -1,4 +1,4 @@
-#CFLAGS = -g
+CFLAGS = -g
 
 all: protocol.o network.o ap.o main.o
 	gcc protocol.o network.o ap.o main.o -o AP

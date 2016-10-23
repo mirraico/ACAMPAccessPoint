@@ -14,8 +14,8 @@ extern char* gControllerDescriptor;
 extern u32 gControllerIPAddr; 
 extern u8 gControllerMACAddr[6];
 
-extern char gAPName[32];
-extern char gAPDescriptor[128];
+extern char* gAPName;
+extern char* gAPDescriptor;
 extern u32 gAPIPAddr;
 extern u8 gAPMACAddr[6];
 extern u32 gAPDefaultGateway;
@@ -25,6 +25,7 @@ extern u8 gChannel;
 extern u8 gHardwareMode;
 extern u8 gSuppressSSID;
 extern u8 gSecuritySetting;
+
 
 extern u32 APGetSeqNum();
 
@@ -51,7 +52,7 @@ extern u8 APGetSecuritySetting();
 
 
 void APInit();
-void APInitConfiguration();
+APBool APParseSettingsFile();
 
 
 #endif // AP_H
