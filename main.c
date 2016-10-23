@@ -28,9 +28,37 @@ int main()
 	// printf("MAC:  %02x:%02x:%02x:%02x:%02x:%02x\n", gAPMACAddr[0], gAPMACAddr[1], gAPMACAddr[2], gAPMACAddr[3], gAPMACAddr[4], gAPMACAddr[5]);
 	// printf("gateway:  %u.%u.%u.%u\n", (u8)(gAPDefaultGateway >> 24), (u8)(gAPDefaultGateway >> 16),  (u8)(gAPDefaultGateway >> 8),  (u8)(gAPDefaultGateway >> 0));
 	
+	APStateTransition nextState = AP_ENTER_DISCOVERY;
+
+	/* start acamp state machine */	
+	AP_REPEAT_FOREVER {
+		switch(nextState) {
+			case AP_ENTER_DISCOVERY:
+				// nextState = APEnterDiscovery();
+				break;
+			case AP_ENTER_REGISTER:
+				// nextState = APEnterRegister();
+				break;
+			case AP_ENTER_CONFIGURE:
+				// nextState = APEnterConfigure();
+				break;
+			case AP_ENTER_CONFIGURE_RETRY:
+				// nextState = APEnterConfigureRetry();
+				break;
+			case AP_ENTER_RUN:
+				// nextState = APEnterRun();
+				break;
+			case AP_ENTER_DOWN:
+				// nextState = APEnterDown();
+				break;
+		}
+	}
+
+	/*
 	APProtocolMessage sendMsg;
 	AP_INIT_PROTOCOL(sendMsg);
 	APAssembleDiscoveryRequest(&sendMsg);
 	APNetworkSendToBroad(sendMsg);
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+	*/
 }
