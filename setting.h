@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "ap.h"
+#include "log.h"
 
 #define AP_SETTINGS_FILE 	"setting.conf"
 

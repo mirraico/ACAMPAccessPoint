@@ -2,6 +2,8 @@
 #define __COMMON_H__
 
 #include "stdio.h"
+#include "stdarg.h"
+#include "time.h"
 #include <net/ethernet.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>

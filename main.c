@@ -2,6 +2,7 @@
 #include "protocol.h"
 #include "ap.h"
 #include "setting.h"
+#include "log.h"
 
 int main()
 {
@@ -13,6 +14,9 @@ int main()
 	if(!APParseSettingsFile()) {
 		return 0;
 	}
+	// printf("gLogFileName: %s\n", gLogFileName);
+	// printf("gLogLevel: %d\n", gLogLevel);
+	// printf("gStdoutLevel: %d\n", gStdoutLevel);
 	// printf("gAPName: %s\n", gAPName);
 	// printf("gAPDescriptor: %s\n", gAPDescriptor);
 	// printf("gDiscoveryType: %d\n", gDiscoveryType);
@@ -22,6 +26,7 @@ int main()
 	// printf("gChannel: %d\n", gChannel);
 	// printf("gSecuritySetting: %d\n", gSecuritySetting);
 	
+	APInitLogFile();
 	
 	if(!APNetworkInitLocalAddr(&gAPIPAddr, gAPMACAddr, &gAPDefaultGateway)) {
 		return 0;

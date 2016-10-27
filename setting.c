@@ -116,6 +116,36 @@ APBool APParseSettingsFile()
 		}
 		pos[0] = '\0';
 
+
+
+		if (!strcmp(APExtractTag(line), "AP_LOG_PATH"))
+		{
+			char* value = APExtractStringVaule(pos+1);
+			int len = strlen(value);
+			
+			AP_CREATE_STRING_ERR(gLogFileName, len, return AP_FALSE;);
+			AP_ZERO_MEMORY(gLogFileName, len + 1);
+			AP_COPY_MEMORY(gLogFileName, value, len);
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+
+		if (!strcmp(APExtractTag(line), "AP_LOG_LEVEL"))
+		{
+			gLogLevel = APExtractIntVaule(pos+1);
+			
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+
+		if (!strcmp(APExtractTag(line), "AP_STDOUT_LOG_LEVEL"))
+		{
+			gStdoutLevel = APExtractIntVaule(pos+1);
+			
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+
 		if (!strcmp(APExtractTag(line), "AP_NAME"))
 		{
 			char* value = APExtractStringVaule(pos+1);
@@ -192,6 +222,10 @@ APBool APParseSettingsFile()
 
 void APDefaultSettings()
 {
+	gLogFileName = "./ap2.log";
+	gLogLevel = 0;
+	gStdoutLevel = 0;
+
     gDiscoveryType = 0;
 	gRegisteredService = 0;
 
