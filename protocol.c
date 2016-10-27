@@ -92,8 +92,8 @@ APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type)
 {
 	APProtocolMessage completeMsg;
 
-	if(msgPtr == NULL) return AP_FALSE;
-	AP_INIT_PROTOCOL_MESSAGE(completeMsg, ELEMENT_HEADER_LEN+(msgPtr->offset));
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+	AP_INIT_PROTOCOL_MESSAGE(completeMsg, ELEMENT_HEADER_LEN+(msgPtr->offset), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL););
 
 	APProtocolStore16(&completeMsg, type);
 	APProtocolStore16(&completeMsg, msgPtr->offset);
@@ -144,7 +144,7 @@ APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
 		return AP_FALSE;
 	}
 
-	AP_INIT_PROTOCOL_MESSAGE(completeMsg, controlHdr.offset + msgElemsLen);
+	AP_INIT_PROTOCOL_MESSAGE(completeMsg, controlHdr.offset + msgElemsLen, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL););
 	APProtocolStoreMessage(&completeMsg, &controlHdr);
 	AP_FREE_PROTOCOL_MESSAGE(controlHdr);
 
@@ -171,7 +171,7 @@ APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *va
 {
 	if(controlHdrPtr == NULL || valPtr == NULL) return AP_FALSE;
 
-	AP_INIT_PROTOCOL_MESSAGE(*controlHdrPtr, HEADER_LEN);
+	AP_INIT_PROTOCOL_MESSAGE(*controlHdrPtr, HEADER_LEN, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL););
 
 	APProtocolStore8(controlHdrPtr, valPtr->version);
 	APProtocolStore8(controlHdrPtr, valPtr->type);
@@ -235,7 +235,7 @@ u32 APProtocolRetrieve32(APProtocolMessage *msgPtr) {
 char* APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len) {
 	u8* str;
 
-	AP_CREATE_OBJECT_SIZE(str, (len+1));
+	AP_CREATE_OBJECT_SIZE_ERR(str, (len+1), return NULL;);
 
 	AP_COPY_MEMORY(str, &((msgPtr->msg)[(msgPtr->offset)]), len);
 	str[len] = '\0';
@@ -253,7 +253,7 @@ char* APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len) {
 u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len) {
 	u8* bytes;
 
-	AP_CREATE_OBJECT_SIZE(bytes, len);
+	AP_CREATE_OBJECT_SIZE_ERR(bytes, len, return NULL;);
 
 	AP_COPY_MEMORY(bytes, &((msgPtr->msg)[(msgPtr->offset)]), len);
 	(msgPtr->offset) += len;

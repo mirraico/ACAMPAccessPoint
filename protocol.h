@@ -2,6 +2,7 @@
 #define __PROTOCOL_H__
 
 #include "common.h"
+#include "error.h"
 
 
 #define PROTOCOL_PORT 6606
@@ -132,8 +133,8 @@ typedef enum {
  * @param  mess  [a not initialized value]
  * @param  size  [required size]
  */
-#define		AP_INIT_PROTOCOL_MESSAGE(mess, size) {\
-							AP_CREATE_OBJECT_SIZE(((mess).msg), (size));\
+#define		AP_INIT_PROTOCOL_MESSAGE(mess, size, err) {\
+							AP_CREATE_OBJECT_SIZE_ERR(((mess).msg), (size), err);\
 							AP_ZERO_MEMORY(((mess).msg), (size));\
 							(mess).offset = 0; }
 
@@ -152,8 +153,8 @@ typedef enum {
  * @param  ar_name  [name for array]
  * @param  ar_size  [required size for array]
  */
-#define 	AP_CREATE_PROTOCOL_ARRAY(ar_name, ar_size) {\
-							AP_CREATE_ARRAY(ar_name, ar_size, APProtocolMessage)\
+#define 	AP_CREATE_PROTOCOL_ARRAY(ar_name, ar_size, err) {\
+							AP_CREATE_ARRAY_ERR(ar_name, ar_size, APProtocolMessage, err)\
 							int i;\
 							for(i=0;i<(ar_size); i++) {\
 								(ar_name)[i].msg = NULL;\

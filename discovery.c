@@ -1,5 +1,6 @@
 #include "common.h"
 #include "error.h"
+#include "log.h"
 #include "ap.h"
 #include "network.h"
 
@@ -15,7 +16,7 @@ APBool APAssembleDiscoveryRequest(APProtocolMessage *messagesPtr)
 	
 	APProtocolMessage *msgElems;
 	int msgElemCount = 0;
-	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount);
+	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL););
 	
 	return APAssembleControlMessage(messagesPtr, 
 				 APGetAPID(),
@@ -51,9 +52,14 @@ APBool APReadDiscoveryResponse() {
 
 APStateTransition APEnterDiscovery() 
 {
+    APLog("\n");	
+	APLog("######### Discovery State #########");
+
+    /*reset discovery count*/
     gDiscoveryCount = 0;
 
-    if(!APNetworkInitBroadcast()){
+    if(!APNetworkInitBroadcast()) {
+        APErrorLog("Init broadcast failed");
 		return AP_ENTER_DOWN;
 	}
 

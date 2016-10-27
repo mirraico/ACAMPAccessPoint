@@ -57,7 +57,7 @@ __inline__ void APDebugLog(int level, const char *format, ...)
     
     timestr[strlen(timestr)-1] = '\0';
     
-    AP_CREATE_STRING_ERR(logStr, (strlen(format)+strlen(timestr)+100), return;);
+    AP_CREATE_STRING_SIZE_ERR(logStr, (strlen(format)+strlen(timestr)+100), return;);
     
     AP_ZERO_MEMORY(label, 10);
     if(level == -1) strcpy(label, "ERROR");

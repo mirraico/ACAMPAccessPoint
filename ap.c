@@ -49,7 +49,7 @@ __inline__ u8 APGetSecuritySetting() { return gSecuritySetting; }
 
 
 /**
- * init ap, including seqnum, apid, etc
+ * init ap, including seqnum, apid, etc, and set random seed
  */
 void APInit()
 {

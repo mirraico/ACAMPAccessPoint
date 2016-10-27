@@ -16,19 +16,20 @@ APBool APErrorRaise(APErrorCode code, const char *msg)
 	if(msg != NULL) strcpy(gLastErrorDataPtr->message, msg);
 	else gLastErrorDataPtr->message[0]='\0';
 	
+	/* keep return false */
 	return AP_FALSE;
 }
 
 APErrorCode APGetLastErrorCode() 
 {
-    return gLastErrorDataPtr == NULL ? AP_ERROR_GENERAL : gLastErrorDataPtr->code;
+    return gLastErrorDataPtr == NULL ? AP_ERROR_NONE : gLastErrorDataPtr->code;
 }
 
 APBool APHandleLastError()
 {
 	APErrorHandlingInfo *infoPtr = gLastErrorDataPtr;
 	
-	if(infoPtr == NULL || infoPtr->code == AP_ERROR_NONE) {
+	if(infoPtr == NULL) {
 		APErrorLog("Encounter fallure but no error pending");
 		exit(1);
 		return AP_FALSE;
@@ -41,36 +42,36 @@ APBool APHandleLastError()
 			break;
 			
 		case AP_ERROR_OUT_OF_MEMORY:
-			APErrorLog("Out of Memory");
+			APErrorLog("Out of Memory, %s", infoPtr->message);
 			exit(1);
 			break;
 			
 		case AP_ERROR_WRONG_ARG:
-			APErrorLog("Wrong Arguments in Function");
+			APErrorLog("Wrong Arguments in Function, %s", infoPtr->message);
 			break;
 			
 		case AP_ERROR_NEED_RESOURCE:
-			APErrorLog("Missing Resource");
+			APErrorLog("Missing Resource, %s", infoPtr->message);
 			break;
 			
 		case AP_ERROR_GENERAL:
-			APErrorLog("Error Occurred");
+			APErrorLog("Error Occurred, %s", infoPtr->message);
 			break;
 		
 		case AP_ERROR_CREATING:
-			APErrorLog("Error Creating Resource");
+			APErrorLog("Error Creating Resource, %s", infoPtr->message);
 			break;
 			
 		case AP_ERROR_SENDING:
-			APErrorLog("Error Sending");
+			APErrorLog("Error Sending, %s", infoPtr->message);
 			break;
 		
 		case AP_ERROR_RECEIVING:
-			APErrorLog("Error Receiving");
+			APErrorLog("Error Receiving, %s", infoPtr->message);
 			break;
 			
 		case AP_ERROR_INVALID_FORMAT:
-			APErrorLog("Invalid Format");
+			APErrorLog("Invalid Format, %s", infoPtr->message);
 			break;
 				
 		default:

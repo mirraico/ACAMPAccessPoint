@@ -13,7 +13,7 @@ char * APGetLine(FILE *configFile) {
 	char *command = NULL;
 	char *ret = NULL;
 
-	AP_CREATE_STRING_ERR(buff, AP_BUFFER_SIZE, return NULL;);
+	AP_CREATE_STRING_SIZE_ERR(buff, AP_BUFFER_SIZE, return NULL;);
 	
 	while ( ((ret = fgets(buff, AP_BUFFER_SIZE, configFile)) != NULL) &&\
 		(buff[0] == '\n' || buff[0] == '\r' || buff[0] == '#') );
@@ -23,7 +23,7 @@ char * APGetLine(FILE *configFile) {
 		int len = strlen(buff);
 		buff[len-1] = '\0';
 		
-		AP_CREATE_STRING_ERR(command, len-1, return NULL;);
+		AP_CREATE_STRING_SIZE_ERR(command, len, return NULL;);
 		strcpy(command, buff);
 	}
 	
@@ -123,7 +123,7 @@ APBool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			AP_CREATE_STRING_ERR(gLogFileName, len, return AP_FALSE;);
+			AP_CREATE_STRING_SIZE_ERR(gLogFileName, len + 1, return AP_FALSE;);
 			AP_ZERO_MEMORY(gLogFileName, len + 1);
 			AP_COPY_MEMORY(gLogFileName, value, len);
 			AP_FREE_OBJECT(line);
@@ -151,7 +151,7 @@ APBool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			AP_CREATE_STRING_ERR(gAPName, len, return AP_FALSE;);
+			AP_CREATE_STRING_SIZE_ERR(gAPName, len + 1, return AP_FALSE;);
 			AP_ZERO_MEMORY(gAPName, len + 1);
 			AP_COPY_MEMORY(gAPName, value, len);
 			AP_FREE_OBJECT(line);
@@ -163,7 +163,7 @@ APBool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			AP_CREATE_STRING_ERR(gAPDescriptor, len, return AP_FALSE;);
+			AP_CREATE_STRING_SIZE_ERR(gAPDescriptor, len + 1, return AP_FALSE;);
 			AP_ZERO_MEMORY(gAPDescriptor, len + 1);
 			AP_COPY_MEMORY(gAPDescriptor, value, len);
 			AP_FREE_OBJECT(line);
@@ -181,7 +181,7 @@ APBool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			AP_CREATE_STRING_ERR(gSSID, len, return AP_FALSE;);
+			AP_CREATE_STRING_SIZE_ERR(gSSID, len + 1, return AP_FALSE;);
 			AP_ZERO_MEMORY(gSSID, len + 1);
 			AP_COPY_MEMORY(gSSID, value, len);
 			AP_FREE_OBJECT(line);
