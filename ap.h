@@ -52,7 +52,6 @@ extern u8 APGetSecuritySetting();
 
 
 void APInit();
-APBool APParseSettingsFile();
 
 
 #endif // AP_H

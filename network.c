@@ -1,5 +1,4 @@
 #include "network.h"
-#include "error.h"
 
 APSocket gSocket = -1;
 APSocket gSocketBroad = -1;

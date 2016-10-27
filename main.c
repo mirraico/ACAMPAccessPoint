@@ -1,14 +1,16 @@
 #include "common.h"
 #include "protocol.h"
 #include "ap.h"
+#include "setting.h"
 
 int main()
 {
 	APStateTransition nextState = AP_ENTER_DISCOVERY;
 
 	APInit();
+	APDefaultSettings();
 
-	if(!APParseSettingsFile()){
+	if(!APParseSettingsFile()) {
 		return 0;
 	}
 	// printf("gAPName: %s\n", gAPName);
@@ -21,7 +23,7 @@ int main()
 	// printf("gSecuritySetting: %d\n", gSecuritySetting);
 	
 	
-	if(!APNetworkInitLocalAddr(&gAPIPAddr, gAPMACAddr, &gAPDefaultGateway)){
+	if(!APNetworkInitLocalAddr(&gAPIPAddr, gAPMACAddr, &gAPDefaultGateway)) {
 		return 0;
 	}
 	// printf("IP:  %u.%u.%u.%u\n", (u8)(gAPIPAddr >> 24), (u8)(gAPIPAddr >> 16),  (u8)(gAPIPAddr >> 8),  (u8)(gAPIPAddr >> 0));

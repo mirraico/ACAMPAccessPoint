@@ -2,6 +2,7 @@
 #define __NETWORK_H__
 
 #include "common.h"
+#include "error.h"
 #include "protocol.h"
 
 /*
