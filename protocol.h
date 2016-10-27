@@ -174,7 +174,6 @@ typedef enum {
 							AP_FREE_OBJECT(ar_name); }
 
 
-
 void APProtocolStore8(APProtocolMessage *msgPtr, u8 val);
 void APProtocolStore16(APProtocolMessage *msgPtr, u16 val);
 void APProtocolStore32(APProtocolMessage *msgPtr, u32 val);
@@ -193,5 +192,14 @@ u16 APProtocolRetrieve16(APProtocolMessage *msgPtr);
 u32 APProtocolRetrieve32(APProtocolMessage *msgPtr);
 char *APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len);
 u8 *APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len);
+void APProtocolRetrieveReserved(APProtocolMessage *msgPtr, int reservedLen);
+
+APBool APParseControlHeader(APProtocolMessage *msgPtr, APHeaderVal *valPtr);
+void APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len);
+
+
+APBool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr);
+APBool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **valPtr);
+APBool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr);
 
 #endif

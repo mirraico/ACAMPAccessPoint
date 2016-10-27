@@ -1,6 +1,5 @@
 #include "protocol.h"
 
-
 /**
  * store a 8-bit value into a initialized APProtocolMessage
  * @param msgPtr [a initialized APProtocolMessage and there is space left]
@@ -127,7 +126,7 @@ APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
 	AP_INIT_PROTOCOL(controlHdr);
 
 	if(msgPtr == NULL || (msgElems == NULL && msgElemNum > 0))
-		return AP_FALSE;
+		return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
 
 	for(i = 0; i < msgElemNum; i++) msgElemsLen += msgElems[i].offset;
 
@@ -169,7 +168,7 @@ APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
  */
 APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr)
 {
-	if(controlHdrPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(controlHdrPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
 
 	AP_INIT_PROTOCOL_MESSAGE(*controlHdrPtr, HEADER_LEN, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL););
 
@@ -189,7 +188,8 @@ APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *va
  * @param  msgPtr [a APProtocolMessage that include value]
  * @return        [u8 value]
  */
-u8 APProtocolRetrieve8(APProtocolMessage *msgPtr) {
+u8 APProtocolRetrieve8(APProtocolMessage *msgPtr) 
+{
 	u8 val;
 
 	AP_COPY_MEMORY(&val, &((msgPtr->msg)[(msgPtr->offset)]), 1);
@@ -203,7 +203,8 @@ u8 APProtocolRetrieve8(APProtocolMessage *msgPtr) {
  * @param  msgPtr [a APProtocolMessage that include value]
  * @return        [u16 value]
  */
-u16 APProtocolRetrieve16(APProtocolMessage *msgPtr) {
+u16 APProtocolRetrieve16(APProtocolMessage *msgPtr) 
+{
 	u16 val;
 
 	AP_COPY_MEMORY(&val, &((msgPtr->msg)[(msgPtr->offset)]), 2);
@@ -217,7 +218,8 @@ u16 APProtocolRetrieve16(APProtocolMessage *msgPtr) {
  * @param  msgPtr [a APProtocolMessage that include value]
  * @return        [u32 value]
  */
-u32 APProtocolRetrieve32(APProtocolMessage *msgPtr) {
+u32 APProtocolRetrieve32(APProtocolMessage *msgPtr) 
+{
 	u32 val;
 
 	AP_COPY_MEMORY(&val, &((msgPtr->msg)[(msgPtr->offset)]), 4);
@@ -232,7 +234,8 @@ u32 APProtocolRetrieve32(APProtocolMessage *msgPtr) {
  * @param  len    [length of string]
  * @return        [a standard string that end with '\0']
  */
-char* APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len) {
+char* APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len) 
+{
 	u8* str;
 
 	AP_CREATE_OBJECT_SIZE_ERR(str, (len+1), return NULL;);
@@ -250,7 +253,8 @@ char* APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len) {
  * @param  len    [size of raw bytes]
  * @return        [an array that include raw bytes]
  */
-u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len) {
+u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len) 
+{
 	u8* bytes;
 
 	AP_CREATE_OBJECT_SIZE_ERR(bytes, len, return NULL;);
@@ -259,4 +263,88 @@ u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len) {
 	(msgPtr->offset) += len;
 
 	return bytes;
+}
+
+/**
+ * pass reserved value
+ * @param msgPtr      [a APProtocolMessage]
+ * @param reservedLen [size of reserved space]
+ */
+void APProtocolRetrieveReserved(APProtocolMessage *msgPtr, int reservedLen) 
+{
+	(msgPtr->offset) += reservedLen;
+}
+
+
+APBool APParseControlHeader(APProtocolMessage *msgPtr, APHeaderVal *valPtr) 
+{	
+	if(msgPtr == NULL|| valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+
+	valPtr->version = APProtocolRetrieve8(msgPtr);
+	valPtr->type = APProtocolRetrieve8(msgPtr);
+	valPtr->apid = APProtocolRetrieve16(msgPtr);
+	valPtr->seqNum = APProtocolRetrieve32(msgPtr);
+	valPtr->msgType = APProtocolRetrieve16(msgPtr);
+	valPtr->msgLen = APProtocolRetrieve16(msgPtr);
+	APProtocolRetrieveReserved(msgPtr, 4);
+	
+	return AP_TRUE;
+}
+
+void APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len)
+{
+	*type = APProtocolRetrieve16(msgPtr);
+	*len = APProtocolRetrieve16(msgPtr);
+}
+
+
+APBool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr) 
+{	
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+	
+	*valPtr = APProtocolRetrieveStr(msgPtr, len);
+	if(valPtr == NULL) return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL);
+	APDebugLog(5, "Controller Name: %s", *valPtr);
+	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
+		APErrorRaise(AP_ERROR_INVALID_FORMAT, "Message Element Malformed");
+}
+
+APBool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **valPtr) 
+{	
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+	
+	*valPtr = APProtocolRetrieveStr(msgPtr, len);
+	if(valPtr == NULL) return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL);
+	APDebugLog(5, "Controller Descriptor: %s", *valPtr);
+	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
+		APErrorRaise(AP_ERROR_INVALID_FORMAT, "Message Element Malformed");
+}
+
+APBool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr) 
+{	
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+	
+	*valPtr = APProtocolRetrieve32(msgPtr);
+	APDebugLog(5, "Controller IP:  %u.%u.%u.%u", (u8)(*valPtr >> 24), (u8)(*valPtr >> 16),\
+	  (u8)(*valPtr >> 8),  (u8)(*valPtr >> 0));
+	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
+		APErrorRaise(AP_ERROR_INVALID_FORMAT, "Message Element Malformed");
+}
+
+APBool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 **valPtr) 
+{	
+	int i;
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+	
+	for(i = 0; i < 6; i++) {
+		*valPtr[i] = APProtocolRetrieve8(msgPtr);
+	}
+	APDebugLog(5, "Controller MAC:  %02x:%02x:%02x:%02x:%02x:%02x", *valPtr[0], *valPtr[1],\
+	 *valPtr[2], *valPtr[3], *valPtr[4], *valPtr[5]);
+	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
+		APErrorRaise(AP_ERROR_INVALID_FORMAT, "Message Element Malformed");
 }

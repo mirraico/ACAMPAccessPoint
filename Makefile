@@ -1,7 +1,9 @@
 CFLAGS = -g
 
-all: protocol.o network.o setting.o ap.o error.o log.o discovery.o main.o
-	gcc protocol.o network.o setting.o ap.o error.o log.o discovery.o main.o -o AP
+all: common.o protocol.o network.o setting.o ap.o error.o log.o discovery.o main.o
+	gcc common.o protocol.o network.o setting.o ap.o error.o log.o discovery.o main.o -o AP
+common.o: common.c common.h
+	gcc -c common.c
 protocol: protocol.c protocol.h
 	gcc -c protocol.c
 network: network.c network.h

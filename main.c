@@ -58,7 +58,7 @@ int main()
 	// APDebugLog(5, "Local gateway:  %u.%u.%u.%u", (u8)(gAPDefaultGateway >> 24), (u8)(gAPDefaultGateway >> 16),\
 	  (u8)(gAPDefaultGateway >> 8),  (u8)(gAPDefaultGateway >> 0));
 
-	APDebugLog(3, "Finish all init");
+	APDebugLog(3, "All init finished");
 	APLog("Starting WTP...");
 
 	/* if Controller address is given, jump Discovery and use this address for register */

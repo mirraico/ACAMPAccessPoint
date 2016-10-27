@@ -42,36 +42,36 @@ APBool APHandleLastError()
 			break;
 			
 		case AP_ERROR_OUT_OF_MEMORY:
-			APErrorLog("Out of Memory, %s", infoPtr->message);
+			APErrorLog("Out of Memory %s", infoPtr->message);
 			exit(1);
 			break;
 			
 		case AP_ERROR_WRONG_ARG:
-			APErrorLog("Wrong Arguments in Function, %s", infoPtr->message);
+			APErrorLog("Wrong Arguments in Function %s", infoPtr->message);
 			break;
 			
 		case AP_ERROR_NEED_RESOURCE:
-			APErrorLog("Missing Resource, %s", infoPtr->message);
+			APErrorLog("Missing Resource %s", infoPtr->message);
 			break;
 			
 		case AP_ERROR_GENERAL:
-			APErrorLog("Error Occurred, %s", infoPtr->message);
+			APErrorLog("Error Occurred %s", infoPtr->message);
 			break;
 		
 		case AP_ERROR_CREATING:
-			APErrorLog("Error Creating Resource, %s", infoPtr->message);
+			APErrorLog("Error Creating Resource %s", infoPtr->message);
 			break;
 			
 		case AP_ERROR_SENDING:
-			APErrorLog("Error Sending, %s", infoPtr->message);
+			APErrorLog("Error Sending %s", infoPtr->message);
 			break;
 		
 		case AP_ERROR_RECEIVING:
-			APErrorLog("Error Receiving, %s", infoPtr->message);
+			APErrorLog("Error Receiving %s", infoPtr->message);
 			break;
 			
 		case AP_ERROR_INVALID_FORMAT:
-			APErrorLog("Invalid Format, %s", infoPtr->message);
+			APErrorLog("Invalid Format %s", infoPtr->message);
 			break;
 				
 		default:

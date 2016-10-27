@@ -60,10 +60,10 @@ __inline__ void APDebugLog(int level, const char *format, ...)
     AP_CREATE_STRING_SIZE_ERR(logStr, (strlen(format)+strlen(timestr)+100), return;);
     
     AP_ZERO_MEMORY(label, 10);
-    if(level == -1) strcpy(label, "ERROR");
+    if(level == -1) strcpy(label, "ERR");
     else if(level == 0) strcpy(label, "LOG");
-    else sprintf(label, "DEBUG(%d)", level);
-    sprintf(logStr, "[[AP-%s::%s]]\t\t %s\n", label, timestr, format);
+    else sprintf(label, "DE%d", level);
+    sprintf(logStr, "[[AP-%s::%s]]\t %s\n", label, timestr, format);
 
     va_start(args, format);
     

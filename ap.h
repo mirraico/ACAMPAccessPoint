@@ -26,6 +26,7 @@ extern u8 gHardwareMode;
 extern u8 gSuppressSSID;
 extern u8 gSecuritySetting;
 
+#define APSeqNumIncrement()     gSeqNum++
 
 extern u32 APGetSeqNum();
 

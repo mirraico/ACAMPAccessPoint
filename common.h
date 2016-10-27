@@ -38,6 +38,10 @@ typedef enum  {
 
 #define	AP_RANDOM_INT(min, max) { (min) + (rand() % ((max)-(min))); }
 
+
+int APTimevalSubtract(struct timeval *res, const struct timeval *x, const struct timeval *y);
+
+
 typedef u_int64_t u64;
 typedef u_int32_t u32;
 typedef u_int16_t u16;
@@ -46,5 +50,6 @@ typedef int64_t s64;
 typedef int32_t s32;
 typedef int16_t s16;
 typedef int8_t s8;
+
 
 #endif // COMMON_H

@@ -178,10 +178,9 @@ void APNetworkCloseSocket(APSocket s)
 APBool APNetworkSend(APProtocolMessage sendMsg) 
 {
 	if(sendMsg.msg == NULL) 
-		return AP_FALSE;
-	while(sendto(gSocket, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&gControllerSockaddr, sizeof(gControllerSockaddr)) < 0) {
-		if(errno == EINTR) continue;
-		printf("%s\n", strerror(errno));
+		return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+	if(sendto(gSocket, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&gControllerSockaddr, sizeof(gControllerSockaddr)) < 0) {
+		return APErrorRaise(AP_ERROR_SENDING, NULL);
 	}
 	return AP_TRUE;
 }
@@ -194,14 +193,14 @@ APBool APNetworkSend(APProtocolMessage sendMsg)
 APBool APNetworkSendToBroad(APProtocolMessage sendMsg) 
 {
 	if(sendMsg.msg == NULL) 
-		return AP_FALSE;
+		return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
 	APNetworkAddress broadAddr;
 	AP_ZERO_MEMORY(&broadAddr, sizeof(broadAddr));
 	broadAddr.sin_family = AF_INET;
 	broadAddr.sin_addr.s_addr = inet_addr("255.255.255.255");
 	broadAddr.sin_port = htons(PROTOCOL_PORT);
 	if(sendto(gSocketBroad, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&broadAddr, sizeof(gControllerSockaddr)) < 0) {
-		return AP_FALSE;
+		return APErrorRaise(AP_ERROR_SENDING, NULL);
 	}
 	return AP_TRUE;
 }
@@ -210,16 +209,19 @@ APBool APNetworkSendToBroad(APProtocolMessage sendMsg)
  * receive a singlecast msg from controller
  * @param  buffer     [a buffer to store content]
  * @param  bufferLen  [size of buffer]
+ * @param  addr       [addr of controller]
  * @param  readLenPtr [output size of received msg]
  * @return            [whether the operation is success or not]
  */
 APBool APNetworkReceive(u8* buffer,
-					 int bufferLen, int* readLenPtr) 
+					 int bufferLen, APNetworkAddress* addr, int* readLenPtr) 
 {
 	if(buffer == NULL || readLenPtr == NULL)
-		return AP_FALSE;
+		return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
 	unsigned int  addrLen = sizeof(APNetworkAddress);
-	*readLenPtr = recvfrom(gSocket, (char*)buffer, bufferLen, 0, (struct sockaddr*)&gControllerSockaddr, &addrLen);
+	if((*readLenPtr = recvfrom(gSocket, (char*)buffer, bufferLen, 0, (struct sockaddr*)addr, &addrLen)) < 0) {
+		return APErrorRaise(AP_ERROR_RECEIVING, NULL);
+	}
 	return AP_TRUE;
 }
 
@@ -227,16 +229,19 @@ APBool APNetworkReceive(u8* buffer,
  * receive a broadcast msg from controller
  * @param  buffer     [a buffer to store content]
  * @param  bufferLen  [size of buffer]
+ * @param  addr       [addr of controller]
  * @param  readLenPtr [output size of received msg]
  * @return            [whether the operation is success or not]
  */
 APBool APNetworkReceiveFromBroad(u8* buffer,
-					 int bufferLen, int* readLenPtr) 
+					 int bufferLen, APNetworkAddress* addr, int* readLenPtr) 
 {
 	if(buffer == NULL || readLenPtr == NULL)
-		return AP_FALSE;
-	unsigned int  addrLen = sizeof(APNetworkAddress);
-	*readLenPtr = recvfrom(gSocketBroad, (char*)buffer, bufferLen, 0, (struct sockaddr*)&gControllerSockaddr, &addrLen);
+		return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+	unsigned int addrLen = sizeof(APNetworkAddress);
+	if((*readLenPtr = recvfrom(gSocketBroad, (char*)buffer, bufferLen, 0, (struct sockaddr*)addr, &addrLen)) < 0) {
+		return APErrorRaise(AP_ERROR_RECEIVING, NULL);
+	}
 	return AP_TRUE;
 }
 
@@ -251,7 +256,7 @@ APBool APNetworkTimedPollRead(APSocket sock, struct timeval *timeout) {
 	
 	fd_set fset;
 	
-	if(timeout == NULL) return AP_FALSE;
+	if(timeout == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
 	
 	FD_ZERO(&fset);
 	FD_SET(sock, &fset);
@@ -262,10 +267,13 @@ APBool APNetworkTimedPollRead(APSocket sock, struct timeval *timeout) {
 	} 
 	else if (r < 0) 
 	{
+		APErrorLog("Select Error");
 		if(errno == EINTR)
 		{
+			APErrorLog("Select Interrupted by signal");
 			return APErrorRaise(AP_ERROR_INTERRUPTED, NULL);
 		}
+		return APErrorRaise(AP_ERROR_GENERAL, NULL);
 	}
 
 	return AP_TRUE;

@@ -27,8 +27,8 @@ APBool APNetworkSend(
 APBool APNetworkSendToBroad(
 					APProtocolMessage sendMsg);
 APBool APNetworkReceive(u8* buffer,
-					 int bufferLen, int* readLenPtr);
+					 int bufferLen, APNetworkAddress* addr, int* readLenPtr);
 APBool APNetworkReceiveFromBroad(u8* buffer,
-					 int bufferLen, int* readLenPtr);
+					 int bufferLen, APNetworkAddress* addr, int* readLenPtr);
 
 #endif
