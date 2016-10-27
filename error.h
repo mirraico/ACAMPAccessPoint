@@ -25,6 +25,7 @@ typedef struct {
 	char message[256];
 } APErrorHandlingInfo;
 
+APBool APInitErrorHandling();
 APBool APErrorRaise(APErrorCode code, const char *msg);
 APErrorCode APGetLastErrorCode();
 

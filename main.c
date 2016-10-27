@@ -3,6 +3,15 @@
 #include "ap.h"
 #include "setting.h"
 #include "log.h"
+#include "network.h"
+
+void APDestroy()
+{
+	APDebugLog(3, "Start destroying AP");
+	APCloseLogFile();
+	APNetworkCloseSocket(gSocket);
+	APNetworkCloseSocket(gSocketBroad);
+}
 
 int main()
 {
@@ -11,32 +20,56 @@ int main()
 	APInit();
 	APDefaultSettings();
 
+	if(!APInitErrorHandling()) {
+		APErrorLog("Can't init error handling structure");
+		exit(1);
+	};
+
 	if(!APParseSettingsFile()) {
-		return 0;
+		APErrorLog("Can't read setting file");
+		exit(1);
 	}
-	// printf("gLogFileName: %s\n", gLogFileName);
-	// printf("gLogLevel: %d\n", gLogLevel);
-	// printf("gStdoutLevel: %d\n", gStdoutLevel);
-	// printf("gAPName: %s\n", gAPName);
-	// printf("gAPDescriptor: %s\n", gAPDescriptor);
-	// printf("gDiscoveryType: %d\n", gDiscoveryType);
-	// printf("gSSID: %s\n", gSSID);
-	// printf("gSuppressSSID: %d\n", gSuppressSSID);
-	// printf("gHardwareMode: %d\n", gHardwareMode);
-	// printf("gChannel: %d\n", gChannel);
-	// printf("gSecuritySetting: %d\n", gSecuritySetting);
-	
+
 	APInitLogFile();
+	APLog("Finish to read setting file");
+
+	// APDebugLog(5, "gLogFileName: %s", gLogFileName);
+	// APDebugLog(5, "gLogLevel: %d", gLogLevel);
+	// APDebugLog(5, "gStdoutLevel: %d", gStdoutLevel);
+	// APDebugLog(5, "gAPName: %s", gAPName);
+	// APDebugLog(5, "gAPDescriptor: %s", gAPDescriptor);
+	// APDebugLog(5, "gDiscoveryType: %d", gDiscoveryType);
+	// APDebugLog(5, "gSSID: %s", gSSID);
+	// APDebugLog(5, "gSuppressSSID: %d", gSuppressSSID);
+	// APDebugLog(5, "gHardwareMode: %d", gHardwareMode);
+	// APDebugLog(5, "gChannel: %d", gChannel);
+	// APDebugLog(5, "gSecuritySetting: %d", gSecuritySetting);
+	
 	
 	if(!APNetworkInitLocalAddr(&gAPIPAddr, gAPMACAddr, &gAPDefaultGateway)) {
-		return 0;
+		APErrorLog("Can't init local address");
+		exit(1);
 	}
-	// printf("IP:  %u.%u.%u.%u\n", (u8)(gAPIPAddr >> 24), (u8)(gAPIPAddr >> 16),  (u8)(gAPIPAddr >> 8),  (u8)(gAPIPAddr >> 0));
-	// printf("MAC:  %02x:%02x:%02x:%02x:%02x:%02x\n", gAPMACAddr[0], gAPMACAddr[1], gAPMACAddr[2], gAPMACAddr[3], gAPMACAddr[4], gAPMACAddr[5]);
-	// printf("gateway:  %u.%u.%u.%u\n", (u8)(gAPDefaultGateway >> 24), (u8)(gAPDefaultGateway >> 16),  (u8)(gAPDefaultGateway >> 8),  (u8)(gAPDefaultGateway >> 0));
+
+	// APDebugLog(5, "Local IP:  %u.%u.%u.%u", (u8)(gAPIPAddr >> 24), (u8)(gAPIPAddr >> 16),\
+	  (u8)(gAPIPAddr >> 8),  (u8)(gAPIPAddr >> 0));
+	// APDebugLog(5, "Local MAC:  %02x:%02x:%02x:%02x:%02x:%02x", gAPMACAddr[0], gAPMACAddr[1],\
+	 gAPMACAddr[2], gAPMACAddr[3], gAPMACAddr[4], gAPMACAddr[5]);
+	// APDebugLog(5, "Local gateway:  %u.%u.%u.%u", (u8)(gAPDefaultGateway >> 24), (u8)(gAPDefaultGateway >> 16),\
+	  (u8)(gAPDefaultGateway >> 8),  (u8)(gAPDefaultGateway >> 0));
+
+	APDebugLog(3, "Finish all init");
+	APLog("Starting WTP...");
 
 	/* if Controller address is given, jump Discovery and use this address for register */
-	if(gDiscoveryType != 0) nextState = AP_ENTER_REGISTER;
+	// if(gDiscoveryType != 0) 
+	// {
+	// 	//todo: init single socket
+	// 	nextState = AP_ENTER_REGISTER;
+	// 	APDebugLog(3, "Use gived controller address:  %u.%u.%u.%u", (u8)(gControllerIPAddr >> 24),\
+	// 	 (u8)(gControllerIPAddr >> 16),  (u8)(gControllerIPAddr >> 8),  (u8)(gControllerIPAddr >> 0));
+	// }
+	
 
 	/* start acamp state machine */	
 	AP_REPEAT_FOREVER {
@@ -58,6 +91,8 @@ int main()
 				break;
 			case AP_ENTER_DOWN:
 				// nextState = APEnterDown();
+				APDestroy();
+				APLog("WTP is down");
 				return 0;
 				break;
 		}

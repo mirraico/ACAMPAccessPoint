@@ -53,7 +53,7 @@ __inline__ u8 APGetSecuritySetting() { return gSecuritySetting; }
  */
 void APInit()
 {
-	srand((int)time(NULL));
+	srand( (unsigned)time( NULL ) );
 
 	gSeqNum = rand();
 	gAPID = 0;

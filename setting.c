@@ -222,7 +222,7 @@ APBool APParseSettingsFile()
 
 void APDefaultSettings()
 {
-	gLogFileName = "./ap2.log";
+	gLogFileName = "./ap.log";
 	gLogLevel = 0;
 	gStdoutLevel = 0;
 

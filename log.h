@@ -11,6 +11,7 @@ extern int gStdoutLevel;
 void APInitLogFile();
 void APCloseLogFile();
 extern void APLog(const char *format, ...);
+extern void APErrorLog(const char *format, ...);
 extern void APDebugLog(int level, const char *format, ...);
 
 #endif // LOG_H
