@@ -4,6 +4,7 @@
 #include "common.h"
 
 extern u32 gSeqNum;
+extern u32 gWaitSeqNum;
 
 extern u16 gAPID;
 extern u8 gDiscoveryType;
@@ -26,11 +27,14 @@ extern u8 gHardwareMode;
 extern u8 gSuppressSSID;
 extern u8 gSecuritySetting;
 
-#define APSeqNumIncrement()     gSeqNum++
+#define APSeqNumIncrement()         gSeqNum++
+#define APWaitSeqNumIncrement()     gWaitSeqNum++
 
 extern u32 APGetSeqNum();
+extern u32 APGetWaitSeqNum();
 
 extern u16 APGetAPID();
+extern void APSetAPID(u16 apid);
 extern u8 APGetDiscoveryType();
 extern u8 APGetRegisteredService();
 

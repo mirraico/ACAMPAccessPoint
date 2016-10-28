@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "error.h"
+#include "ap.h"
 
 
 #define PROTOCOL_PORT 6606
@@ -201,5 +202,17 @@ void APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len);
 APBool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr);
 APBool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **valPtr);
 APBool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr);
+
+APBool APAssembleRegisteredService(APProtocolMessage *msgPtr);
+APBool APAssembleAPName(APProtocolMessage *msgPtr);
+APBool APAssembleAPDescriptor(APProtocolMessage *msgPtr);
+APBool APAssembleAPIPAddr(APProtocolMessage *msgPtr);
+APBool APAssembleAPMACAddr(APProtocolMessage *msgPtr);
+APBool APAssembleDiscoveryType(APProtocolMessage *msgPtr);
+
+APBool APParseResultCode(APProtocolMessage *msgPtr, int len, u16 *valPtr);
+APBool APParseReasonCode(APProtocolMessage *msgPtr, int len, u16 *valPtr);
+APBool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr);
+
 
 #endif

@@ -1,6 +1,7 @@
 #include "ap.h"
 
 u32 gSeqNum;
+u32 gWaitSeqNum;
 
 u16 gAPID;
 u8 gDiscoveryType;
@@ -24,8 +25,10 @@ u8 gSuppressSSID;
 u8 gSecuritySetting;
 
 __inline__ u32 APGetSeqNum() { return gSeqNum; }
+__inline__ u32 APGetWaitSeqNum() { return gWaitSeqNum; }
 
 __inline__ u16 APGetAPID() { return gAPID; }
+void APSetAPID(u16 apid) { gAPID = apid; }
 __inline__ u8 APGetDiscoveryType() { return gDiscoveryType; }
 __inline__ u8 APGetRegisteredService() { return gRegisteredService; }
 
@@ -56,6 +59,7 @@ void APInit()
 	srand( (unsigned)time( NULL ) );
 
 	gSeqNum = rand();
+	gWaitSeqNum = gSeqNum;
 	gAPID = 0;
 }
 

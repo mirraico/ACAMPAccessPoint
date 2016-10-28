@@ -92,7 +92,7 @@ APBool APParseDiscoveryResponse(char *msg,
 		u16 len = 0;
 
 		APParseFormatMsgElem(&completeMsg, &type, &len);
-	    // CWDebugLog(3, "Parsing Message Element: %u, len: %u", type, len);
+	    // APDebugLog(3, "Parsing Message Element: %u, len: %u", type, len);
 		
 		switch(type) 
         {
@@ -137,7 +137,7 @@ APBool APReceiveDiscoveryResponse() {
 	}
 	
 	/* check if it is a valid Discovery Response */
-	if(!APErr(APParseDiscoveryResponse(buf, readBytes, APGetSeqNum(), controllerPtr))) {
+	if(!APErr(APParseDiscoveryResponse(buf, readBytes, APGetWaitSeqNum(), controllerPtr))) {
 		return APErrorRaise(AP_ERROR_INVALID_FORMAT, 
 				    "Received something different from a\
 				     Discovery Response while in Discovery State");
@@ -155,7 +155,8 @@ APBool APReceiveDiscoveryResponse() {
 	return AP_TRUE;
 }
 
-APBool APReadDiscoveryResponse() {
+APBool APReadDiscoveryResponse() 
+{
 
 	struct timeval timeout, new_timeout, before, after, delta;
 	
@@ -246,6 +247,7 @@ APStateTransition APEnterDiscovery()
         if(!APReadDiscoveryResponse()) {
 			continue; // no response
 		}
+        APWaitSeqNumIncrement();
 
         //choose one controller
         APEvaluateController();

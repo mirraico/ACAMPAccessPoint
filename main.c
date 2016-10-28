@@ -78,7 +78,7 @@ int main()
 				nextState = APEnterDiscovery();
 				break;
 			case AP_ENTER_REGISTER:
-				// nextState = APEnterRegister();
+				nextState = APEnterRegister();
 				break;
 			case AP_ENTER_CONFIGURE:
 				// nextState = APEnterConfigure();
@@ -92,7 +92,7 @@ int main()
 			case AP_ENTER_DOWN:
 				// nextState = APEnterDown();
 				APDestroy();
-				APLog("WTP is down");
+				APLog("AP is down");
 				return 0;
 				break;
 		}
