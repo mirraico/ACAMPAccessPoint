@@ -65,9 +65,9 @@ do
 	local f_acamp_msg_type = ProtoField.uint16("ACAMP.MsgType", "Msg Type", base.HEX, msg_type)
 	local f_acamp_msg_len = ProtoField.uint16("ACAMP.MsgLen", "Msg Len", base.DEC)
 
-	local f_element_type = ProtoField.uint16("ACAMP.ELEM_TYPE", "Element Type", base.HEX, msg_ele_type)
-	local f_element_len = ProtoField.uint16("ACAMP.ELEM_TYPE", "Element Len", base.DEC)
-	local f_element_data = ProtoField.string("ACAMP.ELEM_DATA", "Element Data")
+	local f_element_type = ProtoField.uint16("ACAMP.ElemType", "Element Type", base.HEX, msg_elem_type)
+	local f_element_len = ProtoField.uint16("ACAMP.ElemType", "Element Len", base.DEC)
+	local f_element_data = ProtoField.string("ACAMP.ElemData", "Element Data")
 
 	proto_acamp.fields = {f_acamp_version, f_acamp_type, f_acamp_apid, f_acamp_seqnum, f_acamp_msg_type, f_acamp_msg_len, 
 								f_element_type, f_element_len, f_element_data}
@@ -108,7 +108,7 @@ do
 				local v_element_data = v_element(p_elem + 4, element_len)
 			end
 			local element_totlen = element_len + 4
-			local te = tes.add(tes, v_element(p_elem, element_totlen), msg_ele_type[v_element_type:uint()])
+			local te = tes.add(tes, v_element(p_elem, element_totlen), msg_elem_type[v_element_type:uint()])
 		
 			te:add(f_element_type, v_element(p_elem, 2))
 			te:add(f_element_len, v_element(p_elem + 2, 2))

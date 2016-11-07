@@ -51,11 +51,11 @@ int main()
 		exit(1);
 	}
 
-	// APDebugLog(5, "Local IP:  %u.%u.%u.%u", (u8)(gAPIPAddr >> 24), (u8)(gAPIPAddr >> 16),\
+	APDebugLog(5, "Local IP:  %u.%u.%u.%u", (u8)(gAPIPAddr >> 24), (u8)(gAPIPAddr >> 16),\
 	  (u8)(gAPIPAddr >> 8),  (u8)(gAPIPAddr >> 0));
-	// APDebugLog(5, "Local MAC:  %02x:%02x:%02x:%02x:%02x:%02x", gAPMACAddr[0], gAPMACAddr[1],\
+	APDebugLog(5, "Local MAC:  %02x:%02x:%02x:%02x:%02x:%02x", gAPMACAddr[0], gAPMACAddr[1],\
 	 gAPMACAddr[2], gAPMACAddr[3], gAPMACAddr[4], gAPMACAddr[5]);
-	// APDebugLog(5, "Local gateway:  %u.%u.%u.%u", (u8)(gAPDefaultGateway >> 24), (u8)(gAPDefaultGateway >> 16),\
+	APDebugLog(5, "Local gateway:  %u.%u.%u.%u", (u8)(gAPDefaultGateway >> 24), (u8)(gAPDefaultGateway >> 16),\
 	  (u8)(gAPDefaultGateway >> 8),  (u8)(gAPDefaultGateway >> 0));
 
 	APDebugLog(3, "All init finished");

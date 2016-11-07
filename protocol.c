@@ -334,17 +334,17 @@ APBool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr)
 		APErrorRaise(AP_ERROR_INVALID_FORMAT, "Message Element Malformed");
 }
 
-APBool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 **valPtr) 
+APBool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
 {	
 	int i;
 	int oldOffset = msgPtr->offset;
 	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
 	
 	for(i = 0; i < 6; i++) {
-		*valPtr[i] = APProtocolRetrieve8(msgPtr);
+		valPtr[i] = APProtocolRetrieve8(msgPtr);
 	}
-	APDebugLog(5, "Controller MAC:  %02x:%02x:%02x:%02x:%02x:%02x", *valPtr[0], *valPtr[1],\
-	 *valPtr[2], *valPtr[3], *valPtr[4], *valPtr[5]);
+	APDebugLog(5, "Controller MAC:  %02x:%02x:%02x:%02x:%02x:%02x", valPtr[0], valPtr[1],\
+	 valPtr[2], valPtr[3], valPtr[4], valPtr[5]);
 	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
 		APErrorRaise(AP_ERROR_INVALID_FORMAT, "Message Element Malformed");
 }
@@ -452,4 +452,57 @@ APBool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr)
 	APDebugLog(5, "Assigned APID:  %d", *valPtr);
 	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
 		APErrorRaise(AP_ERROR_INVALID_FORMAT, "Message Element Malformed");
+}
+
+APBool APAssembleSSID(APProtocolMessage *msgPtr) 
+{
+	char* str;
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+	str = APGetSSID();
+	
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL););
+	// APDebugLog(3, "AP Name: %s", str);
+	APProtocolStoreStr(msgPtr, str);
+
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SSID);
+}
+
+APBool APAssembleChannel(APProtocolMessage *msgPtr) 
+{
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+	
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL););
+	APProtocolStore8(msgPtr, APGetChannel());
+
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_CHANNEL);
+}
+
+APBool APAssembleHardwareMode(APProtocolMessage *msgPtr) 
+{
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+	
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL););
+	APProtocolStore8(msgPtr, APGetHardwareMode());
+
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_HARDWARE_MODE);
+}
+
+APBool APAssembleSuppressSSID(APProtocolMessage *msgPtr) 
+{
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+	
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL););
+	APProtocolStore8(msgPtr, APGetSuppressSSID());
+
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SUPPRESS_SSID);
+}
+
+APBool APAssembleSecuritySetting(APProtocolMessage *msgPtr) 
+{
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, NULL);
+	
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL););
+	APProtocolStore8(msgPtr, APGetSecuritySetting());
+
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SECURITY_SETTING);
 }

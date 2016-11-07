@@ -23,28 +23,9 @@ void APCloseLogFile()
 	fclose(gLogFile);
 }
 
-__inline__ void APLog(const char *format, ...)
-{
-	va_list args;
-	
-	va_start(args, format);
-	APDebugLog(0, format, args);
-	va_end(args);
-}
-
-__inline__ void APErrorLog(const char *format, ...)
-{
-	va_list args;
-	
-	va_start(args, format);
-	APDebugLog(-1, format, args);
-	va_end(args);
-}
-
-__inline__ void APDebugLog(int level, const char *format, ...) 
+__inline__ void _APDebugLog(int level, const char *format, va_list args) 
 {
     char *logStr = NULL;
-    va_list args;
     time_t curtime;
     char *timestr = NULL;
     char label[10];
@@ -64,8 +45,6 @@ __inline__ void APDebugLog(int level, const char *format, ...)
     else if(level == 0) strcpy(label, "LOG");
     else sprintf(label, "DE%d", level);
     sprintf(logStr, "[[AP-%s::%s]]\t %s\n", label, timestr, format);
-
-    va_start(args, format);
     
     char fileLine[256];
     vsnprintf(fileLine, 255, logStr, args);
@@ -80,6 +59,31 @@ __inline__ void APDebugLog(int level, const char *format, ...)
         printf("%s", fileLine);
     }
     
-    va_end(args);
     AP_FREE_OBJECT(logStr);
+}
+
+__inline__ void APLog(const char *format, ...)
+{
+	va_list args;
+	
+	va_start(args, format);
+	_APDebugLog(0, format, args);
+	va_end(args);
+}
+
+__inline__ void APErrorLog(const char *format, ...)
+{
+	va_list args;
+	
+	va_start(args, format);
+	_APDebugLog(-1, format, args);
+	va_end(args);
+}
+
+__inline__ void APDebugLog(int level, const char *format, ...) 
+{
+    va_list args;
+    va_start(args, format);
+    _APDebugLog(level, format, args);
+    va_end(args);
 }

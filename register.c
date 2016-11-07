@@ -109,7 +109,7 @@ APBool APParseRegisterResponse(char *msg,
                     return APErrorRaise(AP_ERROR_INVALID_FORMAT, NULL);
 				break;
             case MSGELEMTYPE_CONTROLLER_MAC_ADDR:
-				if(!(APParseControllerMACAddr(&completeMsg, len, &gControllerMACAddr)))
+				if(!(APParseControllerMACAddr(&completeMsg, len, gControllerMACAddr)))
                     return APErrorRaise(AP_ERROR_INVALID_FORMAT, NULL);
 				break;
 			

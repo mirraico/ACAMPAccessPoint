@@ -26,11 +26,11 @@ APBool APEvaluateController()
     int i;
     /* now the strategy is that choose the first */
     AP_CREATE_OBJECT_SIZE_ERR(gControllerName, (strlen(controllers[0].name) + 1), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL););
-	AP_COPY_MEMORY(gControllerName, &controllers[0].name, strlen(controllers[0].name));
+	AP_COPY_MEMORY(gControllerName, controllers[0].name, strlen(controllers[0].name));
 	gControllerName[strlen(controllers[0].name)] = '\0';
 
     AP_CREATE_OBJECT_SIZE_ERR(gControllerDescriptor, (strlen(controllers[0].descriptor) + 1), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, NULL););
-	AP_COPY_MEMORY(gControllerDescriptor, &controllers[0].descriptor, strlen(controllers[0].descriptor));
+	AP_COPY_MEMORY(gControllerDescriptor, controllers[0].descriptor, strlen(controllers[0].descriptor));
 	gControllerDescriptor[strlen(controllers[0].descriptor)] = '\0';
 
     gControllerIPAddr = controllers[0].IPAddr; 
@@ -109,7 +109,8 @@ APBool APParseDiscoveryResponse(char *msg,
                     return APErrorRaise(AP_ERROR_INVALID_FORMAT, NULL);
 				break;
             case MSGELEMTYPE_CONTROLLER_MAC_ADDR:
-				if(!(APParseControllerMACAddr(&completeMsg, len, &(controllerPtr->MACAddr))))
+                (controllerPtr->MACAddr)[0] = 5;
+				if(!(APParseControllerMACAddr(&completeMsg, len, controllerPtr->MACAddr)))
                     return APErrorRaise(AP_ERROR_INVALID_FORMAT, NULL);
 				break;
 			
@@ -124,7 +125,7 @@ APBool APParseDiscoveryResponse(char *msg,
 APBool APReceiveDiscoveryResponse() {
 	char buf[AP_BUFFER_SIZE];
 	APNetworkAddress addr;
-	controllerVal *controllerPtr = &controllers[gDiscoveryCount];
+	controllerVal *controllerPtr = &controllers[foundControllerCount];
 	int readBytes;
 	
 	/* receive the datagram */
@@ -144,13 +145,13 @@ APBool APReceiveDiscoveryResponse() {
 	}
 
     /* the address declared by controller is fake */
-    if(addr.sin_addr.s_addr != controllers[foundControllerCount].IPAddr) {
+    if(ntohl(addr.sin_addr.s_addr) != controllerPtr->IPAddr) {
         APErrorLog("Address Deception");
         return APErrorRaise(AP_ERROR_GENERAL, NULL);
     }
-
-    APLog("Discovery Response from %u.%u.%u.%u", (u8)(controllers[foundControllerCount].IPAddr >> 24), (u8)(controllers[foundControllerCount].IPAddr >> 16),\
-	  (u8)(controllers[foundControllerCount].IPAddr >> 8),  (u8)(controllers[foundControllerCount].IPAddr >> 0));
+    
+    APLog("Discovery Response from %u.%u.%u.%u", (u8)((controllerPtr->IPAddr) >> 24), (u8)((controllerPtr->IPAddr) >> 16),\
+	  (u8)((controllerPtr->IPAddr) >> 8),  (u8)((controllerPtr->IPAddr) >> 0));
 	
 	return AP_TRUE;
 }

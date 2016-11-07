@@ -75,7 +75,7 @@ msg type
 #define MSGTYPE_CONFIGURATION_UPDATE_REQUEST 0x0201
 #define MSGTYPE_CONFIGURATION_UPDATE_RESPONSE 0x0202
 #define MSGTYPE_CONFIGURATION_REQUEST 0x0203
-#define MSGTYPE_CONFIGURATION_RESPONSE 0x0204
+#define MSGTYPE_CONFIGURATION_REPORT 0x0204
 
 /*
 msg elem type
@@ -202,6 +202,7 @@ void APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len);
 APBool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr);
 APBool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **valPtr);
 APBool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr);
+APBool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 
 APBool APAssembleRegisteredService(APProtocolMessage *msgPtr);
 APBool APAssembleAPName(APProtocolMessage *msgPtr);
@@ -213,6 +214,13 @@ APBool APAssembleDiscoveryType(APProtocolMessage *msgPtr);
 APBool APParseResultCode(APProtocolMessage *msgPtr, int len, u16 *valPtr);
 APBool APParseReasonCode(APProtocolMessage *msgPtr, int len, u16 *valPtr);
 APBool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr);
+
+APBool APAssembleSSID(APProtocolMessage *msgPtr);
+APBool APAssembleChannel(APProtocolMessage *msgPtr);
+APBool APAssembleHardwareMode(APProtocolMessage *msgPtr);
+APBool APAssembleSuppressSSID(APProtocolMessage *msgPtr);
+APBool APAssembleSecuritySetting(APProtocolMessage *msgPtr);
+
 
 
 #endif
