@@ -117,7 +117,6 @@ APBool APParseSettingsFile()
 		pos[0] = '\0';
 
 
-
 		if (!strcmp(APExtractTag(line), "AP_LOG_PATH"))
 		{
 			char* value = APExtractStringVaule(pos+1);

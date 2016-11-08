@@ -31,20 +31,7 @@ int main()
 	}
 
 	APInitLogFile();
-	APLog("Finish to read setting file");
-
-	// APDebugLog(5, "gLogFileName: %s", gLogFileName);
-	// APDebugLog(5, "gLogLevel: %d", gLogLevel);
-	// APDebugLog(5, "gStdoutLevel: %d", gStdoutLevel);
-	// APDebugLog(5, "gAPName: %s", gAPName);
-	// APDebugLog(5, "gAPDescriptor: %s", gAPDescriptor);
-	// APDebugLog(5, "gDiscoveryType: %d", gDiscoveryType);
-	// APDebugLog(5, "gSSID: %s", gSSID);
-	// APDebugLog(5, "gSuppressSSID: %d", gSuppressSSID);
-	// APDebugLog(5, "gHardwareMode: %d", gHardwareMode);
-	// APDebugLog(5, "gChannel: %d", gChannel);
-	// APDebugLog(5, "gSecuritySetting: %d", gSecuritySetting);
-	
+	APLog("Finished reading the setting file");
 	
 	if(!APNetworkInitLocalAddr(&gAPIPAddr, gAPMACAddr, &gAPDefaultGateway)) {
 		APErrorLog("Can't init local address");
@@ -58,7 +45,7 @@ int main()
 	APDebugLog(5, "Local gateway:  %u.%u.%u.%u", (u8)(gAPDefaultGateway >> 24), (u8)(gAPDefaultGateway >> 16),\
 	  (u8)(gAPDefaultGateway >> 8),  (u8)(gAPDefaultGateway >> 0));
 
-	APDebugLog(3, "All init finished");
+	APDebugLog(3, "All init is finished");
 	APLog("Starting WTP...");
 
 	/* if Controller address is given, jump Discovery and use this address for register */
