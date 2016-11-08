@@ -226,7 +226,7 @@ APBool APParseRegisterResponse(char *msg,
 
 	if(gRegisteredService != recvRegisteredService) {
         APErrorLog("The service is different from the requested one");
-		return APErrorRaise(AP_ERROR_WARNING, NULL);
+		return APErrorRaise(AP_ERROR_WARNING, "APParseRegisterResponse()");
 	}
 
 	if(strcmp(gControllerName, recvControllerInfo.name) != 0) {
@@ -247,7 +247,7 @@ APBool APParseRegisterResponse(char *msg,
 
 	if(gControllerIPAddr != recvControllerInfo.IPAddr) {
 		APErrorLog("The Controller IP Addr has changed");
-		return APErrorRaise(AP_ERROR_WARNING, NULL);
+		return APErrorRaise(AP_ERROR_WARNING, "APParseRegisterResponse()");
 	}
 
 	if(
