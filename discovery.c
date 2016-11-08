@@ -309,7 +309,9 @@ APStateTransition APEnterDiscovery()
         APWaitSeqNumIncrement();
 
         //choose one controller
-        APEvaluateController();
+        if(!APErr(APEvaluateController())) {
+			continue;
+		}
         APLog("Picks a Controller from %u.%u.%u.%u", (u8)(gControllerIPAddr >> 24), (u8)(gControllerIPAddr >> 16),\
 	        (u8)(gControllerIPAddr >> 8),  (u8)(gControllerIPAddr >> 0));
         break;
