@@ -237,15 +237,15 @@ void APDefaultSettings()
 		gControllerMACAddr[i] = 0;
 	}
 
-	gAPName = "AP_TEST";
-	gAPDescriptor = "an AP for test";
+	gAPName = "AP";
+	gAPDescriptor = "no descriptor";
 	gAPIPAddr = 0;
 	for(i = 0; i < 6; i++) {
 		gAPMACAddr[i] = 0;
 	}
 	gAPDefaultGateway = 0;
 
-	gSSID = "test_ap_ssid";
+	gSSID = "ap_ssid";
 	gChannel = 7;
 	gHardwareMode = 2;
 	gSuppressSSID = 0;
