@@ -297,6 +297,15 @@ void APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len)
 	*len = APProtocolRetrieve16(msgPtr);
 }
 
+void APParseUnrecognizedMegElem(APProtocolMessage *msgPtr, int len)
+{
+	msgPtr->offset += len;
+}
+
+void APParseRepeatedMegElem(APProtocolMessage *msgPtr, int len) 
+{
+	msgPtr->offset += len;
+}
 
 APBool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr) 
 {	
@@ -306,8 +315,12 @@ APBool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr)
 	*valPtr = APProtocolRetrieveStr(msgPtr, len);
 	if(valPtr == NULL) return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APParseControllerName()");
 	APDebugLog(5, "Controller Name: %s", *valPtr);
-	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
-		APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseControllerName()");
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseControllerName()");
+	}
+	return AP_TRUE;
 }
 
 APBool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **valPtr) 
@@ -318,8 +331,12 @@ APBool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **va
 	*valPtr = APProtocolRetrieveStr(msgPtr, len);
 	if(valPtr == NULL) return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APParseControllerDescriptor()");
 	APDebugLog(5, "Controller Descriptor: %s", *valPtr);
-	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
-		APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseControllerDescriptor()");
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseControllerDescriptor()");
+	}
+	return AP_TRUE;
 }
 
 APBool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr) 
@@ -330,8 +347,12 @@ APBool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr)
 	*valPtr = APProtocolRetrieve32(msgPtr);
 	APDebugLog(5, "Controller IP:  %u.%u.%u.%u", (u8)(*valPtr >> 24), (u8)(*valPtr >> 16),\
 	  (u8)(*valPtr >> 8),  (u8)(*valPtr >> 0));
-	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
-		APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseControllerIPAddr()");
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseControllerIPAddr()");
+	}
+	return AP_TRUE;
 }
 
 APBool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
@@ -345,8 +366,12 @@ APBool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 *valPtr)
 	}
 	APDebugLog(5, "Controller MAC:  %02x:%02x:%02x:%02x:%02x:%02x", valPtr[0], valPtr[1],\
 	 valPtr[2], valPtr[3], valPtr[4], valPtr[5]);
-	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
-		APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseControllerMACAddr()");
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseControllerMACAddr()");
+	}
+	return AP_TRUE;
 }
 
 APBool APAssembleRegisteredService(APProtocolMessage *msgPtr) 
@@ -428,8 +453,12 @@ APBool APParseResultCode(APProtocolMessage *msgPtr, int len, u16 *valPtr)
 	
 	*valPtr = APProtocolRetrieve16(msgPtr);
 	APDebugLog(5, "Result Code:  %u", *valPtr);
-	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
-		APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseResultCode()");
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseResultCode()");
+	}
+	return AP_TRUE;
 }
 
 APBool APParseReasonCode(APProtocolMessage *msgPtr, int len, u16 *valPtr) 
@@ -439,8 +468,12 @@ APBool APParseReasonCode(APProtocolMessage *msgPtr, int len, u16 *valPtr)
 	
 	*valPtr = APProtocolRetrieve16(msgPtr);
 	APDebugLog(5, "Reason Code:  %u", *valPtr);
-	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
-		APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseReasonCode()");
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseReasonCode()");
+	}
+	return AP_TRUE;
 }
 
 APBool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr) 
@@ -450,8 +483,12 @@ APBool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr)
 	
 	*valPtr = APProtocolRetrieve16(msgPtr);
 	APDebugLog(5, "Assigned APID:  %d", *valPtr);
-	return ((msgPtr->offset) - oldOffset) == len ? AP_TRUE :\
-		APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseAssignedAPID()");
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseAssignedAPID()");
+	}
+	return AP_TRUE;
 }
 
 APBool APAssembleSSID(APProtocolMessage *msgPtr) 

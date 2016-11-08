@@ -197,6 +197,8 @@ void APProtocolRetrieveReserved(APProtocolMessage *msgPtr, int reservedLen);
 
 APBool APParseControlHeader(APProtocolMessage *msgPtr, APHeaderVal *valPtr);
 void APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len);
+void APParseUnrecognizedMegElem(APProtocolMessage *msgPtr, int len);
+void APParseRepeatedMegElem(APProtocolMessage *msgPtr, int len);
 
 
 APBool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr);

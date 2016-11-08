@@ -221,6 +221,8 @@ APBool APParseSettingsFile()
 
 void APDefaultSettings()
 {
+	int i;
+
 	gLogFileName = "./ap.log";
 	gLogLevel = 0;
 	gStdoutLevel = 0;
@@ -230,14 +232,18 @@ void APDefaultSettings()
 
 	gControllerName = NULL;
 	gControllerDescriptor = NULL;
-	gControllerIPAddr = -1; 
-	gControllerMACAddr[0] = -1;
+	gControllerIPAddr = 0; 
+	for(i = 0; i < 6; i++) {
+		gControllerMACAddr[i] = 0;
+	}
 
 	gAPName = "AP_TEST";
 	gAPDescriptor = "an AP for test";
-	gAPIPAddr = -1;
-	gAPMACAddr[0] = -1;
-	gAPDefaultGateway = -1;
+	gAPIPAddr = 0;
+	for(i = 0; i < 6; i++) {
+		gAPMACAddr[i] = 0;
+	}
+	gAPDefaultGateway = 0;
 
 	gSSID = "test_ap_ssid";
 	gChannel = 7;

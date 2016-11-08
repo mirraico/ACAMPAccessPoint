@@ -64,11 +64,13 @@ APBool APParseDiscoveryResponse(char *msg,
 {
 	APHeaderVal controlVal;
 	APProtocolMessage completeMsg;
+
+    u16 elemFlag = 0;
 	
 	if(msg == NULL || controllerPtr == NULL) 
 		return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseDiscoveryResponse()");
 	
-	APDebugLog(3, "Parse Discovery Response");
+	APLog("Parse Discovery Response");
 	
 	completeMsg.msg = msg;
 	completeMsg.offset = 0;
@@ -104,50 +106,87 @@ APBool APParseDiscoveryResponse(char *msg,
 		switch(type) 
         {
 			case MSGELEMTYPE_CONTROLLER_NAME:
+                if(elemFlag & 0x01) {
+                    APParseRepeatedMegElem(&completeMsg, len);
+                    APErrorLog("Repeated Message Element");
+                    break;
+                }
 				if(!(APParseControllerName(&completeMsg, len, &(controllerPtr->name))))
                     return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                elemFlag |= 0x01;
 				break;
             case MSGELEMTYPE_CONTROLLER_DESCRIPTOR:
+                if(elemFlag & 0x02) {
+                    APParseRepeatedMegElem(&completeMsg, len);
+                    APErrorLog("Repeated Message Element");
+                    break;
+                }
 				if(!(APParseControllerDescriptor(&completeMsg, len, &(controllerPtr->descriptor))))
                     return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                elemFlag |= 0x02;
 				break;
             case MSGELEMTYPE_CONTROLLER_IP_ADDR:
+                if(elemFlag & 0x04) {
+                    APParseRepeatedMegElem(&completeMsg, len);
+                    APErrorLog("Repeated Message Element");
+                    break;
+                }
 				if(!(APParseControllerIPAddr(&completeMsg, len, &(controllerPtr->IPAddr))))
                     return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                elemFlag |= 0x04;
 				break;
             case MSGELEMTYPE_CONTROLLER_MAC_ADDR:
-                (controllerPtr->MACAddr)[0] = 5;
+                if(elemFlag & 0x08) {
+                    APParseRepeatedMegElem(&completeMsg, len);
+                    APErrorLog("Repeated Message Element");
+                    break;
+                }
 				if(!(APParseControllerMACAddr(&completeMsg, len, controllerPtr->MACAddr)))
                     return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                elemFlag |= 0x08;
 				break;
 			
 			default:
+                APParseUnrecognizedMegElem(&completeMsg, len);
                 APErrorLog("Unrecognized Message Element");
 				// return APErrorRaise(AP_ERROR_INVALID_FORMAT,
 				// 	"APParseDiscoveryResponse()");
 		}
 	}
+
+    if(elemFlag != 0x0F) {
+        APErrorLog("Incomplete Message Element in Discovery Response");
+        return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseDiscoveryResponse()");
+    }
 	return AP_TRUE;
 }
 
 APBool APReceiveDiscoveryResponse() {
+    int i;
 	char buf[AP_BUFFER_SIZE];
 	APNetworkAddress addr;
 	controllerVal *controllerPtr = &controllers[foundControllerCount];
 	int readBytes;
     u32 recvAddr;
-	
+
+    controllerPtr->name = NULL;
+    controllerPtr->descriptor = NULL;
+    controllerPtr->IPAddr = 0;
+    for(i = 0; i < 6; i++) {
+        controllerPtr->MACAddr[i] = 0;
+    }
+
 	/* receive the datagram */
 	if(!APErr(APNetworkReceiveFromBroad(buf,
 					 AP_BUFFER_SIZE - 1,
                      &addr,
 					 &readBytes))) {
-        APErrorLog("Receive discovery response failed");
+        APErrorLog("Receive Discovery Response failed");
 		return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
 	}
 
     recvAddr = ntohl(addr.sin_addr.s_addr);
-    APDebugLog(3, "Receive Discovery Response from %u.%u.%u.%u", (u8)(recvAddr >> 24), (u8)(recvAddr >> 16),\
+    APLog("Receive Discovery Response from %u.%u.%u.%u", (u8)(recvAddr >> 24), (u8)(recvAddr >> 16),\
 	  (u8)(recvAddr >> 8),  (u8)(recvAddr >> 0));
 	
 	/* check if it is a valid Discovery Response */
@@ -161,7 +200,7 @@ APBool APReceiveDiscoveryResponse() {
         return APErrorRaise(AP_ERROR_WARNING, "APReceiveDiscoveryResponse()");
     }
     
-    APLog("Receive valid Discovery Response from %u.%u.%u.%u", (u8)((controllerPtr->IPAddr) >> 24), (u8)((controllerPtr->IPAddr) >> 16),\
+    APLog("Accept valid Discovery Response from %u.%u.%u.%u", (u8)((controllerPtr->IPAddr) >> 24), (u8)((controllerPtr->IPAddr) >> 16),\
 	  (u8)((controllerPtr->IPAddr) >> 8),  (u8)((controllerPtr->IPAddr) >> 0));
 	
 	return AP_TRUE;
@@ -211,7 +250,7 @@ APBool APReadDiscoveryResponse()
         }
     }
     ap_time_over:
-        APDebugLog(3, "Timer expired during read discovery response");	
+        APDebugLog(3, "Timer expired during read Discovery Response");	
 
     if(foundControllerCount == 0) {
         APLog("There is no response or valid Controller");
@@ -240,20 +279,20 @@ APStateTransition APEnterDiscovery()
         foundControllerCount = 0;
 
         if(gDiscoveryCount == gMaxDiscovery) {
-            APLog("No discovery responses for 3 times");
+            APLog("No Discovery Responses for 3 times");
 			return AP_ENTER_DOWN;
         }
         
         APProtocolMessage sendMsg;
         AP_INIT_PROTOCOL(sendMsg);
-	    APDebugLog(3, "Assemble discovery request");
+	    APDebugLog(3, "Assemble Discovery Request");
         if(!APErr(APAssembleDiscoveryRequest(&sendMsg))) {
-            APErrorLog("Failed to assemble discovery request");
+            APErrorLog("Failed to assemble Discovery Request");
 		    return AP_ENTER_DOWN;
         }
-	    APLog("Send discovery request");
+	    APLog("Send Discovery Request");
         if(!APErr(APNetworkSendToBroad(sendMsg))) {
-            APErrorLog("Failed to send discovery request");
+            APErrorLog("Failed to send Discovery Request");
 		    return AP_ENTER_DOWN;
         }
         AP_FREE_PROTOCOL_MESSAGE(sendMsg);
