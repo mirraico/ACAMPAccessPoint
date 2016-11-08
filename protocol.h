@@ -216,6 +216,7 @@ APBool APAssembleDiscoveryType(APProtocolMessage *msgPtr);
 APBool APParseResultCode(APProtocolMessage *msgPtr, int len, u16 *valPtr);
 APBool APParseReasonCode(APProtocolMessage *msgPtr, int len, u16 *valPtr);
 APBool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr);
+APBool APParseRegisteredService(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 
 APBool APAssembleSSID(APProtocolMessage *msgPtr);
 APBool APAssembleChannel(APProtocolMessage *msgPtr);

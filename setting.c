@@ -175,6 +175,13 @@ APBool APParseSettingsFile()
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
+		if (!strcmp(APExtractTag(line), "REGISTERED_SERVICE"))
+		{
+			gRegisteredService = APExtractIntVaule(pos+1);
+			
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
 		if (!strcmp(APExtractTag(line), "SSID"))
 		{
 			char* value = APExtractStringVaule(pos+1);

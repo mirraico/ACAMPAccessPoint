@@ -140,7 +140,7 @@ APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
 	if(!(APAssembleControlHeader(&controlHdr, &controlHdrVal))) {
 		AP_FREE_PROTOCOL_MESSAGE(controlHdr);
 		AP_FREE_ARRAY_AND_PROTOCOL_MESSAGE(msgElems, msgElemNum);
-		return AP_FALSE;
+		return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
 	}
 
 	AP_INIT_PROTOCOL_MESSAGE(completeMsg, controlHdr.offset + msgElemsLen, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleControlMessage()"););
@@ -379,7 +379,7 @@ APBool APAssembleRegisteredService(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleRegisteredService()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleRegisteredService()"););
-	// APDebugLog(3, "Registered Service: %d", APGetRegisteredService());
+	APDebugLog(5, "Registered Service: %d", APGetRegisteredService());
 	APProtocolStore8(msgPtr, APGetRegisteredService());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_REGISTERED_SERVICE);
@@ -392,7 +392,7 @@ APBool APAssembleAPName(APProtocolMessage *msgPtr)
 	str = APGetAPName();
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleAPName()"););
-	// APDebugLog(3, "AP Name: %s", str);
+	APDebugLog(5, "AP Name: %s", str);
 	APProtocolStoreStr(msgPtr, str);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_AP_NAME);
@@ -405,7 +405,7 @@ APBool APAssembleAPDescriptor(APProtocolMessage *msgPtr)
 	str = APGetAPDescriptor();
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleAPDescriptor()"););
-	// APDebugLog(3, "AP Descriptor: %s", str);
+	APDebugLog(5, "AP Descriptor: %s", str);
 	APProtocolStoreStr(msgPtr, str);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_AP_DESCRIPTOR);
@@ -414,9 +414,12 @@ APBool APAssembleAPDescriptor(APProtocolMessage *msgPtr)
 APBool APAssembleAPIPAddr(APProtocolMessage *msgPtr) 
 {
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleAPIPAddr()");
-	
+	u32 ip = APGetAPIPAddr();
+
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 4, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleAPIPAddr()"););
-	APProtocolStore32(msgPtr, APGetAPIPAddr());
+	APDebugLog(5, "AP IPAddr:  %u.%u.%u.%u", (u8)(ip >> 24), (u8)(ip >> 16),\
+	  (u8)(ip >> 8),  (u8)(ip >> 0));
+	APProtocolStore32(msgPtr, ip);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_AP_IP_ADDR);
 }
@@ -424,10 +427,12 @@ APBool APAssembleAPIPAddr(APProtocolMessage *msgPtr)
 APBool APAssembleAPMACAddr(APProtocolMessage *msgPtr) 
 {
 	int i;
-	u8 *mac = APGetAPMACAddr();
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleAPMACAddr()");
-	
+	u8 *mac = APGetAPMACAddr();
+
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 6, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleAPMACAddr()"););
+	APDebugLog(5, "AP MACAddr:  %02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1],\
+	 mac[2], mac[3], mac[4], mac[5]);
 	for(i = 0; i < 6; i++) {
 		APProtocolStore8(msgPtr, mac[i]);
 	}
@@ -440,7 +445,7 @@ APBool APAssembleDiscoveryType(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleDiscoveryType()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleDiscoveryType()"););
-	// APDebugLog(3, "Discovery Type: %d", APGetDiscoveryType());
+	APDebugLog(5, "Discovery Type: %d", APGetDiscoveryType());
 	APProtocolStore8(msgPtr, APGetDiscoveryType());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_DISCOVERY_TYPE);
@@ -487,6 +492,21 @@ APBool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr)
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
 		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseAssignedAPID()");
+	}
+	return AP_TRUE;
+}
+
+APBool APParseRegisteredService(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+{	
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseRegisteredService()");
+	
+	*valPtr = APProtocolRetrieve8(msgPtr);
+	APDebugLog(5, "Registered Service:  %u", *valPtr);
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseRegisteredService()");
 	}
 	return AP_TRUE;
 }
