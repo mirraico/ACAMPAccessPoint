@@ -1,17 +1,20 @@
 #include "log.h"
 
-char *gLogFileName;
-FILE *gLogFile = NULL;
-int gLogLevel;
-int gStdoutLevel;
+char *gAPLogFileName;
+int gAPLogLevel;
+int gAPStdoutLevel;
+
+FILE *gAPLogFile = NULL;
 
 void APInitLogFile()
 {
-	if(gLogFileName == NULL) 
+	if(gAPLogFileName == NULL) 
     {
-		APErrorLog("Wrong File Name for Log File");
+        gAPLogFile = NULL;
+		APLog("The Log File is disabled");
+        return;
 	}
-	if((gLogFile = fopen(gLogFileName, "w")) == NULL) 
+	if((gAPLogFile = fopen(gAPLogFileName, "w")) == NULL) 
     {
 		APErrorLog("Can't open log file: %s", strerror(errno));
 		exit(1);
@@ -20,7 +23,7 @@ void APInitLogFile()
 
 void APCloseLogFile()
 {
-	fclose(gLogFile);
+	fclose(gAPLogFile);
 }
 
 __inline__ void _APDebugLog(int level, const char *format, va_list args) 
@@ -30,7 +33,7 @@ __inline__ void _APDebugLog(int level, const char *format, va_list args)
     char *timestr = NULL;
     char label[10];
     
-    if(gLogLevel < level && gStdoutLevel < level) return;
+    if(gAPLogLevel < level && gAPStdoutLevel < level) return;
     if(format == NULL) return;
     
     time(&curtime);
@@ -49,12 +52,12 @@ __inline__ void _APDebugLog(int level, const char *format, va_list args)
     char fileLine[256];
     vsnprintf(fileLine, 255, logStr, args);
 
-    if(gLogLevel >= level && gLogFile != NULL) 
+    if(gAPLogLevel >= level && gAPLogFile != NULL) 
     {
-        fwrite(fileLine, strlen(fileLine), 1, gLogFile);
-        fflush(gLogFile);
+        fwrite(fileLine, strlen(fileLine), 1, gAPLogFile);
+        fflush(gAPLogFile);
     }
-    if(gStdoutLevel >= level)
+    if(gAPStdoutLevel >= level)
     {
         printf("%s", fileLine);
     }

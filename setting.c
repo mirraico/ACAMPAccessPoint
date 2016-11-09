@@ -122,29 +122,54 @@ APBool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			AP_CREATE_STRING_SIZE_ERR(gLogFileName, len + 1, return AP_FALSE;);
-			AP_ZERO_MEMORY(gLogFileName, len + 1);
-			AP_COPY_MEMORY(gLogFileName, value, len);
+			AP_CREATE_STRING_SIZE_ERR(gAPLogFileName, len + 1, return AP_FALSE;);
+			AP_ZERO_MEMORY(gAPLogFileName, len + 1);
+			AP_COPY_MEMORY(gAPLogFileName, value, len);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
-
 		if (!strcmp(APExtractTag(line), "AP_LOG_LEVEL"))
 		{
-			gLogLevel = APExtractIntVaule(pos+1);
+			gAPLogLevel = APExtractIntVaule(pos+1);
 			
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
-
 		if (!strcmp(APExtractTag(line), "AP_STDOUT_LOG_LEVEL"))
 		{
-			gStdoutLevel = APExtractIntVaule(pos+1);
+			gAPStdoutLevel = APExtractIntVaule(pos+1);
 			
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
-
+		if (!strcmp(APExtractTag(line), "HD_SYS_LOG_MODULES"))
+		{
+			gHdSysLogModules = APExtractIntVaule(pos+1);
+			
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+		if (!strcmp(APExtractTag(line), "HD_SYS_LOG_LEVEL"))
+		{
+			gHdSysLogLevel = APExtractIntVaule(pos+1);
+			
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+		if (!strcmp(APExtractTag(line), "HD_STDOUT_LOG_MODULES"))
+		{
+			gHdStdoutModules = APExtractIntVaule(pos+1);
+			
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+		if (!strcmp(APExtractTag(line), "HD_STDOUT_LOG_LEVEL"))
+		{
+			gHdStdoutLevel = APExtractIntVaule(pos+1);
+			
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
 		if (!strcmp(APExtractTag(line), "AP_NAME"))
 		{
 			char* value = APExtractStringVaule(pos+1);
@@ -156,7 +181,6 @@ APBool APParseSettingsFile()
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
-
 		if (!strcmp(APExtractTag(line), "AP_DESCRIPTOR"))
 		{
 			char* value = APExtractStringVaule(pos+1);
@@ -174,6 +198,20 @@ APBool APParseSettingsFile()
 			
 			AP_FREE_OBJECT(line);
 			continue;	
+		}
+		if (!strcmp(APExtractTag(line), "STATIC_CONTROLLER_ADDRESS"))
+		{
+			char* ip;
+			char* value = APExtractStringVaule(pos+1);
+			int len = strlen(value);
+			
+			AP_CREATE_STRING_SIZE_ERR(ip, len + 1, return AP_FALSE;);
+			AP_ZERO_MEMORY(ip, len + 1);
+			AP_COPY_MEMORY(ip, value, len);
+			gStaticControllerIPAddr = ntohl(inet_addr(ip));
+			AP_FREE_OBJECT(line);
+			AP_FREE_OBJECT(ip);
+			continue;
 		}
 		if (!strcmp(APExtractTag(line), "REGISTERED_SERVICE"))
 		{
@@ -214,9 +252,9 @@ APBool APParseSettingsFile()
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "AUTH_ALGS"))
+		if (!strcmp(APExtractTag(line), "SECURITY_OPTION"))
 		{
-			gSecuritySetting = APExtractIntVaule(pos+1);
+			gSecurityOption = APExtractIntVaule(pos+1);
 			
 			AP_FREE_OBJECT(line);
 			continue;	
@@ -230,12 +268,32 @@ void APDefaultSettings()
 {
 	int i;
 
-	gLogFileName = "./ap.log";
-	gLogLevel = 0;
-	gStdoutLevel = 0;
+	gAPLogFileName = NULL; //no file log
+	gAPLogLevel = 0;
+	gAPStdoutLevel = 0;
 
-    gDiscoveryType = 0;
-	gRegisteredService = 0;
+	gHdSysLogModules = -1;
+	gHdSysLogLevel = 4;
+	gHdStdoutModules = -1;
+	gHdStdoutLevel = 4;
+
+	gAPName = "AP";
+	gAPDescriptor = "no descriptor";
+	/* IP, MAC and default gateway addr will be automatically obtained soon by APNetworkInitLocalAddr() */
+	gAPIPAddr = 0;
+	for(i = 0; i < 6; i++) {
+		gAPMACAddr[i] = 0;
+	}
+	gAPDefaultGateway = 0;
+
+    gDiscoveryType = 0; //broadcast discovery
+	gRegisteredService = 0; //configuration and station service
+
+	gSSID = "ap_ssid";
+	gSuppressSSID = 0;
+	gHardwareMode = 2;
+	gChannel = 7;
+	gSecurityOption = 0;
 
 	gControllerName = NULL;
 	gControllerDescriptor = NULL;
@@ -243,18 +301,4 @@ void APDefaultSettings()
 	for(i = 0; i < 6; i++) {
 		gControllerMACAddr[i] = 0;
 	}
-
-	gAPName = "AP";
-	gAPDescriptor = "no descriptor";
-	gAPIPAddr = 0;
-	for(i = 0; i < 6; i++) {
-		gAPMACAddr[i] = 0;
-	}
-	gAPDefaultGateway = 0;
-
-	gSSID = "ap_ssid";
-	gChannel = 7;
-	gHardwareMode = 2;
-	gSuppressSSID = 0;
-	gSecuritySetting = 0;
 }

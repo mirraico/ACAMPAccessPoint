@@ -518,7 +518,7 @@ APBool APAssembleSSID(APProtocolMessage *msgPtr)
 	str = APGetSSID();
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSSID()"););
-	// APDebugLog(3, "AP Name: %s", str);
+	APDebugLog(5, "SSID: %s", str);
 	APProtocolStoreStr(msgPtr, str);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SSID);
@@ -529,6 +529,7 @@ APBool APAssembleChannel(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleChannel()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleChannel()"););
+	APDebugLog(5, "Channel:  %u", APGetChannel());
 	APProtocolStore8(msgPtr, APGetChannel());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_CHANNEL);
@@ -539,6 +540,7 @@ APBool APAssembleHardwareMode(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleHardwareMode()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleHardwareMode()"););
+	APDebugLog(5, "Hardware Mode:  %u", APGetHardwareMode());
 	APProtocolStore8(msgPtr, APGetHardwareMode());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_HARDWARE_MODE);
@@ -549,17 +551,19 @@ APBool APAssembleSuppressSSID(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSuppressSSID()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSuppressSSID()"););
+	APDebugLog(5, "Suppress SSID:  %u", APGetSuppressSSID());
 	APProtocolStore8(msgPtr, APGetSuppressSSID());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SUPPRESS_SSID);
 }
 
-APBool APAssembleSecuritySetting(APProtocolMessage *msgPtr) 
+APBool APAssembleSecurityOption(APProtocolMessage *msgPtr) 
 {
-	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSecuritySetting()");
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSecurityOption()");
 	
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSecuritySetting()"););
-	APProtocolStore8(msgPtr, APGetSecuritySetting());
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSecurityOption()"););
+	APDebugLog(5, "Security Option:  %u", APGetSecurityOption());
+	APProtocolStore8(msgPtr, APGetSecurityOption());
 
-	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SECURITY_SETTING);
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SECURITY_OPTION);
 }

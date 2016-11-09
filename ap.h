@@ -10,6 +10,8 @@ extern u16 gAPID;
 extern u8 gDiscoveryType;
 extern u8 gRegisteredService;
 
+extern u32 gStaticControllerIPAddr; 
+
 extern char* gControllerName;
 extern char* gControllerDescriptor;
 extern u32 gControllerIPAddr; 
@@ -21,11 +23,16 @@ extern u32 gAPIPAddr;
 extern u8 gAPMACAddr[6];
 extern u32 gAPDefaultGateway;
 
+extern int gHdSysLogModules;
+extern int gHdSysLogLevel;
+extern int gHdStdoutModules;
+extern int gHdStdoutLevel;
+
 extern char* gSSID;
 extern u8 gChannel;
 extern u8 gHardwareMode;
 extern u8 gSuppressSSID;
-extern u8 gSecuritySetting;
+extern u8 gSecurityOption;
 
 #define APSeqNumIncrement()         gSeqNum++
 #define APWaitSeqNumIncrement()     gWaitSeqNum++
@@ -38,6 +45,8 @@ extern void APSetAPID(u16 apid);
 extern u8 APGetDiscoveryType();
 extern u8 APGetRegisteredService();
 
+extern u32 APGetStaticControllerIPAddr(); 
+
 extern char* APGetControllerName();
 extern char* APGetControllerDescriptor();
 extern u32 APGetControllerIPAddr(); 
@@ -49,11 +58,16 @@ extern u32 APGetAPIPAddr();
 extern u8* APGetAPMACAddr();
 extern u32 APGetAPDefaultGateway();
 
+extern int APGetHdSysLogModules();
+extern int APGetHdSysLogLevel();
+extern int APGetHdStdoutModules();
+extern int APGetHdStdoutLevel();
+
 extern char* APGetSSID();
 extern u8 APGetChannel();
 extern u8 APGetHardwareMode();
 extern u8 APGetSuppressSSID();
-extern u8 APGetSecuritySetting();
+extern u8 APGetSecurityOption();
 
 
 void APInit();

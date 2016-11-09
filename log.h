@@ -3,10 +3,9 @@
 
 #include "common.h"
 
-extern char *gLogFileName;
-extern FILE *gLogFile;
-extern int gLogLevel;
-extern int gStdoutLevel;
+extern char *gAPLogFileName;
+extern int gAPLogLevel;
+extern int gAPStdoutLevel;
 
 void APInitLogFile();
 void APCloseLogFile();
