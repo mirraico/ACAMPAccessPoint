@@ -297,12 +297,12 @@ void APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len)
 	*len = APProtocolRetrieve16(msgPtr);
 }
 
-void APParseUnrecognizedMegElem(APProtocolMessage *msgPtr, int len)
+void APParseUnrecognizedMsgElem(APProtocolMessage *msgPtr, int len)
 {
 	msgPtr->offset += len;
 }
 
-void APParseRepeatedMegElem(APProtocolMessage *msgPtr, int len) 
+void APParseRepeatedMsgElem(APProtocolMessage *msgPtr, int len) 
 {
 	msgPtr->offset += len;
 }
@@ -314,7 +314,7 @@ APBool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr)
 	
 	*valPtr = APProtocolRetrieveStr(msgPtr, len);
 	if(valPtr == NULL) return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APParseControllerName()");
-	APDebugLog(5, "Controller Name: %s", *valPtr);
+	APDebugLog(5, "Parse Controller Name: %s", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
@@ -330,7 +330,7 @@ APBool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **va
 	
 	*valPtr = APProtocolRetrieveStr(msgPtr, len);
 	if(valPtr == NULL) return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APParseControllerDescriptor()");
-	APDebugLog(5, "Controller Descriptor: %s", *valPtr);
+	APDebugLog(5, "Parse Controller Descriptor: %s", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
@@ -345,7 +345,7 @@ APBool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr)
 	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseControllerIPAddr()");
 	
 	*valPtr = APProtocolRetrieve32(msgPtr);
-	APDebugLog(5, "Controller IP:  %u.%u.%u.%u", (u8)(*valPtr >> 24), (u8)(*valPtr >> 16),\
+	APDebugLog(5, "Parse Controller IP: %u.%u.%u.%u", (u8)(*valPtr >> 24), (u8)(*valPtr >> 16),\
 	  (u8)(*valPtr >> 8),  (u8)(*valPtr >> 0));
 
 	if((msgPtr->offset - oldOffset) != len) {
@@ -364,7 +364,7 @@ APBool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 *valPtr)
 	for(i = 0; i < 6; i++) {
 		valPtr[i] = APProtocolRetrieve8(msgPtr);
 	}
-	APDebugLog(5, "Controller MAC:  %02x:%02x:%02x:%02x:%02x:%02x", valPtr[0], valPtr[1],\
+	APDebugLog(5, "Parse Controller MAC: %02x:%02x:%02x:%02x:%02x:%02x", valPtr[0], valPtr[1],\
 	 valPtr[2], valPtr[3], valPtr[4], valPtr[5]);
 
 	if((msgPtr->offset - oldOffset) != len) {
@@ -379,7 +379,7 @@ APBool APAssembleRegisteredService(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleRegisteredService()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleRegisteredService()"););
-	APDebugLog(5, "Registered Service: %d", APGetRegisteredService());
+	APDebugLog(5, "Assemble Registered Service: 0x%02x", APGetRegisteredService());
 	APProtocolStore8(msgPtr, APGetRegisteredService());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_REGISTERED_SERVICE);
@@ -392,7 +392,7 @@ APBool APAssembleAPName(APProtocolMessage *msgPtr)
 	str = APGetAPName();
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleAPName()"););
-	APDebugLog(5, "AP Name: %s", str);
+	APDebugLog(5, "Assemble AP Name: %s", str);
 	APProtocolStoreStr(msgPtr, str);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_AP_NAME);
@@ -405,7 +405,7 @@ APBool APAssembleAPDescriptor(APProtocolMessage *msgPtr)
 	str = APGetAPDescriptor();
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleAPDescriptor()"););
-	APDebugLog(5, "AP Descriptor: %s", str);
+	APDebugLog(5, "Assemble AP Descriptor: %s", str);
 	APProtocolStoreStr(msgPtr, str);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_AP_DESCRIPTOR);
@@ -417,7 +417,7 @@ APBool APAssembleAPIPAddr(APProtocolMessage *msgPtr)
 	u32 ip = APGetAPIPAddr();
 
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 4, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleAPIPAddr()"););
-	APDebugLog(5, "AP IPAddr:  %u.%u.%u.%u", (u8)(ip >> 24), (u8)(ip >> 16),\
+	APDebugLog(5, "Assemble AP IPAddr: %u.%u.%u.%u", (u8)(ip >> 24), (u8)(ip >> 16),\
 	  (u8)(ip >> 8),  (u8)(ip >> 0));
 	APProtocolStore32(msgPtr, ip);
 
@@ -431,7 +431,7 @@ APBool APAssembleAPMACAddr(APProtocolMessage *msgPtr)
 	u8 *mac = APGetAPMACAddr();
 
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 6, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleAPMACAddr()"););
-	APDebugLog(5, "AP MACAddr:  %02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1],\
+	APDebugLog(5, "Assemble AP MACAddr: %02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1],\
 	 mac[2], mac[3], mac[4], mac[5]);
 	for(i = 0; i < 6; i++) {
 		APProtocolStore8(msgPtr, mac[i]);
@@ -445,7 +445,7 @@ APBool APAssembleDiscoveryType(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleDiscoveryType()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleDiscoveryType()"););
-	APDebugLog(5, "Discovery Type: %d", APGetDiscoveryType());
+	APDebugLog(5, "Assemble Discovery Type: 0x%02x", APGetDiscoveryType());
 	APProtocolStore8(msgPtr, APGetDiscoveryType());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_DISCOVERY_TYPE);
@@ -457,7 +457,7 @@ APBool APParseResultCode(APProtocolMessage *msgPtr, int len, u16 *valPtr)
 	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseResultCode()");
 	
 	*valPtr = APProtocolRetrieve16(msgPtr);
-	APDebugLog(5, "Result Code:  %u", *valPtr);
+	APDebugLog(5, "Parse Result Code: 0x%04x", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
@@ -472,7 +472,7 @@ APBool APParseReasonCode(APProtocolMessage *msgPtr, int len, u16 *valPtr)
 	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseReasonCode()");
 	
 	*valPtr = APProtocolRetrieve16(msgPtr);
-	APDebugLog(5, "Reason Code:  %u", *valPtr);
+	APDebugLog(5, "Parse Reason Code: 0x%04x", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
@@ -487,7 +487,7 @@ APBool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr)
 	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseAssignedAPID()");
 	
 	*valPtr = APProtocolRetrieve16(msgPtr);
-	APDebugLog(5, "Assigned APID:  %d", *valPtr);
+	APDebugLog(5, "Parse Assigned APID: %u", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
@@ -502,7 +502,7 @@ APBool APParseRegisteredService(APProtocolMessage *msgPtr, int len, u8 *valPtr)
 	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseRegisteredService()");
 	
 	*valPtr = APProtocolRetrieve8(msgPtr);
-	APDebugLog(5, "Registered Service:  %u", *valPtr);
+	APDebugLog(5, "Parse Registered Service: 0x%02x", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
@@ -518,7 +518,7 @@ APBool APAssembleSSID(APProtocolMessage *msgPtr)
 	str = APGetSSID();
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSSID()"););
-	APDebugLog(5, "SSID: %s", str);
+	APDebugLog(5, "Assemble SSID: %s", str);
 	APProtocolStoreStr(msgPtr, str);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SSID);
@@ -529,7 +529,7 @@ APBool APAssembleChannel(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleChannel()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleChannel()"););
-	APDebugLog(5, "Channel:  %u", APGetChannel());
+	APDebugLog(5, "Assemble Channel:  %u", APGetChannel());
 	APProtocolStore8(msgPtr, APGetChannel());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_CHANNEL);
@@ -540,7 +540,7 @@ APBool APAssembleHardwareMode(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleHardwareMode()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleHardwareMode()"););
-	APDebugLog(5, "Hardware Mode:  %u", APGetHardwareMode());
+	APDebugLog(5, "Assemble Hardware Mode:  %u", APGetHardwareMode());
 	APProtocolStore8(msgPtr, APGetHardwareMode());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_HARDWARE_MODE);
@@ -551,7 +551,7 @@ APBool APAssembleSuppressSSID(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSuppressSSID()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSuppressSSID()"););
-	APDebugLog(5, "Suppress SSID:  %u", APGetSuppressSSID());
+	APDebugLog(5, "Assemble Suppress SSID:  %u", APGetSuppressSSID());
 	APProtocolStore8(msgPtr, APGetSuppressSSID());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SUPPRESS_SSID);
@@ -562,7 +562,7 @@ APBool APAssembleSecurityOption(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSecurityOption()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSecurityOption()"););
-	APDebugLog(5, "Security Option:  %u", APGetSecurityOption());
+	APDebugLog(5, "Assemble Security Option:  %u", APGetSecurityOption());
 	APProtocolStore8(msgPtr, APGetSecurityOption());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SECURITY_OPTION);

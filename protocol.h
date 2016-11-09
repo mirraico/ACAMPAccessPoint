@@ -51,9 +51,7 @@ typedef struct {
 } APElementVal;
 #define ELEMENT_HEADER_LEN 4
 
-/*
-general type
-*/
+/* general type */
 typedef struct {
 	u8 *msg;
 	int offset;
@@ -61,9 +59,7 @@ typedef struct {
 }APProtocolMessage;
 
 
-/*
-msg type 
-*/
+/* msg type */
 #define MSGTYPE_KEEPALIVE_REQUEST 0x0001
 #define MSGTYPE_KEEPALIVE_RESPONSE 0x0002
 #define MSGTYPE_DISCOVERY_REQUEST 0x0003
@@ -77,9 +73,7 @@ msg type
 #define MSGTYPE_CONFIGURATION_REQUEST 0x0203
 #define MSGTYPE_CONFIGURATION_REPORT 0x0204
 
-/*
-msg elem type
-*/
+/* msg elem type */
 #define MSGELEMTYPE_RESULT_CODE 0x0001
 #define MSGELEMTYPE_REASON_CODE 0x0002
 #define MSGELEMTYPE_ASSIGNED_APID 0x0003
@@ -102,9 +96,21 @@ msg elem type
 #define MSGELEMTYPE_WPA_OPTION 0x0201
 #define MSGELEMTYPE_WEP_OPTION 0x0202
 
-/*
-fsm
-*/
+/* result code */
+#define RESULT_SUCCESS 0x0000
+#define RESULT_FAILURE 0x0001
+#define RESULT_UNRECOGNIZED_ELEM 0x0002
+
+/* reason code */
+#define REASON_INVALID_VERSION 0x0101
+#define REASON_REPEATED_REGISTER 0x0102
+#define REASON_INSUFFICIENT_RESOURCE 0x0103
+
+/* registered service */
+#define REGISTERED_SERVICE_CONF_STA 0x00
+
+
+/* fsm */
 typedef enum {
 	AP_ENTER_DOWN,
 	AP_ENTER_DISCOVERY,
@@ -192,8 +198,8 @@ void APProtocolRetrieveReserved(APProtocolMessage *msgPtr, int reservedLen);
 
 APBool APParseControlHeader(APProtocolMessage *msgPtr, APHeaderVal *valPtr);
 void APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len);
-void APParseUnrecognizedMegElem(APProtocolMessage *msgPtr, int len);
-void APParseRepeatedMegElem(APProtocolMessage *msgPtr, int len);
+void APParseUnrecognizedMsgElem(APProtocolMessage *msgPtr, int len);
+void APParseRepeatedMsgElem(APProtocolMessage *msgPtr, int len);
 
 
 APBool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr);

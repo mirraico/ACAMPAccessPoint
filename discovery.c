@@ -107,7 +107,7 @@ APBool APParseDiscoveryResponse(char *msg,
         {
 			case MSGELEMTYPE_CONTROLLER_NAME:
                 if(elemFlag & 0x01) {
-                    APParseRepeatedMegElem(&completeMsg, len);
+                    APParseRepeatedMsgElem(&completeMsg, len);
                     APErrorLog("Repeated Message Element");
                     break;
                 }
@@ -117,7 +117,7 @@ APBool APParseDiscoveryResponse(char *msg,
 				break;
             case MSGELEMTYPE_CONTROLLER_DESCRIPTOR:
                 if(elemFlag & 0x02) {
-                    APParseRepeatedMegElem(&completeMsg, len);
+                    APParseRepeatedMsgElem(&completeMsg, len);
                     APErrorLog("Repeated Message Element");
                     break;
                 }
@@ -127,7 +127,7 @@ APBool APParseDiscoveryResponse(char *msg,
 				break;
             case MSGELEMTYPE_CONTROLLER_IP_ADDR:
                 if(elemFlag & 0x04) {
-                    APParseRepeatedMegElem(&completeMsg, len);
+                    APParseRepeatedMsgElem(&completeMsg, len);
                     APErrorLog("Repeated Message Element");
                     break;
                 }
@@ -137,7 +137,7 @@ APBool APParseDiscoveryResponse(char *msg,
 				break;
             case MSGELEMTYPE_CONTROLLER_MAC_ADDR:
                 if(elemFlag & 0x08) {
-                    APParseRepeatedMegElem(&completeMsg, len);
+                    APParseRepeatedMsgElem(&completeMsg, len);
                     APErrorLog("Repeated Message Element");
                     break;
                 }
@@ -147,7 +147,7 @@ APBool APParseDiscoveryResponse(char *msg,
 				break;
 			
 			default:
-                APParseUnrecognizedMegElem(&completeMsg, len);
+                APParseUnrecognizedMsgElem(&completeMsg, len);
                 APErrorLog("Unrecognized Message Element");
 				// return APErrorRaise(AP_ERROR_INVALID_FORMAT,
 				// 	"APParseDiscoveryResponse()");
