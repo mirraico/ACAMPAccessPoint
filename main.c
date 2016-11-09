@@ -8,9 +8,10 @@
 void APDestroy()
 {
 	APDebugLog(3, "Start destroying AP");
-	APCloseLogFile();
 	APNetworkCloseSocket(gSocket);
 	APNetworkCloseSocket(gSocketBroad);
+	APLog("AP is down");
+	APCloseLogFile();
 }
 
 int main()
@@ -107,7 +108,6 @@ int main()
 			case AP_ENTER_DOWN:
 				// nextState = APEnterDown();
 				APDestroy();
-				APLog("AP is down");
 				return 0;
 				break;
 		}

@@ -24,6 +24,7 @@ void APInitLogFile()
 void APCloseLogFile()
 {
 	fclose(gAPLogFile);
+    gAPLogFile = NULL;
 }
 
 __inline__ void _APDebugLog(int level, const char *format, va_list args) 
