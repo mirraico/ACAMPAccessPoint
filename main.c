@@ -25,8 +25,14 @@ int main()
 		exit(1);
 	};
 
+	APLog("Start reading the setting file");
 	if(!APParseSettingsFile()) {
 		APErrorLog("Can't read setting file");
+		exit(1);
+	}
+
+	if(!APCheckSettings()) {
+		APErrorLog("There may exist illegal assignment");
 		exit(1);
 	}
 

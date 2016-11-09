@@ -125,6 +125,7 @@ APBool APParseSettingsFile()
 			AP_CREATE_STRING_SIZE_ERR(gAPLogFileName, len + 1, return AP_FALSE;);
 			AP_ZERO_MEMORY(gAPLogFileName, len + 1);
 			AP_COPY_MEMORY(gAPLogFileName, value, len);
+
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
@@ -178,6 +179,8 @@ APBool APParseSettingsFile()
 			AP_CREATE_STRING_SIZE_ERR(gAPName, len + 1, return AP_FALSE;);
 			AP_ZERO_MEMORY(gAPName, len + 1);
 			AP_COPY_MEMORY(gAPName, value, len);
+			
+			APDebugLog(5, "CONF AP Name: %s", gAPName);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
@@ -189,13 +192,16 @@ APBool APParseSettingsFile()
 			AP_CREATE_STRING_SIZE_ERR(gAPDescriptor, len + 1, return AP_FALSE;);
 			AP_ZERO_MEMORY(gAPDescriptor, len + 1);
 			AP_COPY_MEMORY(gAPDescriptor, value, len);
+
+			APDebugLog(5, "CONF AP Descriptor: %s", gAPDescriptor);
 			AP_FREE_OBJECT(line);
 			continue;
 		}
 		if (!strcmp(APExtractTag(line), "DIDCOVERY_TYPE"))
 		{
 			gDiscoveryType = APExtractIntVaule(pos+1);
-			
+
+			APDebugLog(5, "CONF Discovery Type: %u", gDiscoveryType);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
@@ -209,14 +215,18 @@ APBool APParseSettingsFile()
 			AP_ZERO_MEMORY(ip, len + 1);
 			AP_COPY_MEMORY(ip, value, len);
 			gStaticControllerIPAddr = ntohl(inet_addr(ip));
-			AP_FREE_OBJECT(line);
 			AP_FREE_OBJECT(ip);
+
+			APDebugLog(5, "CONF Static Controller IP Addr: %u.%u.%u.%u", (u8)(gStaticControllerIPAddr >> 24), (u8)(gStaticControllerIPAddr >> 16),\
+	  			(u8)(gStaticControllerIPAddr >> 8),  (u8)(gStaticControllerIPAddr >> 0));
+			AP_FREE_OBJECT(line);
 			continue;
 		}
 		if (!strcmp(APExtractTag(line), "REGISTERED_SERVICE"))
 		{
 			gRegisteredService = APExtractIntVaule(pos+1);
 			
+			APDebugLog(5, "CONF Registered Service: %u", gRegisteredService);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
@@ -228,6 +238,8 @@ APBool APParseSettingsFile()
 			AP_CREATE_STRING_SIZE_ERR(gSSID, len + 1, return AP_FALSE;);
 			AP_ZERO_MEMORY(gSSID, len + 1);
 			AP_COPY_MEMORY(gSSID, value, len);
+
+			APDebugLog(5, "CONF SSID: %s", gSSID);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
@@ -235,6 +247,7 @@ APBool APParseSettingsFile()
 		{
 			gSuppressSSID = APExtractIntVaule(pos+1);
 			
+			APDebugLog(5, "CONF Suppress SSID: %u", gSuppressSSID);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
@@ -242,6 +255,7 @@ APBool APParseSettingsFile()
 		{
 			gHardwareMode = APExtractIntVaule(pos+1);
 			
+			APDebugLog(5, "CONF Hardware Mode: %u", gHardwareMode);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
@@ -249,6 +263,7 @@ APBool APParseSettingsFile()
 		{
 			gChannel = APExtractIntVaule(pos+1);
 			
+			APDebugLog(5, "CONF Channel: %u", gChannel);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
@@ -256,10 +271,45 @@ APBool APParseSettingsFile()
 		{
 			gSecurityOption = APExtractIntVaule(pos+1);
 			
+			APDebugLog(5, "CONF Security Option: %u", gSecurityOption);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
 	}
+	return AP_TRUE;
+}
+
+APBool APCheckSettings()
+{
+	if(gDiscoveryType < 0 || gDiscoveryType > 3) {
+		APErrorLog("Invalid Discovery Type"); return AP_FALSE;
+	}
+	if(gRegisteredService < 0 || gRegisteredService > 0) {
+		APErrorLog("Invalid Registered Service"); return AP_FALSE;
+	}
+	if(strlen(gAPName) < 4 || strlen(gAPName) > 32) {
+		APErrorLog("Invalid AP Name"); return AP_FALSE;
+	}
+	if(strlen(gAPDescriptor) < 1 || strlen(gAPDescriptor) > 128) {
+		APErrorLog("Invalid AP Descriptor"); return AP_FALSE;
+	}
+	if(strlen(gSSID) < 1 || strlen(gSSID) > 32) {
+		APErrorLog("Invalid SSID"); return AP_FALSE;
+	}
+	if(gChannel < 1 || gChannel > 13) {
+		APErrorLog("Invalid Channel"); return AP_FALSE;
+	}
+	if(gHardwareMode < 0 || gHardwareMode > 3) {
+		APErrorLog("Invalid Hardware Mode"); return AP_FALSE;
+	}
+	if(gSuppressSSID < 0 || gSuppressSSID > 2) {
+		APErrorLog("Invalid Suppress SSID"); return AP_FALSE;
+	}
+	if(gSecurityOption < 0 || gSecurityOption > 3) {
+		APErrorLog("Invalid Security Option"); return AP_FALSE;
+	}
+
+	if(gDiscoveryType == 1 && gStaticControllerIPAddr == 0) gDiscoveryType = 0;
 	return AP_TRUE;
 }
 
@@ -277,7 +327,7 @@ void APDefaultSettings()
 	gHdStdoutModules = -1;
 	gHdStdoutLevel = 4;
 
-	gAPName = "AP";
+	gAPName = "unnamed AP";
 	gAPDescriptor = "no descriptor";
 	/* IP, MAC and default gateway addr will be automatically obtained soon by APNetworkInitLocalAddr() */
 	gAPIPAddr = 0;

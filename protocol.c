@@ -529,7 +529,7 @@ APBool APAssembleChannel(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleChannel()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleChannel()"););
-	APDebugLog(5, "Assemble Channel:  %u", APGetChannel());
+	APDebugLog(5, "Assemble Channel: %u", APGetChannel());
 	APProtocolStore8(msgPtr, APGetChannel());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_CHANNEL);
@@ -540,7 +540,7 @@ APBool APAssembleHardwareMode(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleHardwareMode()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleHardwareMode()"););
-	APDebugLog(5, "Assemble Hardware Mode:  %u", APGetHardwareMode());
+	APDebugLog(5, "Assemble Hardware Mode: %u", APGetHardwareMode());
 	APProtocolStore8(msgPtr, APGetHardwareMode());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_HARDWARE_MODE);
@@ -551,7 +551,7 @@ APBool APAssembleSuppressSSID(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSuppressSSID()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSuppressSSID()"););
-	APDebugLog(5, "Assemble Suppress SSID:  %u", APGetSuppressSSID());
+	APDebugLog(5, "Assemble Suppress SSID: %u", APGetSuppressSSID());
 	APProtocolStore8(msgPtr, APGetSuppressSSID());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SUPPRESS_SSID);
@@ -562,7 +562,7 @@ APBool APAssembleSecurityOption(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSecurityOption()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSecurityOption()"););
-	APDebugLog(5, "Assemble Security Option:  %u", APGetSecurityOption());
+	APDebugLog(5, "Assemble Security Option: %u", APGetSecurityOption());
 	APProtocolStore8(msgPtr, APGetSecurityOption());
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SECURITY_OPTION);
