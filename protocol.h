@@ -109,6 +109,12 @@ typedef struct {
 /* registered service */
 #define REGISTERED_SERVICE_CONF_STA 0x00
 
+/* discovery type */
+#define DISCOVERY_TPYE_DISCOVERY 0
+#define DISCOVERY_TPYE_STATIC 1
+#define DISCOVERY_TPYE_DEFAULT_GATE 2
+#define DISCOVERY_TPYE_DNS 3
+
 
 /* fsm */
 typedef enum {

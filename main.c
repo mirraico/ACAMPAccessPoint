@@ -55,13 +55,35 @@ int main()
 	APLog("Starting WTP...");
 
 	/* if Controller address is given, jump Discovery and use this address for register */
-	// if(gDiscoveryType != 0) 
-	// {
-	// 	//todo: init single socket
-	// 	nextState = AP_ENTER_REGISTER;
-	// 	APDebugLog(3, "Use gived controller address:  %u.%u.%u.%u", (u8)(gControllerIPAddr >> 24),\
-	// 	 (u8)(gControllerIPAddr >> 16),  (u8)(gControllerIPAddr >> 8),  (u8)(gControllerIPAddr >> 0));
-	// }
+	if(gDiscoveryType != DISCOVERY_TPYE_DISCOVERY) 
+	{
+		switch(gDiscoveryType) {
+			case DISCOVERY_TPYE_STATIC:
+				if(gStaticControllerIPAddr != 0) {
+					gControllerIPAddr = gStaticControllerIPAddr;
+					nextState = AP_ENTER_REGISTER;
+					APLog("Use static controller addr to register: %u.%u.%u.%u", (u8)(gControllerIPAddr >> 24),\
+		 				(u8)(gControllerIPAddr >> 16),  (u8)(gControllerIPAddr >> 8),  (u8)(gControllerIPAddr >> 0));
+				} else {
+					gDiscoveryType = DISCOVERY_TPYE_DISCOVERY;
+				}
+				break;
+			case DISCOVERY_TPYE_DEFAULT_GATE:
+				if(gAPDefaultGateway != 0) {
+				 	gControllerIPAddr = gAPDefaultGateway;
+					nextState = AP_ENTER_REGISTER;
+					APLog("Use default gateway addr to register: %u.%u.%u.%u", (u8)(gControllerIPAddr >> 24),\
+		 				(u8)(gControllerIPAddr >> 16),  (u8)(gControllerIPAddr >> 8),  (u8)(gControllerIPAddr >> 0));
+			 	} else {
+					 gDiscoveryType = DISCOVERY_TPYE_DISCOVERY;
+				 }
+			 case DISCOVERY_TPYE_DNS: //TODO: DISCOVERY_TPYE_DNS
+			 default:
+			 	break;
+		}
+		
+		
+	}
 	
 
 	/* start acamp state machine */	

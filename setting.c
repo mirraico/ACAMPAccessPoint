@@ -309,7 +309,6 @@ APBool APCheckSettings()
 		APErrorLog("Invalid Security Option"); return AP_FALSE;
 	}
 
-	if(gDiscoveryType == 1 && gStaticControllerIPAddr == 0) gDiscoveryType = 0;
 	return AP_TRUE;
 }
 

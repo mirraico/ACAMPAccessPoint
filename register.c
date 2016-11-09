@@ -270,16 +270,16 @@ APBool APParseRegisterResponse(char *msg,
 		return APErrorRaise(AP_ERROR_WARNING, "APParseRegisterResponse()");
 	}
 
-	if(strcmp(gControllerName, recvControllerInfo.name) != 0) {
-		APErrorLog("The Controller name has changed");
+	if(gControllerName == NULL || strcmp(gControllerName, recvControllerInfo.name) != 0) {
+		if(gDiscoveryType == DISCOVERY_TPYE_DISCOVERY) APErrorLog("The Controller name has changed");
 		AP_FREE_OBJECT(gControllerName);
 		AP_CREATE_OBJECT_SIZE_ERR(gControllerName, (strlen(recvControllerInfo.name) + 1), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APParseRegisterResponse()"););
 		AP_COPY_MEMORY(gControllerName, recvControllerInfo.name, strlen(recvControllerInfo.name));
 		gControllerName[strlen(recvControllerInfo.name)] = '\0';
 	}
 
-	if(strcmp(gControllerDescriptor, recvControllerInfo.descriptor) != 0) {
-		APErrorLog("The Controller descriptor has changed");
+	if(gControllerDescriptor == NULL || strcmp(gControllerDescriptor, recvControllerInfo.descriptor) != 0) {
+		if(gDiscoveryType == DISCOVERY_TPYE_DISCOVERY) APErrorLog("The Controller descriptor has changed");
 		AP_FREE_OBJECT(gControllerDescriptor);
 		AP_CREATE_OBJECT_SIZE_ERR(gControllerDescriptor, (strlen(recvControllerInfo.descriptor) + 1), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APParseRegisterResponse()"););
 		AP_COPY_MEMORY(gControllerDescriptor, recvControllerInfo.descriptor, strlen(recvControllerInfo.descriptor));
@@ -301,7 +301,7 @@ APBool APParseRegisterResponse(char *msg,
 	) 
 	{
 		int i;
-		APErrorLog("The Controller MAC Addr has changed");
+		if(gDiscoveryType == DISCOVERY_TPYE_DISCOVERY) APErrorLog("The Controller MAC Addr has changed");
 		for(i = 0; i < 6; i++) {
 			gControllerMACAddr[i] = recvControllerInfo.MACAddr[i];
 		}
