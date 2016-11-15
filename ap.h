@@ -34,6 +34,30 @@ extern u8 gHardwareMode;
 extern u8 gSuppressSSID;
 extern u8 gSecurityOption;
 
+/* wep */
+typedef struct {
+	int default_key;
+	int key0_type;
+	char* key0;
+	int key1_type;
+	char* key1;
+	int key2_type;
+	char* key2;
+	int key3_type;
+	char* key3;
+} APWEP;
+
+/* wpa/wpa2 */
+typedef struct {
+	int version;
+	char* password;
+	int pairwire_cipher;
+	int group_rekey;
+} APWPA;
+
+extern APWEP gWEP;
+extern APWPA gWPA;
+
 #define APSeqNumIncrement()         gSeqNum++
 #define APWaitSeqNumIncrement()     gWaitSeqNum++
 
@@ -69,6 +93,8 @@ extern u8 APGetHardwareMode();
 extern u8 APGetSuppressSSID();
 extern u8 APGetSecurityOption();
 
+extern APWEP* APGetWEP();
+extern APWPA* APGetWPA();
 
 void APInit();
 

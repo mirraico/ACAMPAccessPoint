@@ -197,7 +197,7 @@ APBool APParseSettingsFile()
 			AP_FREE_OBJECT(line);
 			continue;
 		}
-		if (!strcmp(APExtractTag(line), "DIDCOVERY_TYPE"))
+		if (!strcmp(APExtractTag(line), "DISCOVERY_TYPE"))
 		{
 			gDiscoveryType = APExtractIntVaule(pos+1);
 
@@ -275,42 +275,230 @@ APBool APParseSettingsFile()
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
+		if (!strcmp(APExtractTag(line), "WEP_DEFAULT_KEY"))
+		{
+			gWEP.default_key = APExtractIntVaule(pos+1);
+			
+			APDebugLog(5, "CONF WEP Default Key: %u", gWEP.default_key);
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+		if (!strcmp(APExtractTag(line), "WEP_DEFAULT_KEY"))
+		{
+			gWEP.default_key = APExtractIntVaule(pos+1);
+			
+			APDebugLog(5, "CONF WEP Default Key: %u", gWEP.default_key);
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+		if (!strcmp(APExtractTag(line), "WEP_KEY0"))
+		{
+			int keylen = strlen(pos+1);
+			if(keylen == 7 || keylen == 15 || keylen == 18 || keylen == 10 || keylen == 26 || keylen == 32) {
+				char* value = APExtractStringVaule(pos+1);
+				int len = strlen(value);
+				
+				AP_CREATE_STRING_SIZE_ERR(gWEP.key0, len + 1, return AP_FALSE;);
+				AP_ZERO_MEMORY(gWEP.key0, len + 1);
+				AP_COPY_MEMORY(gWEP.key0, value, len);
+				
+				if(keylen == 7) {
+					gWEP.key0_type = 1;
+					APDebugLog(5, "CONF WEP key0: %s (Type 1)", gWEP.key0);
+				} else if(keylen == 15) {
+					gWEP.key0_type = 2;
+					APDebugLog(5, "CONF WEP key0: %s (Type 2)", gWEP.key0);
+				} else if(keylen == 18) {
+					gWEP.key0_type = 3;
+					APDebugLog(5, "CONF WEP key0: %s (Type 3)", gWEP.key0);
+				} else if(keylen == 10) {
+					gWEP.key0_type = 4;
+					APDebugLog(5, "CONF WEP key0: %s (Type 4)", gWEP.key0);
+				} else if(keylen == 26) {
+					gWEP.key0_type = 5;
+					APDebugLog(5, "CONF WEP key0: %s (Type 5)", gWEP.key0);
+				} else if(keylen == 32) {
+					gWEP.key0_type = 6;
+					APDebugLog(5, "CONF WEP key0: %s (Type 6)", gWEP.key0);
+				}
+			}
+		}
+		if (!strcmp(APExtractTag(line), "WEP_KEY1"))
+		{
+			int keylen = strlen(pos+1);
+			if(keylen == 7 || keylen == 15 || keylen == 18 || keylen == 10 || keylen == 26 || keylen == 32) {
+				char* value = APExtractStringVaule(pos+1);
+				int len = strlen(value);
+				
+				AP_CREATE_STRING_SIZE_ERR(gWEP.key1, len + 1, return AP_FALSE;);
+				AP_ZERO_MEMORY(gWEP.key1, len + 1);
+				AP_COPY_MEMORY(gWEP.key1, value, len);
+				
+				if(keylen == 7) {
+					gWEP.key1_type = 1;
+					APDebugLog(5, "CONF WEP key1: %s (Type 1)", gWEP.key1);
+				} else if(keylen == 15) {
+					gWEP.key1_type = 2;
+					APDebugLog(5, "CONF WEP key1: %s (Type 2)", gWEP.key1);
+				} else if(keylen == 18) {
+					gWEP.key1_type = 3;
+					APDebugLog(5, "CONF WEP key1: %s (Type 3)", gWEP.key1);
+				} else if(keylen == 10) {
+					gWEP.key1_type = 4;
+					APDebugLog(5, "CONF WEP key1: %s (Type 4)", gWEP.key1);
+				} else if(keylen == 26) {
+					gWEP.key1_type = 5;
+					APDebugLog(5, "CONF WEP key1: %s (Type 5)", gWEP.key1);
+				} else if(keylen == 32) {
+					gWEP.key1_type = 6;
+					APDebugLog(5, "CONF WEP key1: %s (Type 6)", gWEP.key1);
+				}
+			}
+		}
+		if (!strcmp(APExtractTag(line), "WEP_KEY2"))
+		{
+			int keylen = strlen(pos+1);
+			if(keylen == 7 || keylen == 15 || keylen == 18 || keylen == 10 || keylen == 26 || keylen == 32) {
+				char* value = APExtractStringVaule(pos+1);
+				int len = strlen(value);
+				
+				AP_CREATE_STRING_SIZE_ERR(gWEP.key2, len + 1, return AP_FALSE;);
+				AP_ZERO_MEMORY(gWEP.key2, len + 1);
+				AP_COPY_MEMORY(gWEP.key2, value, len);
+				
+				if(keylen == 7) {
+					gWEP.key2_type = 1;
+					APDebugLog(5, "CONF WEP key2: %s (Type 1)", gWEP.key2);
+				} else if(keylen == 15) {
+					gWEP.key2_type = 2;
+					APDebugLog(5, "CONF WEP key2: %s (Type 2)", gWEP.key2);
+				} else if(keylen == 18) {
+					gWEP.key2_type = 3;
+					APDebugLog(5, "CONF WEP key2: %s (Type 3)", gWEP.key2);
+				} else if(keylen == 10) {
+					gWEP.key2_type = 4;
+					APDebugLog(5, "CONF WEP key2: %s (Type 4)", gWEP.key2);
+				} else if(keylen == 26) {
+					gWEP.key2_type = 5;
+					APDebugLog(5, "CONF WEP key2: %s (Type 5)", gWEP.key2);
+				} else if(keylen == 32) {
+					gWEP.key2_type = 6;
+					APDebugLog(5, "CONF WEP key2: %s (Type 6)", gWEP.key2);
+				}
+			}
+		}
+		if (!strcmp(APExtractTag(line), "WEP_KEY3"))
+		{
+			int keylen = strlen(pos+1);
+			if(keylen == 7 || keylen == 15 || keylen == 18 || keylen == 10 || keylen == 26 || keylen == 32) {
+				char* value = APExtractStringVaule(pos+1);
+				int len = strlen(value);
+				
+				AP_CREATE_STRING_SIZE_ERR(gWEP.key3, len + 1, return AP_FALSE;);
+				AP_ZERO_MEMORY(gWEP.key3, len + 1);
+				AP_COPY_MEMORY(gWEP.key3, value, len);
+				
+				if(keylen == 7) {
+					gWEP.key3_type = 1;
+					APDebugLog(5, "CONF WEP key3: %s (Type 1)", gWEP.key3);
+				} else if(keylen == 15) {
+					gWEP.key3_type = 2;
+					APDebugLog(5, "CONF WEP key3: %s (Type 2)", gWEP.key3);
+				} else if(keylen == 18) {
+					gWEP.key3_type = 3;
+					APDebugLog(5, "CONF WEP key3: %s (Type 3)", gWEP.key3);
+				} else if(keylen == 10) {
+					gWEP.key3_type = 4;
+					APDebugLog(5, "CONF WEP key3: %s (Type 4)", gWEP.key3);
+				} else if(keylen == 26) {
+					gWEP.key3_type = 5;
+					APDebugLog(5, "CONF WEP key3: %s (Type 5)", gWEP.key3);
+				} else if(keylen == 32) {
+					gWEP.key3_type = 6;
+					APDebugLog(5, "CONF WEP key3: %s (Type 6)", gWEP.key3);
+				}
+			}
+		}
+		if (!strcmp(APExtractTag(line), "WPA_VERSION"))
+		{
+			gWPA.version = APExtractIntVaule(pos+1);
+			
+			APDebugLog(5, "CONF WPA Version: %u", gWPA.version);
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+		if (!strcmp(APExtractTag(line), "WPA_PASSPHRASE"))
+		{
+			char* value = APExtractStringVaule(pos+1);
+			int len = strlen(value);
+			
+			AP_CREATE_STRING_SIZE_ERR(gWPA.password, len + 1, return AP_FALSE;);
+			AP_ZERO_MEMORY(gWPA.password, len + 1);
+			AP_COPY_MEMORY(gWPA.password, value, len);
+
+			APDebugLog(5, "CONF WPA Password: %s", gWPA.password);
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+		if (!strcmp(APExtractTag(line), "WPA_PAIRWIRE"))
+		{
+			gWPA.pairwire_cipher = APExtractIntVaule(pos+1);
+			
+			APDebugLog(5, "CONF WPA Pairwire Cipher: %u", gWPA.pairwire_cipher);
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+		if (!strcmp(APExtractTag(line), "WPA_GROUP_REKEY"))
+		{
+			gWPA.group_rekey = APExtractIntVaule(pos+1);
+			
+			APDebugLog(5, "CONF WPA Group Rekey: %u", gWPA.group_rekey);
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+
+		AP_FREE_OBJECT(line);
+		continue;	
 	}
 	return AP_TRUE;
 }
 
-APBool APCheckSettings()
-{
-	if(gDiscoveryType < 0 || gDiscoveryType > 3) {
-		APErrorLog("Invalid Discovery Type"); return AP_FALSE;
-	}
-	if(gRegisteredService < 0 || gRegisteredService > 0) {
-		APErrorLog("Invalid Registered Service"); return AP_FALSE;
-	}
-	if(strlen(gAPName) < 4 || strlen(gAPName) > 32) {
-		APErrorLog("Invalid AP Name"); return AP_FALSE;
-	}
-	if(strlen(gAPDescriptor) < 1 || strlen(gAPDescriptor) > 128) {
-		APErrorLog("Invalid AP Descriptor"); return AP_FALSE;
-	}
-	if(strlen(gSSID) < 1 || strlen(gSSID) > 32) {
-		APErrorLog("Invalid SSID"); return AP_FALSE;
-	}
-	if(gChannel < 1 || gChannel > 13) {
-		APErrorLog("Invalid Channel"); return AP_FALSE;
-	}
-	if(gHardwareMode < 0 || gHardwareMode > 3) {
-		APErrorLog("Invalid Hardware Mode"); return AP_FALSE;
-	}
-	if(gSuppressSSID < 0 || gSuppressSSID > 2) {
-		APErrorLog("Invalid Suppress SSID"); return AP_FALSE;
-	}
-	if(gSecurityOption < 0 || gSecurityOption > 3) {
-		APErrorLog("Invalid Security Option"); return AP_FALSE;
-	}
+// APBool APCheckSettings()
+// {
+// 	if(gDiscoveryType < 0 || gDiscoveryType > 3) {
+// 		APErrorLog("Invalid Discovery Type"); return AP_FALSE;
+// 	}
+// 	if(gRegisteredService < 0 || gRegisteredService > 0) {
+// 		APErrorLog("Invalid Registered Service"); return AP_FALSE;
+// 	}
+// 	if(strlen(gAPName) < 4 || strlen(gAPName) > 32) {
+// 		APErrorLog("Invalid AP Name"); return AP_FALSE;
+// 	}
+// 	if(strlen(gAPDescriptor) < 1 || strlen(gAPDescriptor) > 128) {
+// 		APErrorLog("Invalid AP Descriptor"); return AP_FALSE;
+// 	}
+// 	if(strlen(gSSID) < 1 || strlen(gSSID) > 32) {
+// 		APErrorLog("Invalid SSID"); return AP_FALSE;
+// 	}
+// 	if(gChannel < 1 || gChannel > 13) {
+// 		APErrorLog("Invalid Channel"); return AP_FALSE;
+// 	}
+// 	if(gHardwareMode < 0 || gHardwareMode > 3) {
+// 		APErrorLog("Invalid Hardware Mode"); return AP_FALSE;
+// 	}
+// 	if(gSuppressSSID < 0 || gSuppressSSID > 2) {
+// 		APErrorLog("Invalid Suppress SSID"); return AP_FALSE;
+// 	}
+// 	if(gSecurityOption < 0 || gSecurityOption > 3) {
+// 		APErrorLog("Invalid Security Option"); return AP_FALSE;
+// 	}
 
-	return AP_TRUE;
-}
+// 	if(gDiscoveryType == 1 && gStaticControllerIPAddr == 0) {
+// 		APErrorLog("Invalid Static Controller IP Addr"); return AP_FALSE;
+// 	}
+
+// 	return AP_TRUE;
+// }
 
 
 void APDefaultSettings()
@@ -336,6 +524,7 @@ void APDefaultSettings()
 	gAPDefaultGateway = 0;
 
     gDiscoveryType = 0; //broadcast discovery
+	gStaticControllerIPAddr = 0; //static Controller IP addr
 	gRegisteredService = 0; //configuration and station service
 
 	gSSID = "ap_ssid";
@@ -343,6 +532,21 @@ void APDefaultSettings()
 	gHardwareMode = 2;
 	gChannel = 7;
 	gSecurityOption = 0;
+
+	gWEP.default_key = 0;
+	gWEP.key0_type = 0;
+	gWEP.key0 = NULL;
+	gWEP.key1_type = 0;
+	gWEP.key1 = NULL;
+	gWEP.key2_type = 0;
+	gWEP.key2 = NULL;
+	gWEP.key3_type = 0;
+	gWEP.key3 = NULL;
+
+	gWPA.version = 2;
+	gWPA.password = NULL;
+	gWPA.pairwire_cipher = 2;
+	gWPA.group_rekey = 86400;
 
 	gControllerName = NULL;
 	gControllerDescriptor = NULL;

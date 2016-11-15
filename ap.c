@@ -31,6 +31,9 @@ u8 gHardwareMode;
 u8 gSuppressSSID;
 u8 gSecurityOption;
 
+APWEP gWEP;
+APWPA gWPA;
+
 __inline__ u32 APGetSeqNum() { return gSeqNum; }
 __inline__ u32 APGetWaitSeqNum() { return gWaitSeqNum; }
 
@@ -63,6 +66,8 @@ __inline__ u8 APGetHardwareMode() { return gHardwareMode; }
 __inline__ u8 APGetSuppressSSID() { return gSuppressSSID; }
 __inline__ u8 APGetSecurityOption() { return gSecurityOption; }
 
+__inline__ APWEP* APGetWEP() { return &gWEP; }
+__inline__ APWPA* APGetWPA() { return &gWPA; }
 
 
 /**

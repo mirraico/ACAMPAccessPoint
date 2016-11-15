@@ -32,10 +32,10 @@ int main()
 		exit(1);
 	}
 
-	if(!APCheckSettings()) {
-		APErrorLog("There may exist illegal assignment");
-		exit(1);
-	}
+	// if(!APCheckSettings()) {
+	// 	APErrorLog("There may exist illegal assignment");
+	// 	exit(1);
+	// }
 
 	APInitLogFile();
 	APLog("Finished reading the setting file");
