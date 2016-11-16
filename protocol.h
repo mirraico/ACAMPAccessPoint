@@ -93,8 +93,8 @@ typedef struct {
 #define MSGELEMTYPE_HARDWARE_MODE 0x0103
 #define MSGELEMTYPE_SUPPRESS_SSID 0x0104
 #define MSGELEMTYPE_SECURITY_OPTION 0x0105
-#define MSGELEMTYPE_WPA_OPTION 0x0201
-#define MSGELEMTYPE_WEP_OPTION 0x0202
+#define MSGELEMTYPE_WEP_INFO 0x0201
+#define MSGELEMTYPE_WPA_INFO 0x0202
 
 /* result code */
 #define RESULT_SUCCESS 0x0000
@@ -114,6 +114,26 @@ typedef struct {
 #define DISCOVERY_TPYE_STATIC 1
 #define DISCOVERY_TPYE_DEFAULT_GATE 2
 #define DISCOVERY_TPYE_DNS 3
+
+/* hardware mode */
+#define HWMODE_A 0
+#define HWMODE_B 1
+#define HWMODE_G 2
+#define HWMODE_AB 3
+
+/* security option */
+#define SECURITY_OPEN 0
+#define SECURITY_WEP 1
+#define SECURITY_WPA 2
+
+/* wep type */
+#define WEPTYPE_CHAR5 1
+#define WEPTYPE_CHAR13 2
+#define WEPTYPE_CHAR16 3
+#define WEPTYPE_HEX10 4
+#define WEPTYPE_HEX26 5
+#define WEPTYPE_HEX32 6
+
 
 
 /* fsm */
@@ -230,6 +250,8 @@ APBool APAssembleChannel(APProtocolMessage *msgPtr);
 APBool APAssembleHardwareMode(APProtocolMessage *msgPtr);
 APBool APAssembleSuppressSSID(APProtocolMessage *msgPtr);
 APBool APAssembleSecurityOption(APProtocolMessage *msgPtr);
+APBool APAssembleWEP(APProtocolMessage *msgPtr);
+APBool APAssembleWPA(APProtocolMessage *msgPtr);
 
 
 

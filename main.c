@@ -97,7 +97,7 @@ int main()
 				nextState = APEnterRegister();
 				break;
 			case AP_ENTER_CONFIGURE:
-				// nextState = APEnterConfigure();
+				nextState = APEnterConfigure();
 				break;
 			case AP_ENTER_CONFIGURE_RETRY:
 				// nextState = APEnterConfigureRetry();

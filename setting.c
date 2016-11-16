@@ -303,23 +303,23 @@ APBool APParseSettingsFile()
 				AP_COPY_MEMORY(gWEP.key0, value, len);
 				
 				if(keylen == 7) {
-					gWEP.key0_type = 1;
-					APDebugLog(5, "CONF WEP key0: %s (Type 1)", gWEP.key0);
+					gWEP.key0_type = WEPTYPE_CHAR5;
+					APDebugLog(5, "CONF WEP key0: %s (Type CHAR5)", gWEP.key0);
 				} else if(keylen == 15) {
-					gWEP.key0_type = 2;
-					APDebugLog(5, "CONF WEP key0: %s (Type 2)", gWEP.key0);
+					gWEP.key0_type = WEPTYPE_CHAR13;
+					APDebugLog(5, "CONF WEP key0: %s (Type CHAR13)", gWEP.key0);
 				} else if(keylen == 18) {
-					gWEP.key0_type = 3;
-					APDebugLog(5, "CONF WEP key0: %s (Type 3)", gWEP.key0);
+					gWEP.key0_type = WEPTYPE_CHAR16;
+					APDebugLog(5, "CONF WEP key0: %s (Type CHAR16)", gWEP.key0);
 				} else if(keylen == 10) {
-					gWEP.key0_type = 4;
-					APDebugLog(5, "CONF WEP key0: %s (Type 4)", gWEP.key0);
+					gWEP.key0_type = WEPTYPE_HEX10;
+					APDebugLog(5, "CONF WEP key0: %s (Type HEX10)", gWEP.key0);
 				} else if(keylen == 26) {
-					gWEP.key0_type = 5;
-					APDebugLog(5, "CONF WEP key0: %s (Type 5)", gWEP.key0);
+					gWEP.key0_type = WEPTYPE_HEX26;
+					APDebugLog(5, "CONF WEP key0: %s (Type HEX26)", gWEP.key0);
 				} else if(keylen == 32) {
-					gWEP.key0_type = 6;
-					APDebugLog(5, "CONF WEP key0: %s (Type 6)", gWEP.key0);
+					gWEP.key0_type = WEPTYPE_HEX32;
+					APDebugLog(5, "CONF WEP key0: %s (Type HEX32)", gWEP.key0);
 				}
 			}
 		}
@@ -335,23 +335,23 @@ APBool APParseSettingsFile()
 				AP_COPY_MEMORY(gWEP.key1, value, len);
 				
 				if(keylen == 7) {
-					gWEP.key1_type = 1;
-					APDebugLog(5, "CONF WEP key1: %s (Type 1)", gWEP.key1);
+					gWEP.key1_type = WEPTYPE_CHAR5;
+					APDebugLog(5, "CONF WEP key1: %s (Type CHAR5)", gWEP.key1);
 				} else if(keylen == 15) {
-					gWEP.key1_type = 2;
-					APDebugLog(5, "CONF WEP key1: %s (Type 2)", gWEP.key1);
+					gWEP.key1_type = WEPTYPE_CHAR13;
+					APDebugLog(5, "CONF WEP key1: %s (Type CHAR13)", gWEP.key1);
 				} else if(keylen == 18) {
-					gWEP.key1_type = 3;
-					APDebugLog(5, "CONF WEP key1: %s (Type 3)", gWEP.key1);
+					gWEP.key1_type = WEPTYPE_CHAR16;
+					APDebugLog(5, "CONF WEP key1: %s (Type CHAR16)", gWEP.key1);
 				} else if(keylen == 10) {
-					gWEP.key1_type = 4;
-					APDebugLog(5, "CONF WEP key1: %s (Type 4)", gWEP.key1);
+					gWEP.key1_type = WEPTYPE_HEX10;
+					APDebugLog(5, "CONF WEP key1: %s (Type HEX10)", gWEP.key1);
 				} else if(keylen == 26) {
-					gWEP.key1_type = 5;
-					APDebugLog(5, "CONF WEP key1: %s (Type 5)", gWEP.key1);
+					gWEP.key1_type = WEPTYPE_HEX26;
+					APDebugLog(5, "CONF WEP key1: %s (Type HEX26)", gWEP.key1);
 				} else if(keylen == 32) {
-					gWEP.key1_type = 6;
-					APDebugLog(5, "CONF WEP key1: %s (Type 6)", gWEP.key1);
+					gWEP.key1_type = WEPTYPE_HEX32;
+					APDebugLog(5, "CONF WEP key1: %s (Type HEX32)", gWEP.key1);
 				}
 			}
 		}
@@ -367,23 +367,23 @@ APBool APParseSettingsFile()
 				AP_COPY_MEMORY(gWEP.key2, value, len);
 				
 				if(keylen == 7) {
-					gWEP.key2_type = 1;
-					APDebugLog(5, "CONF WEP key2: %s (Type 1)", gWEP.key2);
+					gWEP.key2_type = WEPTYPE_CHAR5;
+					APDebugLog(5, "CONF WEP key2: %s (Type 1CHAR5)", gWEP.key2);
 				} else if(keylen == 15) {
-					gWEP.key2_type = 2;
-					APDebugLog(5, "CONF WEP key2: %s (Type 2)", gWEP.key2);
+					gWEP.key2_type = WEPTYPE_CHAR13;
+					APDebugLog(5, "CONF WEP key2: %s (Type CHAR13)", gWEP.key2);
 				} else if(keylen == 18) {
-					gWEP.key2_type = 3;
-					APDebugLog(5, "CONF WEP key2: %s (Type 3)", gWEP.key2);
+					gWEP.key2_type = WEPTYPE_CHAR16;
+					APDebugLog(5, "CONF WEP key2: %s (Type CHAR16)", gWEP.key2);
 				} else if(keylen == 10) {
-					gWEP.key2_type = 4;
-					APDebugLog(5, "CONF WEP key2: %s (Type 4)", gWEP.key2);
+					gWEP.key2_type = WEPTYPE_HEX10;
+					APDebugLog(5, "CONF WEP key2: %s (Type HEX10)", gWEP.key2);
 				} else if(keylen == 26) {
-					gWEP.key2_type = 5;
-					APDebugLog(5, "CONF WEP key2: %s (Type 5)", gWEP.key2);
+					gWEP.key2_type = WEPTYPE_HEX26;
+					APDebugLog(5, "CONF WEP key2: %s (Type HEX26)", gWEP.key2);
 				} else if(keylen == 32) {
-					gWEP.key2_type = 6;
-					APDebugLog(5, "CONF WEP key2: %s (Type 6)", gWEP.key2);
+					gWEP.key2_type = WEPTYPE_HEX32;
+					APDebugLog(5, "CONF WEP key2: %s (Type HEX32)", gWEP.key2);
 				}
 			}
 		}
@@ -399,23 +399,23 @@ APBool APParseSettingsFile()
 				AP_COPY_MEMORY(gWEP.key3, value, len);
 				
 				if(keylen == 7) {
-					gWEP.key3_type = 1;
-					APDebugLog(5, "CONF WEP key3: %s (Type 1)", gWEP.key3);
+					gWEP.key3_type = WEPTYPE_CHAR5;
+					APDebugLog(5, "CONF WEP key3: %s (Type CHAR5)", gWEP.key3);
 				} else if(keylen == 15) {
-					gWEP.key3_type = 2;
-					APDebugLog(5, "CONF WEP key3: %s (Type 2)", gWEP.key3);
+					gWEP.key3_type = WEPTYPE_CHAR13;
+					APDebugLog(5, "CONF WEP key3: %s (Type CHAR13)", gWEP.key3);
 				} else if(keylen == 18) {
-					gWEP.key3_type = 3;
-					APDebugLog(5, "CONF WEP key3: %s (Type 3)", gWEP.key3);
+					gWEP.key3_type = WEPTYPE_CHAR16;
+					APDebugLog(5, "CONF WEP key3: %s (Type CHAR16)", gWEP.key3);
 				} else if(keylen == 10) {
-					gWEP.key3_type = 4;
-					APDebugLog(5, "CONF WEP key3: %s (Type 4)", gWEP.key3);
+					gWEP.key3_type = WEPTYPE_HEX10;
+					APDebugLog(5, "CONF WEP key3: %s (Type HEX10)", gWEP.key3);
 				} else if(keylen == 26) {
-					gWEP.key3_type = 5;
-					APDebugLog(5, "CONF WEP key3: %s (Type 5)", gWEP.key3);
+					gWEP.key3_type = WEPTYPE_HEX26;
+					APDebugLog(5, "CONF WEP key3: %s (Type HEX26)", gWEP.key3);
 				} else if(keylen == 32) {
-					gWEP.key3_type = 6;
-					APDebugLog(5, "CONF WEP key3: %s (Type 6)", gWEP.key3);
+					gWEP.key3_type = WEPTYPE_HEX32;
+					APDebugLog(5, "CONF WEP key3: %s (Type HEX32)", gWEP.key3);
 				}
 			}
 		}
@@ -523,15 +523,15 @@ void APDefaultSettings()
 	}
 	gAPDefaultGateway = 0;
 
-    gDiscoveryType = 0; //broadcast discovery
+    gDiscoveryType = DISCOVERY_TPYE_DISCOVERY; //broadcast discovery
 	gStaticControllerIPAddr = 0; //static Controller IP addr
-	gRegisteredService = 0; //configuration and station service
+	gRegisteredService = REGISTERED_SERVICE_CONF_STA; //configuration and station service
 
 	gSSID = "ap_ssid";
 	gSuppressSSID = 0;
-	gHardwareMode = 2;
+	gHardwareMode = HWMODE_G;
 	gChannel = 7;
-	gSecurityOption = 0;
+	gSecurityOption = SECURITY_OPEN;
 
 	gWEP.default_key = 0;
 	gWEP.key0_type = 0;

@@ -36,23 +36,25 @@ extern u8 gSecurityOption;
 
 /* wep */
 typedef struct {
-	int default_key;
-	int key0_type;
+	u8 default_key;
+	u8 key0_type;
 	char* key0;
-	int key1_type;
+	u8 key1_type;
 	char* key1;
-	int key2_type;
+	u8 key2_type;
 	char* key2;
-	int key3_type;
+	u8 key3_type;
 	char* key3;
 } APWEP;
 
+extern int WEP_LEN[7];
+
 /* wpa/wpa2 */
 typedef struct {
-	int version;
+	u8 version;
+	u8 pairwire_cipher;
 	char* password;
-	int pairwire_cipher;
-	int group_rekey;
+	u32 group_rekey;
 } APWPA;
 
 extern APWEP gWEP;

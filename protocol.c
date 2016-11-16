@@ -567,3 +567,107 @@ APBool APAssembleSecurityOption(APProtocolMessage *msgPtr)
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SECURITY_OPTION);
 }
+
+APBool APAssembleWEP(APProtocolMessage *msgPtr) 
+{
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleWEP()");
+	
+	APWEP* pWep = APGetWEP();
+	int len = 0;
+	int key_count = 0;
+	int key_flag[4] = {AP_FALSE, AP_FALSE, AP_FALSE, AP_FALSE};
+
+	len += 1; //default_key
+	len += 1; //key_count
+	if(pWep->key0 != NULL && strlen(pWep->key0) == WEP_LEN[pWep->key0_type]) {
+		key_flag[0] = AP_TRUE;
+		key_count++;
+		len += 2; //key_num & key_type
+		len += WEP_LEN[pWep->key0_type];
+	}
+	if(pWep->key1 != NULL && strlen(pWep->key1) == WEP_LEN[pWep->key1_type]) {
+		key_flag[1] = AP_TRUE;
+		key_count++;
+		len += 2; //key_num & key_type
+		len += WEP_LEN[pWep->key1_type];
+	}
+	if(pWep->key2 != NULL && strlen(pWep->key2) == WEP_LEN[pWep->key2_type]) {
+		key_flag[2] = AP_TRUE;
+		key_count++;
+		len += 2; //key_num & key_type
+		len += WEP_LEN[pWep->key2_type];
+	}
+	if(pWep->key3 != NULL && strlen(pWep->key3) == WEP_LEN[pWep->key3_type]) {
+		key_flag[3] = AP_TRUE;
+		key_count++;
+		len += 2; //key_num & key_type
+		len += WEP_LEN[pWep->key3_type];
+	}
+
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, len, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleWEP()"););
+	
+	APDebugLog(5, "Assemble WEP Default Key: %u", pWep->default_key);
+	APDebugLog(5, "Assemble WEP Key Count: %u", key_count);
+	APProtocolStore8(msgPtr, pWep->default_key);
+	APProtocolStore8(msgPtr, key_count);
+
+	if(key_flag[0]) {
+		APDebugLog(5, "Assemble WEP Key0: %s (Type %d)", pWep->key0, pWep->key0_type);
+		APProtocolStore8(msgPtr, 0);
+		APProtocolStore8(msgPtr, pWep->key0_type);
+		APProtocolStoreStr(msgPtr, pWep->key0);
+	}
+	if(key_flag[1]) {
+		APDebugLog(5, "Assemble WEP Key1: %s (Type %d)", pWep->key1, pWep->key1_type);
+		APProtocolStore8(msgPtr, 1);
+		APProtocolStore8(msgPtr, pWep->key1_type);
+		APProtocolStoreStr(msgPtr, pWep->key1);
+	}
+	if(key_flag[2]) {
+		APDebugLog(5, "Assemble WEP Key2: %s (Type %d)", pWep->key2, pWep->key2_type);
+		APProtocolStore8(msgPtr, 2);
+		APProtocolStore8(msgPtr, pWep->key2_type);
+		APProtocolStoreStr(msgPtr, pWep->key2);
+	}
+	if(key_flag[3]) {
+		APDebugLog(5, "Assemble WEP Key3: %s (Type %d)", pWep->key3, pWep->key3_type);
+		APProtocolStore8(msgPtr, 3);
+		APProtocolStore8(msgPtr, pWep->key3_type);
+		APProtocolStoreStr(msgPtr, pWep->key3);
+	}
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_WEP_INFO);
+}
+
+APBool APAssembleWPA(APProtocolMessage *msgPtr) 
+{
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleWPA()");
+	
+	APWPA* pWpa = APGetWPA();
+	int len = 0;
+	len += 1; //version
+	len += 1; //pairwire_cipher
+	len += 2; //key_len
+	if(pWpa->password != NULL) len += strlen(pWpa->password); //password
+	len += 4; //group_rekey
+
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, len, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleWPA()"););
+	
+	APDebugLog(5, "Assemble WPA Version: %u", pWpa->version);
+	APDebugLog(5, "Assemble WPA Pairwire Cipher: %u", pWpa->pairwire_cipher);
+	APProtocolStore8(msgPtr, pWpa->version);
+	APProtocolStore8(msgPtr, pWpa->pairwire_cipher);
+
+	if(pWpa->password != NULL) {
+		APDebugLog(5, "Assemble WPA Password: %s", pWpa->password);
+		APProtocolStore16(msgPtr, strlen(pWpa->password));
+		APProtocolStoreStr(msgPtr, pWpa->password);
+	} else {
+		APDebugLog(5, "Assemble WPA Password: NULL");
+		APProtocolStore16(msgPtr, 0);
+	}
+
+	APDebugLog(5, "Assemble WPA Group Rekey: %u", pWpa->group_rekey);
+	APProtocolStore32(msgPtr, pWpa->group_rekey);
+	
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_WPA_INFO);
+}

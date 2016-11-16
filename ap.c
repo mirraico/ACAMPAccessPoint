@@ -32,6 +32,7 @@ u8 gSuppressSSID;
 u8 gSecurityOption;
 
 APWEP gWEP;
+int WEP_LEN[7] = {0, 5, 13, 16, 10, 26, 32};
 APWPA gWPA;
 
 __inline__ u32 APGetSeqNum() { return gSeqNum; }
