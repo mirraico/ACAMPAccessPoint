@@ -528,7 +528,7 @@ void APDefaultSettings()
 	gRegisteredService = REGISTERED_SERVICE_CONF_STA; //configuration and station service
 
 	gSSID = "ap_ssid";
-	gSuppressSSID = 0;
+	gSuppressSSID = SUPPRESS_SSID_DISABLED;
 	gHardwareMode = HWMODE_G;
 	gChannel = 7;
 	gSecurityOption = SECURITY_OPEN;

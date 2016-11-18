@@ -3,6 +3,7 @@
 #include "log.h"
 #include "ap.h"
 #include "network.h"
+#include "hostapd.h"
 
 int gConfigureCount;
 int gMaxConfigure = 3;
@@ -75,6 +76,21 @@ APBool APParseConfigurationUpdateRequest(char *msg, int len)
     u8 recvSecurityOption;
     APWEP recvWEP;
     APWPA recvWPA;
+
+    //default vaule
+    recvWEP.default_key = 0;
+	recvWEP.key0_type = 0;
+	recvWEP.key0 = NULL;
+	recvWEP.key1_type = 0;
+	recvWEP.key1 = NULL;
+	recvWEP.key2_type = 0;
+	recvWEP.key2 = NULL;
+	recvWEP.key3_type = 0;
+	recvWEP.key3 = NULL;
+	recvWPA.version = 2;
+	recvWPA.password = NULL;
+	recvWPA.pairwire_cipher = 2;
+	recvWPA.group_rekey = 86400;
 
     if(msg == NULL) 
 		return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseConfigurationUpdateRequest()");
@@ -357,6 +373,6 @@ APStateTransition APEnterConfigure()
 		}
 
         /* generate the hostapd configuration file */
-        
+        HdGenerateConfigurationFile();
     }
 }

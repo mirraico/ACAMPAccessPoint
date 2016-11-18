@@ -119,7 +119,12 @@ typedef struct {
 #define HWMODE_A 0
 #define HWMODE_B 1
 #define HWMODE_G 2
-#define HWMODE_AB 3
+#define HWMODE_AD 3
+
+/* suppress ssid */
+#define SUPPRESS_SSID_DISABLED 0
+#define SUPPRESS_SSID_ENABLED 1
+
 
 /* security option */
 #define SECURITY_OPEN 0
