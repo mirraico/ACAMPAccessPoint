@@ -248,6 +248,7 @@ APBool APParseConfigurationUpdateRequest(char *msg, int len)
     }
 
     gControllerSeqNum = recvControllerSeqNum;
+    APDebugLog(5, "Controller Seq Number is %u", gControllerSeqNum);
 
     return AP_TRUE;
 }
@@ -374,5 +375,8 @@ APStateTransition APEnterConfigure()
 
         /* generate the hostapd configuration file */
         HdGenerateConfigurationFile();
+        APDebugLog(3, "Generate the configuration file successfully");
+        APLog("Start hostapd...");
+        exit(1);
     }
 }
