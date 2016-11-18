@@ -17,7 +17,7 @@ do
 		[0x0201] = "Configuration Update Request",
 		[0x0202] = "Configuration Upadte Response",
 		[0x0203] = "Configuration Request",
-		[0x0204] = "Configuration Response",
+		[0x0204] = "Configuration Report",
 		[0x0301] = "Station Configuration Update Request",
 		[0x0302] = "Station Configuration Upadte Response",
 		[0x0303] = "Station Configuration Request",
