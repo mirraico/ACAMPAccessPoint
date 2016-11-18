@@ -253,6 +253,12 @@ APBool APAssembleSecurityOption(APProtocolMessage *msgPtr);
 APBool APAssembleWEP(APProtocolMessage *msgPtr);
 APBool APAssembleWPA(APProtocolMessage *msgPtr);
 
-
+APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr);
+APBool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseWEP(APProtocolMessage *msgPtr, int len, APWEP *valPtr);
+APBool APParseWPA(APProtocolMessage *msgPtr, int len, APWPA *valPtr);
 
 #endif

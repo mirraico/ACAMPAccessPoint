@@ -2,6 +2,7 @@
 
 u32 gSeqNum;
 u32 gWaitSeqNum;
+u32 gControllerSeqNum;
 
 u16 gAPID;
 u8 gDiscoveryType;

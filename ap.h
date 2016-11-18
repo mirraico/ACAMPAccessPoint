@@ -5,6 +5,7 @@
 
 extern u32 gSeqNum;
 extern u32 gWaitSeqNum;
+extern u32 gControllerSeqNum;
 
 extern u16 gAPID;
 extern u8 gDiscoveryType;

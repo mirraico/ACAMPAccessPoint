@@ -671,3 +671,158 @@ APBool APAssembleWPA(APProtocolMessage *msgPtr)
 	
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_WPA_INFO);
 }
+
+APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr) 
+{	
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseSSID()");
+	
+	*valPtr = APProtocolRetrieveStr(msgPtr, len);
+	if(valPtr == NULL) return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APParseSSID()");
+	APDebugLog(5, "Parse SSID: %s", *valPtr);
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseSSID()");
+	}
+	return AP_TRUE;
+}
+
+APBool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+{	
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseChannel()");
+	
+	*valPtr = APProtocolRetrieve8(msgPtr);
+	APDebugLog(5, "Parse Channel: %u", *valPtr);
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseChannel()");
+	}
+	return AP_TRUE;
+}
+
+APBool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+{	
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseHardwareMode()");
+	
+	*valPtr = APProtocolRetrieve8(msgPtr);
+	APDebugLog(5, "Parse Hardware Mode: %u", *valPtr);
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseHardwareMode()");
+	}
+	return AP_TRUE;
+}
+
+APBool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+{	
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseSuppressSSID()");
+	
+	*valPtr = APProtocolRetrieve8(msgPtr);
+	APDebugLog(5, "Parse Suppress SSID: %u", *valPtr);
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseSuppressSSID()");
+	}
+	return AP_TRUE;
+}
+
+APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+{	
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseSecurityOption()");
+	
+	*valPtr = APProtocolRetrieve8(msgPtr);
+	APDebugLog(5, "Parse Security Option: %u", *valPtr);
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseSecurityOption()");
+	}
+	return AP_TRUE;
+}
+
+APBool APParseWEP(APProtocolMessage *msgPtr, int len, APWEP *valPtr)
+{
+	int i;
+	int key_count = 0;
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseWEP()");
+	
+	valPtr->default_key = APProtocolRetrieve8(msgPtr);
+	key_count = APProtocolRetrieve8(msgPtr);
+	APDebugLog(5, "Parse WEP Default Key: %u", valPtr->default_key);
+	APDebugLog(5, "Parse WEP Key Count: %u", key_count);
+
+	for(i = 0; i < key_count; i++) {
+		int key_num = APProtocolRetrieve8(msgPtr);
+		switch(key_num) {
+			case 0:
+				valPtr->key0_type = APProtocolRetrieve8(msgPtr);
+				valPtr->key0 = APProtocolRetrieveStr(msgPtr, WEP_LEN[valPtr->key0_type]);
+				APDebugLog(5, "Parse WEP Key0: %s (Type %d)", valPtr->key0, valPtr->key0_type);
+				break;
+			case 1:
+				valPtr->key1_type = APProtocolRetrieve8(msgPtr);
+				valPtr->key1 = APProtocolRetrieveStr(msgPtr, WEP_LEN[valPtr->key1_type]);
+				APDebugLog(5, "Parse WEP Key1: %s (Type %d)", valPtr->key1, valPtr->key1_type);
+				break;
+			case 2:
+				valPtr->key2_type = APProtocolRetrieve8(msgPtr);
+				valPtr->key2 = APProtocolRetrieveStr(msgPtr, WEP_LEN[valPtr->key2_type]);
+				APDebugLog(5, "Parse WEP Key2: %s (Type %d)", valPtr->key2, valPtr->key2_type);
+				break;
+			case 3:
+				valPtr->key3_type = APProtocolRetrieve8(msgPtr);
+				valPtr->key3 = APProtocolRetrieveStr(msgPtr, WEP_LEN[valPtr->key3_type]);
+				APDebugLog(5, "Parse WEP Key3: %s (Type %d)", valPtr->key3, valPtr->key3_type);
+				break;
+			default:
+				APErrorLog("Invalid WEP Key Number");
+				return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseWEP()");
+
+		}
+	}
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseWEP()");
+	}
+	return AP_TRUE;
+}
+
+APBool APParseWPA(APProtocolMessage *msgPtr, int len, APWPA *valPtr)
+{
+	u16 pwd_len;
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseWPA()");
+	
+	valPtr->version = APProtocolRetrieve8(msgPtr);
+	valPtr->pairwire_cipher = APProtocolRetrieve8(msgPtr);
+	APDebugLog(5, "Parse WPA Version: %u", valPtr->version);
+	APDebugLog(5, "Parse WPA Pairwire Cipher: %u", valPtr->pairwire_cipher);
+
+	pwd_len = APProtocolRetrieve16(msgPtr);
+	if(pwd_len > 0) {
+		valPtr->password = APProtocolRetrieveStr(msgPtr, pwd_len);
+		APDebugLog(5, "Parse WPA Password: %s", valPtr->password);
+	} else {
+		valPtr->password = NULL;
+		APDebugLog(5, "Parse WPA Password: NULL");
+	}
+
+	valPtr->group_rekey = APProtocolRetrieve32(msgPtr);
+	APDebugLog(5, "Parse WPA Group Rekey: %u", valPtr->group_rekey);
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseWPA()");
+	}
+	return AP_TRUE;
+}
