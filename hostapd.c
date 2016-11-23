@@ -21,6 +21,8 @@ APBool HdGenerateConfigurationFile()
 		return AP_FALSE;
 	}
 
+    sprintf(fileLine, "interface=%s\n", gIfWlanName);
+    fwrite(fileLine, strlen(fileLine), 1, gHdConfiguration);
     sprintf(fileLine, "logger_syslog=%d\n", gHdSysLogModules);
     fwrite(fileLine, strlen(fileLine), 1, gHdConfiguration);
     sprintf(fileLine, "logger_syslog_level=%d\n", gHdSysLogLevel);

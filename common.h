@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include "stdarg.h"
 #include "time.h"
+#include "ifaddrs.h"
 #include <net/ethernet.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>

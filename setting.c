@@ -516,6 +516,11 @@ void APDefaultSettings()
 
 	gAPName = "unnamed AP";
 	gAPDescriptor = "no descriptor";
+
+	/* init in APNetworkInitIfname() */
+	gIfEthName = NULL;
+	gIfWlanName = NULL;
+
 	/* IP, MAC and default gateway addr will be automatically obtained soon by APNetworkInitLocalAddr() */
 	gAPIPAddr = 0;
 	for(i = 0; i < 6; i++) {

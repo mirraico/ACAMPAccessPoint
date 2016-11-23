@@ -3,6 +3,9 @@
 
 #include "common.h"
 
+extern char* gIfEthName;
+extern char* gIfWlanName;
+
 extern u32 gSeqNum;
 extern u32 gWaitSeqNum;
 extern u32 gControllerSeqNum;
@@ -64,8 +67,12 @@ extern APWPA gWPA;
 #define APSeqNumIncrement()         gSeqNum++
 #define APWaitSeqNumIncrement()     gWaitSeqNum++
 
+extern char* APGetIfEthName();
+extern char* APGetIfWlanName();
+
 extern u32 APGetSeqNum();
 extern u32 APGetWaitSeqNum();
+extern u32 APGetControllerSeqNum();
 
 extern u16 APGetAPID();
 extern void APSetAPID(u16 apid);

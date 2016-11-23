@@ -1,5 +1,8 @@
 #include "ap.h"
 
+char* gIfEthName;
+char* gIfWlanName;
+
 u32 gSeqNum;
 u32 gWaitSeqNum;
 u32 gControllerSeqNum;
@@ -36,8 +39,12 @@ APWEP gWEP;
 int WEP_LEN[7] = {0, 5, 13, 16, 10, 26, 32};
 APWPA gWPA;
 
+__inline__ char* APGetIfEthName() { return gIfEthName; }
+__inline__ char* APGetIfWlanName() { return gIfWlanName; }
+
 __inline__ u32 APGetSeqNum() { return gSeqNum; }
 __inline__ u32 APGetWaitSeqNum() { return gWaitSeqNum; }
+__inline__ u32 APGetControllerSeqNum() { return gControllerSeqNum; }
 
 __inline__ u16 APGetAPID() { return gAPID; }
 void APSetAPID(u16 apid) { gAPID = apid; }

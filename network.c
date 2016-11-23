@@ -4,6 +4,40 @@ APSocket gSocket = -1;
 APSocket gSocketBroad = -1;
 APNetworkAddress gControllerSockaddr;
 
+APBool APNetworkInitIfname()
+{
+    struct ifaddrs *ifaddr, *ifa;
+    if(getifaddrs(&ifaddr) == -1) {
+        return AP_FALSE;
+    }
+    ifa = ifaddr;
+    while(ifa != NULL)
+    {
+        if(ifa->ifa_addr == NULL || ifa->ifa_addr->sa_family != AF_PACKET)
+        {
+            ifa = ifa->ifa_next;
+            continue;
+        }
+        if(strncmp(ifa->ifa_name, "wl", 2) == 0) //wl
+        {
+			AP_CREATE_OBJECT_SIZE_ERR(gIfWlanName, (IF_NAMESIZE+1), return AP_FALSE;);
+			AP_COPY_MEMORY(gIfWlanName, ifa->ifa_name, IF_NAMESIZE);
+			gIfWlanName[IF_NAMESIZE] = '\0';
+            strncpy(gIfWlanName, ifa->ifa_name, IF_NAMESIZE);
+			APDebugLog(5, "Wlan name: %s", gIfWlanName);
+        } else if(strncmp(ifa->ifa_name, "en", 2) == 0 || strncmp(ifa->ifa_name, "eth", 3) == 0) { //eth
+			AP_CREATE_OBJECT_SIZE_ERR(gIfEthName, (IF_NAMESIZE+1), return AP_FALSE;);
+			AP_COPY_MEMORY(gIfEthName, ifa->ifa_name, IF_NAMESIZE);
+			gIfEthName[IF_NAMESIZE] = '\0';
+            strncpy(gIfEthName, ifa->ifa_name, IF_NAMESIZE);
+			APDebugLog(5, "Eth name: %s", gIfEthName);
+		}
+        ifa = ifa->ifa_next;
+    }
+    free(ifaddr);
+    return (gIfEthName && gIfWlanName) ? AP_TRUE : AP_FALSE;
+}
+
 /**
  * inner function, get local ip address and default gateway
  * @param  sockFd [don't have to care about]
@@ -75,6 +109,10 @@ void APNetworkParseRoutes(struct nlmsghdr *nlHdr, u32* localIP, u32* localDefaul
 		}
 	}
 
+	/* use wired ethernet to connect with controller */
+	if(strncmp(prtInfo->ifName, "en", 2) != 0 && strncmp(prtInfo->ifName, "eth", 3) != 0) return;
+	// if(strncmp(prtInfo->ifName, "wl", 2) != 0) return;
+
 	if (prtInfo->dstAddr.s_addr == 0)
 		*localDefaultGateway = ntohl((prtInfo->gateWay).s_addr);
 		//sprintf(gAPDefaultGateway, (char *) inet_ntoa(prtInfo->gateWay));
@@ -132,7 +170,9 @@ APBool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGatew
 	//mac
 	struct ifreq ifr;
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
-	strcpy(ifr.ifr_name, "eth0");
+	/* use wired ethernet to connect with controller */
+	strcpy(ifr.ifr_name, gIfEthName);
+	// strcpy(ifr.ifr_name, gIfWlanName);
 	if(!ioctl(sock, SIOCGIFHWADDR, &ifr)) {
 		memcpy(localMAC, ifr.ifr_hwaddr.sa_data, 6);
 	}
