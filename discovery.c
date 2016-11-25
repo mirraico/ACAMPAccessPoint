@@ -196,7 +196,7 @@ APBool APReceiveDiscoveryResponse() {
 
     /* the address declared by controller is fake */
     if(ntohl(addr.sin_addr.s_addr) != controllerPtr->IPAddr) {
-        APErrorLog("Exist IP address Deception");
+        APErrorLog("The source address and the address carried in the packet do not match");
         return APErrorRaise(AP_ERROR_WARNING, "APReceiveDiscoveryResponse()");
     }
     
