@@ -510,9 +510,9 @@ void APDefaultSettings()
 	gAPStdoutLevel = 0;
 
 	gHdSysLogModules = -1;
-	gHdSysLogLevel = 4;
+	gHdSysLogLevel = 2;
 	gHdStdoutModules = -1;
-	gHdStdoutLevel = 4;
+	gHdStdoutLevel = 2;
 
 	gAPName = "unnamed AP";
 	gAPDescriptor = "no descriptor";

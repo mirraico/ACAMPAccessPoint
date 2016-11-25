@@ -57,9 +57,11 @@ APBool HdGenerateConfigurationFile()
     }
 
     if(gSecurityOption == SECURITY_OPEN) {
-        sprintf(fileLine, "auth_algs=2\n");
+        sprintf(fileLine, "auth_algs=1\n");
         fwrite(fileLine, strlen(fileLine), 1, gHdConfiguration);
     } else if(gSecurityOption == SECURITY_WEP) {
+        sprintf(fileLine, "auth_algs=3\n");
+        fwrite(fileLine, strlen(fileLine), 1, gHdConfiguration);
         sprintf(fileLine, "wep_default_key=%d\n", gWEP.default_key);
         fwrite(fileLine, strlen(fileLine), 1, gHdConfiguration);
         if(gWEP.key0 != NULL) {
