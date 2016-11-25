@@ -550,7 +550,7 @@ void APDefaultSettings()
 
 	gWPA.version = 2;
 	gWPA.password = NULL;
-	gWPA.pairwire_cipher = 2;
+	gWPA.pairwire_cipher = WPA_PAIRWIRECIPHER_TKIP_CCMP;
 	gWPA.group_rekey = 86400;
 
 	gControllerName = NULL;

@@ -125,7 +125,6 @@ typedef struct {
 #define SUPPRESS_SSID_DISABLED 0
 #define SUPPRESS_SSID_ENABLED 1
 
-
 /* security option */
 #define SECURITY_OPEN 0
 #define SECURITY_WEP 1
@@ -138,6 +137,11 @@ typedef struct {
 #define WEPTYPE_HEX10 4
 #define WEPTYPE_HEX26 5
 #define WEPTYPE_HEX32 6
+
+/* wpa pairwire cipher */
+#define WPA_PAIRWIRECIPHER_TKIP 0
+#define WPA_PAIRWIRECIPHER_CCMP 1
+#define WPA_PAIRWIRECIPHER_TKIP_CCMP 2
 
 
 

@@ -130,13 +130,13 @@ APBool HdGenerateConfigurationFile()
         sprintf(fileLine, "wpa=%u\n", gWPA.version);
         fwrite(fileLine, strlen(fileLine), 1, gHdConfiguration);
 
-        if(gWPA.pairwire_cipher == 0) {
+        if(gWPA.pairwire_cipher == WPA_PAIRWIRECIPHER_TKIP) {
             sprintf(fileLine, "wpa_pairwise=TKIP\nrsn_pairwise=TKIP\n");
             fwrite(fileLine, strlen(fileLine), 1, gHdConfiguration);
-        } else if(gWPA.pairwire_cipher == 1) {
+        } else if(gWPA.pairwire_cipher == WPA_PAIRWIRECIPHER_CCMP) {
             sprintf(fileLine, "wpa_pairwise=CCMP\nrsn_pairwise=CCMP\n");
             fwrite(fileLine, strlen(fileLine), 1, gHdConfiguration);
-        } else if(gWPA.pairwire_cipher == 2) {
+        } else if(gWPA.pairwire_cipher == WPA_PAIRWIRECIPHER_TKIP_CCMP) {
             sprintf(fileLine, "wpa_pairwise=TKIP CCMP\nrsn_pairwise=TKIP CCMP\n");
             fwrite(fileLine, strlen(fileLine), 1, gHdConfiguration);
         }
