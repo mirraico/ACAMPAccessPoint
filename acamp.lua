@@ -1,4 +1,4 @@
---ACAMP Wireshark Dissector
+-- ACAMP Wireshark Dissector
 
 do
 	local ACAMP_UDP_PORT = 6606
@@ -18,12 +18,6 @@ do
 		[0x0202] = "Configuration Upadte Response",
 		[0x0203] = "Configuration Request",
 		[0x0204] = "Configuration Report",
-		[0x0301] = "Station Configuration Update Request",
-		[0x0302] = "Station Configuration Upadte Response",
-		[0x0303] = "Station Configuration Request",
-		[0x0304] = "Station Configuration Response",	
-		[0x0401] = "Statistic Request",
-		[0x0402] = "Statistic Report"
 	}
 
 	local msg_elem_type = {
@@ -35,27 +29,19 @@ do
 		[0x0006] = "Controller Name",
 		[0x0007] = "Controller Descriptor",
 		[0x0008] = "Controlelr IP Address",
-		[0x0009] = "Controller Mac Address",
+		[0x0009] = "Controller MAC Address",
 		[0x000a] = "AP Name",
 		[0x000b] = "AP Descriptor",
 		[0x000c] = "AP IP Address",
-		[0x000d] = "AP Mac Address",
-		[0x000e] = "Returned Message Element",
+		[0x000d] = "AP MAC Address",
+		-- [0x000e] = "Returned Message Element",
 		[0x0101] = "SSID",
 		[0x0102] = "Channel",
 		[0x0103] = "Hardware Mode",
 		[0x0104] = "Suppress SSID",
-		[0x0105] = "Security Setting",
-		[0x0201] = "WPA Version",
-		[0x0202] = "WPA Passphrase",
-		[0x0203] = "WPA Key Management",
-		[0x0204] = "WPA Pairwise",
-		[0x0205] = "WPA Group Rekey",
-		[0x0301] = "WEP Default Key",
-		[0x0302] = "WEP Key",
-		[0x0501] = "MAC ACL Mode",
-		[0x0502] = "MAC Accept List",
-		[0x0503] = "MAC Deny List",
+		[0x0105] = "Security Option",
+		[0x0201] = "WEP Info",
+		[0x0202] = "WPA Info",
 	}
 
 	local f_acamp_version = ProtoField.uint8("ACAMP.Version", "Version", base.DEC)
@@ -63,14 +49,145 @@ do
 	local f_acamp_apid = ProtoField.uint16("ACAMP.APID", "APID", base.DEC)
 	local f_acamp_seqnum = ProtoField.uint32("ACAMP.SeqNum", "Seq Num", base.DEC)
 	local f_acamp_msg_type = ProtoField.uint16("ACAMP.MsgType", "Msg Type", base.HEX, msg_type)
-	local f_acamp_msg_len = ProtoField.uint16("ACAMP.MsgLen", "Msg Len", base.DEC)
+	local f_acamp_msg_len = ProtoField.int16("ACAMP.MsgLen", "Msg Len", base.DEC)
 
 	local f_element_type = ProtoField.uint16("ACAMP.ElemType", "Element Type", base.HEX, msg_elem_type)
-	local f_element_len = ProtoField.uint16("ACAMP.ElemType", "Element Len", base.DEC)
-	local f_element_data = ProtoField.string("ACAMP.ElemData", "Element Data")
+	local f_element_len = ProtoField.int16("ACAMP.ElemType", "Element Len", base.DEC)
+	-- local f_element_data = ProtoField.string("ACAMP.ElemData", "Element Data")
 
-	proto_acamp.fields = {f_acamp_version, f_acamp_type, f_acamp_apid, f_acamp_seqnum, f_acamp_msg_type, f_acamp_msg_len, 
-								f_element_type, f_element_len, f_element_data}
+	local f_element_result_code = ProtoField.uint16("ACAMP.ResultCode", "Result Code", base.HEX, {[0x0000]="Success", [0x0001]="Failure", [0x0002]="Unrecognized Element"})
+	local f_element_reason_code = ProtoField.uint16("ACAMP.ReasonCode", "Reason Code", base.HEX, {[0x0101]="Invalid Version", [0x0102]="Repeated Register", [0x0103]="Insufficient Resource"})
+	local f_element_assigned_apid = ProtoField.uint16("ACAMP.AssignedAPID", "Assigned APID", base.DEC)
+	local f_element_discovery_type = ProtoField.uint8("ACAMP.DiscoveryType", "Discovery Type", base.DEC, {[0]="Discovery", [1]="Static", [2]="Default Gateway", [3]="DNS"})
+	local f_element_registered_service = ProtoField.uint8("ACAMP.RegisteredService", "Registered Service", base.HEX, {[0x00]="Configuration and station services"})
+	local f_element_controller_name = ProtoField.string("ACAMP.ControllerName", "Controller Name")
+	local f_element_controller_descriptor = ProtoField.string("ACAMP.ControllerDescriptor", "Controller Descriptor")
+	local f_element_controller_ip_addr = ProtoField.ipv4("ACAMP.ControllerIPAddr", "Controller IP Address")
+	local f_element_controller_mac_addr = ProtoField.ether("ACAMP.ControllerMACAddr", "Controller MAC Address")
+	local f_element_ap_name = ProtoField.string("ACAMP.APName", "AP Name")
+	local f_element_ap_descriptor = ProtoField.string("ACAMP.APDescriptor", "AP Descriptor")
+	local f_element_ap_ip_addr = ProtoField.ipv4("ACAMP.APIPAddr", "AP IP Address")
+	local f_element_ap_mac_addr = ProtoField.ether("ACAMP.APMACAddr", "AP MAC Address")
+	local f_element_ssid = ProtoField.string("ACAMP.SSID", "SSID")
+	local f_element_channel = ProtoField.uint8("ACAMP.Channel", "Channel", base.DEC)
+	local f_element_hw_mode = ProtoField.uint8("ACAMP.HWMode", "Hardware Mode", base.DEC, {[0]="802.11a", [1]="802.11b", [2]="802.11g", [3]="802.11ad"})
+	local f_element_suppress_ssid = ProtoField.uint8("ACAMP.SuppressSSID", "Suppress SSID", base.DEC, {[0]="Disabled", [1]="Enabled"})
+	local f_element_security_option = ProtoField.uint8("ACAMP.SecurityOption", "Security Option", base.DEC, {[0]="Open", [1]="WEP", [2]="WPA"})
+	local f_wep_default_key = ProtoField.uint8("ACAMP.DefaultKey", "Default Key", base.DEC)
+	local f_wep_key_count = ProtoField.uint8("ACAMP.WEPKeyCount", "Key Count", base.DEC)
+	local f_wep_key_num = ProtoField.uint8("ACAMP.WEPKeyNum", "Key Num", base.DEC)
+	local f_wep_key_type = ProtoField.uint8("ACAMP.WEPKeyType", "Key Type", base.DEC, {[1]="Char 5", [2]="Char 13", [3]="Char 16", [4]="Hex 10", [5]="Hex 26", [6]="Hex 32"})
+	local f_wep_key = ProtoField.string("ACAMP.WEPKey", "Key")
+	local f_wpa_version = ProtoField.uint8("ACAMP.WPAVersion", "WPA Version", base.DEC, {[1]="WPA", [2]="IEEE 802.11i/RSN (WPA2)"})
+	local f_wpa_pairwire_cipher = ProtoField.uint8("ACAMP.WPAPairwireCipher", "WPA Pairwire Cipher", base.DEC, {[0]="TKIP", [1]="CCMP", [2]="TKIP CCMP"})
+	local f_wpa_key_len = ProtoField.uint16("ACAMP.WPAKeyLen", "Key Len", base.DEC)
+	local f_wpa_key = ProtoField.string("ACAMP.WPAKey", "Key")
+	local f_wpa_group_rekey = ProtoField.uint32("ACAMP.WPAGroupRekey", "Group Rekey", base.DEC)
+
+	local element_data_switch = {
+		[0x0001] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_result_code, v_element(p_elem + 4, element_len))
+		end,
+		[0x0002] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_reason_code, v_element(p_elem + 4, element_len))
+		end,
+		[0x0003] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_assigned_apid, v_element(p_elem + 4, element_len))
+		end,
+		[0x0004] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_discovery_type, v_element(p_elem + 4, element_len))
+		end,
+		[0x0005] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_registered_service, v_element(p_elem + 4, element_len))
+		end,
+		[0x0006] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_controller_name, v_element(p_elem + 4, element_len))
+		end,
+		[0x0007] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_controller_descriptor, v_element(p_elem + 4, element_len))
+		end,
+		[0x0008] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_controller_ip_addr, v_element(p_elem + 4, element_len))
+		end,
+		[0x0009] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_controller_mac_addr, v_element(p_elem + 4, element_len))
+		end,
+		[0x000a] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_ap_name, v_element(p_elem + 4, element_len))
+		end,
+		[0x000b] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_ap_descriptor, v_element(p_elem + 4, element_len))
+		end,
+		[0x000c] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_ap_ip_addr, v_element(p_elem + 4, element_len))
+		end,
+		[0x000d] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_ap_mac_addr, v_element(p_elem + 4, element_len))
+		end,
+		[0x0101] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_ssid, v_element(p_elem + 4, element_len))
+		end,
+		[0x0102] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_channel, v_element(p_elem + 4, element_len))
+		end,
+		[0x0103] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_hw_mode, v_element(p_elem + 4, element_len))
+		end,
+		[0x0104] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_suppress_ssid, v_element(p_elem + 4, element_len))
+		end,
+		[0x0105] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_security_option, v_element(p_elem + 4, element_len))
+		end,
+		[0x0201] = function(v_element, te, p_elem, element_len)
+			local type_len = {[1]=5, [2]=13, [3]=16, [4]=10, [5]=26, [6]=32}
+			
+			local p_wep = 4
+			te:add(f_wep_default_key, v_element(p_elem + p_wep, 1))
+			te:add(f_wep_key_count, v_element(p_elem + p_wep + 1, 1))
+			local wep_key_count = v_element(p_elem + p_wep + 1, 1):uint()
+			p_wep = p_wep + 2
+			local i = 0
+			while i < wep_key_count do
+				local wep_key_totlen = 2 -- num & type
+				local wep_key_num = v_element(p_elem + p_wep, 1):uint()
+				local wep_key_type = v_element(p_elem + p_wep + 1, 1):uint()
+				wep_key_totlen = wep_key_totlen + type_len[wep_key_type]
+				local v_wep = v_element(p_elem + p_wep, wep_key_totlen)
+
+				local twep = te.add(te, v_wep, "WEP Key " .. wep_key_num)
+				twep:add(f_wep_key_num, v_wep(0, 1))
+				twep:add(f_wep_key_type, v_wep(1, 1))
+				twep:add(f_wep_key, v_wep(2, type_len[wep_key_type]))
+
+				p_wep = p_wep + wep_key_totlen
+				i = i + 1
+			end
+		end,
+		[0x0202] = function(v_element, te, p_elem, element_len)
+			local p_wpa = 4
+			te:add(f_wpa_version, v_element(p_elem + p_wpa, 1))
+			te:add(f_wpa_pairwire_cipher, v_element(p_elem + p_wpa + 1, 1))
+			te:add(f_wpa_key_len, v_element(p_elem + p_wpa + 2, 2))
+			local wpa_key_len = v_element(p_elem + p_wpa + 2, 2):uint()
+			p_wpa = p_wpa + 4
+			te:add(f_wpa_key, v_element(p_elem + p_wpa, wpa_key_len))
+			p_wpa = p_wpa + wpa_key_len
+			te:add(f_wpa_group_rekey, v_element(p_elem + p_wpa, 4))
+			p_wpa = p_wpa + 4
+		end,
+	}
+
+	-- proto_acamp.fields = {f_acamp_version, f_acamp_type, f_acamp_apid, f_acamp_seqnum, f_acamp_msg_type, f_acamp_msg_len, 
+	-- 							f_element_type, f_element_len, f_element_data}
+	proto_acamp.fields = {f_acamp_version, f_acamp_type, f_acamp_apid, f_acamp_seqnum, f_acamp_msg_type, f_acamp_msg_len, f_element_type, f_element_len,
+								f_element_result_code, f_element_reason_code, f_element_assigned_apid, f_element_discovery_type, f_element_registered_service,
+								f_element_controller_name, f_element_controller_descriptor, f_element_controller_ip_addr, f_element_controller_mac_addr,
+								f_element_ap_name, f_element_ap_descriptor, f_element_ap_ip_addr, f_element_ap_mac_addr,
+								f_element_ssid, f_element_channel, f_element_hw_mode, f_element_suppress_ssid, f_element_security_option,
+								f_wep_default_key, f_wep_key_num, f_wep_key_count, f_wep_key_type, f_wep_key, 
+								f_wpa_version, f_wpa_pairwire_cipher, f_wpa_key_len, f_wpa_key, f_wpa_group_rekey,}
+
 	local data_dis = Dissector.get("data")
 
 	local function proto_acamp_dissector(buffer, pinfo, tree)
@@ -113,7 +230,9 @@ do
 			te:add(f_element_type, v_element(p_elem, 2))
 			te:add(f_element_len, v_element(p_elem + 2, 2))
 			if element_len ~= 0 then 
-				te:add(f_element_data, v_element(p_elem + 4, element_len))
+				-- te:add(f_element_data, v_element(p_elem + 4, element_len))
+				local func = element_data_switch[v_element_type:uint()]
+				func(v_element, te, p_elem, element_len)
 			end
 			p_elem = (p_elem + element_totlen)
 		end
