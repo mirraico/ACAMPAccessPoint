@@ -17,9 +17,10 @@ typedef struct sockaddr_in APNetworkAddress;
 extern APSocket gSocket;
 extern APSocket gSocketBroad;
 
-APBool APNetworkInitBroadcast();
+APBool APNetworkInitIfname();
 APBool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGateway);
 APBool APNetworkInitControllerAddr(u32 controllerAddr);
+APBool APNetworkInitBroadcast();
 void APNetworkCloseSocket(APSocket s);
 
 APBool APNetworkSend(
