@@ -4,7 +4,6 @@ char* gIfEthName;
 char* gIfWlanName;
 
 u32 gSeqNum;
-u32 gWaitSeqNum;
 u32 gControllerSeqNum;
 
 u16 gAPID;
@@ -43,7 +42,6 @@ __inline__ char* APGetIfEthName() { return gIfEthName; }
 __inline__ char* APGetIfWlanName() { return gIfWlanName; }
 
 __inline__ u32 APGetSeqNum() { return gSeqNum; }
-__inline__ u32 APGetWaitSeqNum() { return gWaitSeqNum; }
 __inline__ u32 APGetControllerSeqNum() { return gControllerSeqNum; }
 
 __inline__ u16 APGetAPID() { return gAPID; }
@@ -87,7 +85,6 @@ void APInit()
 	srand( (unsigned)time( NULL ) );
 
 	gSeqNum = rand();
-	gWaitSeqNum = gSeqNum;
 	gAPID = 0;
 }
 

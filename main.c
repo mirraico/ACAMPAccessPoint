@@ -108,7 +108,7 @@ int main()
 				// nextState = APEnterConfigureRetry();
 				break;
 			case AP_ENTER_RUN:
-				// nextState = APEnterRun();
+				nextState = APEnterRun();
 				break;
 			case AP_ENTER_DOWN:
 				// nextState = APEnterDown();

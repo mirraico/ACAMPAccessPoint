@@ -190,7 +190,7 @@ APBool APReceiveDiscoveryResponse() {
 	  (u8)(recvAddr >> 8),  (u8)(recvAddr >> 0));
 	
 	/* check if it is a valid Discovery Response */
-	if(!APErr(APParseDiscoveryResponse(buf, readBytes, APGetWaitSeqNum(), controllerPtr))) {
+	if(!APErr(APParseDiscoveryResponse(buf, readBytes, APGetSeqNum(), controllerPtr))) {
 		return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
 	}
 
@@ -296,17 +296,16 @@ APStateTransition APEnterDiscovery()
 		    return AP_ENTER_DOWN;
         }
         AP_FREE_PROTOCOL_MESSAGE(sendMsg);
-        APSeqNumIncrement();
 
         gDiscoveryCount++;
 	    APDebugLog(3, "The number of discovery operations = %d", gDiscoveryCount);
 
         /* wait for Responses */
         if(!APErr(APReadDiscoveryResponse())) {
-            APWaitSeqNumIncrement();
+            APSeqNumIncrement();
 			continue; // no available controller
 		}
-        APWaitSeqNumIncrement();
+        APSeqNumIncrement();
 
         //choose one controller
         if(!APErr(APEvaluateController())) {

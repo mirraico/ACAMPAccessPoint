@@ -270,4 +270,6 @@ APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 APBool APParseWEP(APProtocolMessage *msgPtr, int len, APWEP *valPtr);
 APBool APParseWPA(APProtocolMessage *msgPtr, int len, APWPA *valPtr);
 
+APBool APAssembleResultCode(APProtocolMessage *msgPtr, u16 code);
+
 #endif

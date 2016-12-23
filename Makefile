@@ -1,7 +1,7 @@
 CFLAGS = -g
 
-all: common.o protocol.o network.o setting.o ap.o error.o log.o hostapd.o discovery.o register.o configure.o main.o
-	gcc common.o protocol.o network.o setting.o ap.o error.o log.o hostapd.o discovery.o register.o configure.o main.o -o AP
+all: common.o protocol.o network.o setting.o ap.o error.o log.o hostapd.o discovery.o register.o configure.o run.o main.o
+	gcc common.o protocol.o network.o setting.o ap.o error.o log.o hostapd.o discovery.o register.o configure.o run.o main.o -o AP
 common.o: common.c common.h
 	gcc -c common.c
 protocol: protocol.c protocol.h
@@ -24,6 +24,8 @@ register: register.c
 	gcc -c register.c
 configure: configure.c
 	gcc -c configure.c
+run: run.c
+	gcc -c run.c
 main: main.c
 	gcc -g -c main.c
 clean:

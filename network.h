@@ -31,5 +31,6 @@ APBool APNetworkReceive(u8* buffer,
 					 int bufferLen, APNetworkAddress* addr, int* readLenPtr);
 APBool APNetworkReceiveFromBroad(u8* buffer,
 					 int bufferLen, APNetworkAddress* addr, int* readLenPtr);
+void APAddSocketToEpoll(int epollfd, int fd);
 
 #endif

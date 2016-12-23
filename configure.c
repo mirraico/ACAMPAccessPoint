@@ -9,6 +9,34 @@ int gConfigureCount;
 int gMaxConfigure = 3;
 int gConfigureInterval = 2;
 
+APBool APAssembleConfigurationUpdateResponse(APProtocolMessage *messagesPtr)
+{
+    int k = -1;
+	if(messagesPtr == NULL) APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleConfigurationUpdateResponse()");
+	
+    APProtocolMessage *msgElems;
+	int msgElemCount = 1;
+    AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleConfigurationUpdateResponse()"););
+
+    if(
+	   (!(APAssembleResultCode(&(msgElems[++k]), RESULT_SUCCESS)))
+	   )
+	{
+		int i;
+		for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
+		AP_FREE_OBJECT(msgElems);
+		return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+	}
+
+    return APAssembleControlMessage(messagesPtr, 
+				 APGetAPID(),
+				 APGetControllerSeqNum(),
+				 MSGTYPE_CONFIGURATION_UPDATE_RESPONSE,
+				 msgElems,
+				 msgElemCount
+	);
+}
+
 APBool APAssembleConfigurationReport(APProtocolMessage *messagesPtr)
 {
     int k = -1;
@@ -112,6 +140,10 @@ APBool APParseConfigurationUpdateRequest(char *msg, int len)
     }
     if(controlVal.msgType != MSGTYPE_CONFIGURATION_UPDATE_REQUEST) {
         APErrorLog("Message is not Configuration Update Request as Expected");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseConfigurationUpdateRequest()");
+    }
+    if(controlVal.apid != gAPID) {
+        APErrorLog("The APID carried in the message is not this AP");
 		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseConfigurationUpdateRequest()");
     }
 
@@ -377,6 +409,23 @@ APStateTransition APEnterConfigure()
         HdGenerateConfigurationFile();
         APDebugLog(3, "Generate the configuration file successfully");
         APLog("Start hostapd...");
-        exit(1);
+        //TODO: Start hostapd...
+
+        AP_INIT_PROTOCOL(sendMsg);
+	    APDebugLog(3, "Assemble Configuration Update Response");
+        if(!APErr(APAssembleConfigurationUpdateResponse(&sendMsg))) {
+            APErrorLog("Failed to assemble Configuration Update Response");
+		    return AP_ENTER_DOWN;
+        }
+	    APLog("Send Configuration Update Response");
+        if(!APErr(APNetworkSend(sendMsg))) {
+            APErrorLog("Failed to send Configuration Update Response");
+		    return AP_ENTER_DOWN;
+        }
+        AP_FREE_PROTOCOL_MESSAGE(sendMsg);
+        APControllerSeqNumIncrement();
+
+        APLog("The configure state is finished");
+        return AP_ENTER_RUN;
     }
 }

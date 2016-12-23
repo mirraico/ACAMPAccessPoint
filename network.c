@@ -318,3 +318,20 @@ APBool APNetworkTimedPollRead(APSocket sock, struct timeval *timeout) {
 
 	return AP_TRUE;
 }
+
+int APSetNonBlocking(int fd)
+{
+    int old_option = fcntl(fd, F_GETFL);
+    int new_option = old_option | O_NONBLOCK;
+    fcntl(fd, F_SETFD, new_option);
+    return old_option;
+}
+
+void APAddSocketToEpoll(int epollfd, int fd)
+{
+    struct epoll_event event;
+    event.data.fd = fd;
+    event.events = EPOLLIN | EPOLLET;
+    epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event);
+    APSetNonBlocking(fd);
+}

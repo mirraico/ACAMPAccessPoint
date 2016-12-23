@@ -826,3 +826,14 @@ APBool APParseWPA(APProtocolMessage *msgPtr, int len, APWPA *valPtr)
 	}
 	return AP_TRUE;
 }
+
+APBool APAssembleResultCode(APProtocolMessage *msgPtr, u16 code) 
+{
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleResultCode()");
+	
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 2, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleResultCode()"););
+	APDebugLog(5, "Assemble Result Code: 0x%04x", code);
+	APProtocolStore16(msgPtr, code);
+
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_RESULT_CODE);
+}

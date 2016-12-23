@@ -336,7 +336,7 @@ APBool APReceiveRegisterResponse()
     }
 	
 	/* check if it is a valid Register Response */
-	if(!APErr(APParseRegisterResponse(buf, readBytes, APGetWaitSeqNum()))) {
+	if(!APErr(APParseRegisterResponse(buf, readBytes, APGetSeqNum()))) {
 		return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
 	}
 
@@ -432,18 +432,17 @@ APStateTransition APEnterRegister()
 		    return AP_ENTER_DOWN;
         }
         AP_FREE_PROTOCOL_MESSAGE(sendMsg);
-        APSeqNumIncrement();
 
         gRegisterCount++;
 	    APDebugLog(3, "The number of REGISTER operations = %d", gRegisterCount);
 
         /* wait for Responses */
         if(!APErr(APReadRegisterResponse())) {
-			APWaitSeqNumIncrement();
+        	APSeqNumIncrement();
 			if(rejected) return AP_ENTER_DOWN; //rejected, do not need to repeated request
 			continue; // no response or invalid response
 		}
-		APWaitSeqNumIncrement();
+        APSeqNumIncrement();
 
         //set apid
     	APLog("Accept valid Register Response and assigned APID is %d", recvAPID);
