@@ -50,9 +50,9 @@ APBool APReceiveMessageInRunState()
 		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseConfigurationUpdateRequest()");
     }
 
-    case(controlVal.msgType) {
-        //TODO:
-    }
+    // case(controlVal.msgType) {
+    //     //TODO:
+    // }
 
 
     return AP_TRUE;
