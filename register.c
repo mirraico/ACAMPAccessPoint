@@ -452,5 +452,5 @@ APStateTransition APEnterRegister()
     }
 
     APLog("The register state is finished");
-    return AP_ENTER_CONFIGURE;
+    return AP_ENTER_RUN;
 }

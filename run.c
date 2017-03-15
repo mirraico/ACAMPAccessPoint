@@ -3,7 +3,6 @@
 #include "log.h"
 #include "ap.h"
 #include "network.h"
-#include "hostapd.h"
 
 #define MAX_EVENT_NUMBER 1024
 

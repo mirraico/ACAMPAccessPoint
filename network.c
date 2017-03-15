@@ -18,24 +18,28 @@ APBool APNetworkInitIfname()
             ifa = ifa->ifa_next;
             continue;
         }
-        if(strncmp(ifa->ifa_name, "wl", 2) == 0) //wl
-        {
-			AP_CREATE_OBJECT_SIZE_ERR(gIfWlanName, (IF_NAMESIZE+1), return AP_FALSE;);
-			AP_COPY_MEMORY(gIfWlanName, ifa->ifa_name, IF_NAMESIZE);
-			gIfWlanName[IF_NAMESIZE] = '\0';
-            strncpy(gIfWlanName, ifa->ifa_name, IF_NAMESIZE);
-			APDebugLog(5, "Wlan name: %s", gIfWlanName);
-        } else if(strncmp(ifa->ifa_name, "en", 2) == 0 || strncmp(ifa->ifa_name, "eth", 3) == 0) { //eth
+		if(strncmp(ifa->ifa_name, "en", 2) == 0 || strncmp(ifa->ifa_name, "eth", 3) == 0) { //eth
 			AP_CREATE_OBJECT_SIZE_ERR(gIfEthName, (IF_NAMESIZE+1), return AP_FALSE;);
 			AP_COPY_MEMORY(gIfEthName, ifa->ifa_name, IF_NAMESIZE);
 			gIfEthName[IF_NAMESIZE] = '\0';
             strncpy(gIfEthName, ifa->ifa_name, IF_NAMESIZE);
 			APDebugLog(5, "Eth name: %s", gIfEthName);
 		}
+		/*
+        else if(strncmp(ifa->ifa_name, "wl", 2) == 0) //wl
+        {
+			AP_CREATE_OBJECT_SIZE_ERR(gIfWlanName, (IF_NAMESIZE+1), return AP_FALSE;);
+			AP_COPY_MEMORY(gIfWlanName, ifa->ifa_name, IF_NAMESIZE);
+			gIfWlanName[IF_NAMESIZE] = '\0';
+            strncpy(gIfWlanName, ifa->ifa_name, IF_NAMESIZE);
+			APDebugLog(5, "Wlan name: %s", gIfWlanName);
+        }
+		*/
         ifa = ifa->ifa_next;
     }
     free(ifaddr);
-    return (gIfEthName && gIfWlanName) ? AP_TRUE : AP_FALSE;
+    //return (gIfEthName && gIfWlanName) ? AP_TRUE : AP_FALSE;
+    return gIfEthName ? AP_TRUE : AP_FALSE;
 }
 
 /**

@@ -143,34 +143,6 @@ APBool APParseSettingsFile()
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "HD_SYS_LOG_MODULES"))
-		{
-			gHdSysLogModules = APExtractIntVaule(pos+1);
-			
-			AP_FREE_OBJECT(line);
-			continue;	
-		}
-		if (!strcmp(APExtractTag(line), "HD_SYS_LOG_LEVEL"))
-		{
-			gHdSysLogLevel = APExtractIntVaule(pos+1);
-			
-			AP_FREE_OBJECT(line);
-			continue;	
-		}
-		if (!strcmp(APExtractTag(line), "HD_STDOUT_LOG_MODULES"))
-		{
-			gHdStdoutModules = APExtractIntVaule(pos+1);
-			
-			AP_FREE_OBJECT(line);
-			continue;	
-		}
-		if (!strcmp(APExtractTag(line), "HD_STDOUT_LOG_LEVEL"))
-		{
-			gHdStdoutLevel = APExtractIntVaule(pos+1);
-			
-			AP_FREE_OBJECT(line);
-			continue;	
-		}
 		if (!strcmp(APExtractTag(line), "AP_NAME"))
 		{
 			char* value = APExtractStringVaule(pos+1);
@@ -194,6 +166,19 @@ APBool APParseSettingsFile()
 			AP_COPY_MEMORY(gAPDescriptor, value, len);
 
 			APDebugLog(5, "CONF AP Descriptor: %s", gAPDescriptor);
+			AP_FREE_OBJECT(line);
+			continue;
+		}
+		if (!strcmp(APExtractTag(line), "ETH_INTERFACE"))
+		{
+			char* value = APExtractStringVaule(pos+1);
+			int len = strlen(value);
+			
+			AP_CREATE_STRING_SIZE_ERR(gIfEthName, len + 1, return AP_FALSE;);
+			AP_ZERO_MEMORY(gIfEthName, len + 1);
+			AP_COPY_MEMORY(gIfEthName, value, len);
+
+			APDebugLog(5, "Eth Interface Name: %s", gIfEthName);
 			AP_FREE_OBJECT(line);
 			continue;
 		}
@@ -275,14 +260,7 @@ APBool APParseSettingsFile()
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "WEP_DEFAULT_KEY"))
-		{
-			gWEP.default_key = APExtractIntVaule(pos+1);
-			
-			APDebugLog(5, "CONF WEP Default Key: %u", gWEP.default_key);
-			AP_FREE_OBJECT(line);
-			continue;	
-		}
+		/*
 		if (!strcmp(APExtractTag(line), "WEP_DEFAULT_KEY"))
 		{
 			gWEP.default_key = APExtractIntVaule(pos+1);
@@ -427,6 +405,7 @@ APBool APParseSettingsFile()
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
+		*/
 		if (!strcmp(APExtractTag(line), "WPA_PASSPHRASE"))
 		{
 			char* value = APExtractStringVaule(pos+1);
@@ -440,6 +419,7 @@ APBool APParseSettingsFile()
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
+		/*
 		if (!strcmp(APExtractTag(line), "WPA_PAIRWIRE"))
 		{
 			gWPA.pairwire_cipher = APExtractIntVaule(pos+1);
@@ -456,7 +436,8 @@ APBool APParseSettingsFile()
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
-
+		*/
+		
 		AP_FREE_OBJECT(line);
 		continue;	
 	}
@@ -509,17 +490,12 @@ void APDefaultSettings()
 	gAPLogLevel = 0;
 	gAPStdoutLevel = 0;
 
-	gHdSysLogModules = -1;
-	gHdSysLogLevel = 2;
-	gHdStdoutModules = -1;
-	gHdStdoutLevel = 2;
-
 	gAPName = "unnamed AP";
 	gAPDescriptor = "no descriptor";
 
 	/* init in APNetworkInitIfname() */
 	gIfEthName = NULL;
-	gIfWlanName = NULL;
+	//gIfWlanName = NULL;
 
 	/* IP, MAC and default gateway addr will be automatically obtained soon by APNetworkInitLocalAddr() */
 	gAPIPAddr = 0;
@@ -538,6 +514,7 @@ void APDefaultSettings()
 	gChannel = 7;
 	gSecurityOption = SECURITY_OPEN;
 
+/*
 	gWEP.default_key = 0;
 	gWEP.key0_type = 0;
 	gWEP.key0 = NULL;
@@ -547,11 +524,10 @@ void APDefaultSettings()
 	gWEP.key2 = NULL;
 	gWEP.key3_type = 0;
 	gWEP.key3 = NULL;
+*/
 
-	gWPA.version = 2;
 	gWPA.password = NULL;
-	gWPA.pairwire_cipher = WPA_PAIRWIRECIPHER_TKIP_CCMP;
-	gWPA.group_rekey = 86400;
+	//gWPA.pairwire_cipher = WPA_PAIRWIRECIPHER_TKIP_CCMP;
 
 	gControllerName = NULL;
 	gControllerDescriptor = NULL;

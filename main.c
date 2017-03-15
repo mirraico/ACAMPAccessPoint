@@ -40,8 +40,13 @@ int main()
 	APInitLogFile();
 	APLog("Finished reading the setting file");
 	
-	if(!APNetworkInitIfname()) {
-		APErrorLog("Can't obtain Ethernet or Wlan interface name");
+	// if(!APNetworkInitIfname()) {
+	// 	APErrorLog("Can't obtain Ethernet interface");
+	// 	//APErrorLog("Can't obtain Ethernet or Wlan interface name");
+	// 	exit(1);
+	// }
+	if(gIfEthName == NULL) {
+		APErrorLog("Can't obtain Ethernet interface");
 		exit(1);
 	}
 
@@ -58,7 +63,7 @@ int main()
 	  (u8)(gAPDefaultGateway >> 8),  (u8)(gAPDefaultGateway >> 0));
 
 	APDebugLog(3, "All init is finished");
-	APLog("Starting WTP...");
+	APLog("Starting AP...");
 
 	/* if Controller address is given, jump Discovery and use this address for register */
 	if(gDiscoveryType != DISCOVERY_TPYE_DISCOVERY) 
@@ -83,12 +88,10 @@ int main()
 			 	} else {
 					 gDiscoveryType = DISCOVERY_TPYE_DISCOVERY;
 				 }
-			 case DISCOVERY_TPYE_DNS: //TODO: DISCOVERY_TPYE_DNS
+			 //case DISCOVERY_TPYE_DNS:
 			 default:
 			 	break;
 		}
-		
-		
 	}
 	
 
@@ -101,14 +104,8 @@ int main()
 			case AP_ENTER_REGISTER:
 				nextState = APEnterRegister();
 				break;
-			case AP_ENTER_CONFIGURE:
-				nextState = APEnterConfigure();
-				break;
-			case AP_ENTER_CONFIGURE_RETRY:
-				// nextState = APEnterConfigureRetry();
-				break;
 			case AP_ENTER_RUN:
-				nextState = APEnterRun();
+				//nextState = APEnterRun();
 				break;
 			case AP_ENTER_DOWN:
 				// nextState = APEnterDown();

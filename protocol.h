@@ -30,7 +30,7 @@ typedef struct {
 	u16 msgLen;
 } APHeaderVal;
 #define HEADER_LEN 16
-#define CURRENT_VERSION 0x02
+#define CURRENT_VERSION 0x03
 #define TYPE_CONTROL 0x00
 
 
@@ -68,10 +68,18 @@ typedef struct {
 #define MSGTYPE_REGISTER_RESPONSE 0x0102
 #define MSGTYPE_UNREGISTER_REQUEST 0x0103
 #define MSGTYPE_UNREGISTER_RESPONSE 0x0104
+#define MSGTYPE_CONFIGURATION_REQUEST 0x0201
+#define MSGTYPE_CONFIGURATION_RESPONSE 0x0202
 #define MSGTYPE_CONFIGURATION_UPDATE_REQUEST 0x0201
 #define MSGTYPE_CONFIGURATION_UPDATE_RESPONSE 0x0202
-#define MSGTYPE_CONFIGURATION_REQUEST 0x0203
-#define MSGTYPE_CONFIGURATION_REPORT 0x0204
+#define MSGTYPE_SCAN_REQUEST 0x0301
+#define MSGTYPE_SCAN_RESPONSE 0x0302
+#define MSGTYPE_STATION_REQUEST 0x0303
+#define MSGTYPE_STATION_RESPONSE 0x0304
+#define MSGTYPE_STATISTIC_REQUEST 0x0305
+#define MSGTYPE_STATISTIC_RESPONSE 0x0306
+#define MSGTYPE_SYSTEM_REQUEST 0x0307
+#define MSGTYPE_SYSTEM_RESPONSE 0x0308
 
 /* msg elem type */
 #define MSGELEMTYPE_RESULT_CODE 0x0001
@@ -93,8 +101,14 @@ typedef struct {
 #define MSGELEMTYPE_HARDWARE_MODE 0x0103
 #define MSGELEMTYPE_SUPPRESS_SSID 0x0104
 #define MSGELEMTYPE_SECURITY_OPTION 0x0105
-#define MSGELEMTYPE_WEP_INFO 0x0201
-#define MSGELEMTYPE_WPA_INFO 0x0202
+#define MSGELEMTYPE_MACFILTER_MODE 0x0106
+#define MSGELEMTYPE_TX_POWER 0x0107
+//#define MSGELEMTYPE_WEP_INFO 0x0201
+#define MSGELEMTYPE_WPA_PWD 0x0202
+//#define MSGELEMTYPE_WPA_AUTH 0x0203
+#define MSGELEMTYPE_ADD_MACFILTER 0x0301
+#define MSGELEMTYPE_DEL_MACFILTER 0x0302
+#define MSGELEMTYPE_CLEAR_MACFILTER 0x0303
 
 /* result code */
 #define RESULT_SUCCESS 0x0000
@@ -113,7 +127,7 @@ typedef struct {
 #define DISCOVERY_TPYE_DISCOVERY 0
 #define DISCOVERY_TPYE_STATIC 1
 #define DISCOVERY_TPYE_DEFAULT_GATE 2
-#define DISCOVERY_TPYE_DNS 3
+//#define DISCOVERY_TPYE_DNS 3
 
 /* hardware mode */
 #define HWMODE_A 0
@@ -127,22 +141,23 @@ typedef struct {
 
 /* security option */
 #define SECURITY_OPEN 0
-#define SECURITY_WEP 1
+//#define SECURITY_WEP 1
 #define SECURITY_WPA 2
 
-/* wep type */
+/* wep type 
 #define WEPTYPE_CHAR5 1
 #define WEPTYPE_CHAR13 2
 #define WEPTYPE_CHAR16 3
 #define WEPTYPE_HEX10 4
 #define WEPTYPE_HEX26 5
 #define WEPTYPE_HEX32 6
+*/
 
-/* wpa pairwire cipher */
+/* wpa pairwire cipher 
 #define WPA_PAIRWIRECIPHER_TKIP 0
 #define WPA_PAIRWIRECIPHER_CCMP 1
 #define WPA_PAIRWIRECIPHER_TKIP_CCMP 2
-
+*/
 
 
 /* fsm */
@@ -150,8 +165,8 @@ typedef enum {
 	AP_ENTER_DOWN,
 	AP_ENTER_DISCOVERY,
 	AP_ENTER_REGISTER,
-	AP_ENTER_CONFIGURE,
-	AP_ENTER_CONFIGURE_RETRY,
+	//AP_ENTER_CONFIGURE,
+	//AP_ENTER_CONFIGURE_RETRY,
 	AP_ENTER_RUN
 } APStateTransition;
 
@@ -259,16 +274,16 @@ APBool APAssembleChannel(APProtocolMessage *msgPtr);
 APBool APAssembleHardwareMode(APProtocolMessage *msgPtr);
 APBool APAssembleSuppressSSID(APProtocolMessage *msgPtr);
 APBool APAssembleSecurityOption(APProtocolMessage *msgPtr);
-APBool APAssembleWEP(APProtocolMessage *msgPtr);
-APBool APAssembleWPA(APProtocolMessage *msgPtr);
+//APBool APAssembleWEP(APProtocolMessage *msgPtr);
+//APBool APAssembleWPA(APProtocolMessage *msgPtr);
 
 APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr);
 APBool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 APBool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 APBool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-APBool APParseWEP(APProtocolMessage *msgPtr, int len, APWEP *valPtr);
-APBool APParseWPA(APProtocolMessage *msgPtr, int len, APWPA *valPtr);
+//APBool APParseWEP(APProtocolMessage *msgPtr, int len, APWEP *valPtr);
+//APBool APParseWPA(APProtocolMessage *msgPtr, int len, APWPA *valPtr);
 
 APBool APAssembleResultCode(APProtocolMessage *msgPtr, u16 code);
 

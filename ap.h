@@ -4,7 +4,7 @@
 #include "common.h"
 
 extern char* gIfEthName;
-extern char* gIfWlanName;
+//extern char* gIfWlanName;
 
 extern u32 gSeqNum;
 extern u32 gControllerSeqNum;
@@ -26,18 +26,13 @@ extern u32 gAPIPAddr;
 extern u8 gAPMACAddr[6];
 extern u32 gAPDefaultGateway;
 
-extern int gHdSysLogModules;
-extern int gHdSysLogLevel;
-extern int gHdStdoutModules;
-extern int gHdStdoutLevel;
-
 extern char* gSSID;
 extern u8 gChannel;
 extern u8 gHardwareMode;
 extern u8 gSuppressSSID;
 extern u8 gSecurityOption;
 
-/* wep */
+/* wep 
 typedef struct {
 	u8 default_key;
 	u8 key0_type;
@@ -49,25 +44,25 @@ typedef struct {
 	u8 key3_type;
 	char* key3;
 } APWEP;
-
-extern int WEP_LEN[7];
+*/
+//extern int WEP_LEN[7];
 
 /* wpa/wpa2 */
 typedef struct {
-	u8 version;
-	u8 pairwire_cipher;
+	//u8 version;
+	//u8 pairwire_cipher;
 	char* password;
-	u32 group_rekey;
+	//u32 group_rekey;
 } APWPA;
 
-extern APWEP gWEP;
+//extern APWEP gWEP;
 extern APWPA gWPA;
 
 #define APSeqNumIncrement()         gSeqNum++
 #define APControllerSeqNumIncrement()         gControllerSeqNum++
 
 extern char* APGetIfEthName();
-extern char* APGetIfWlanName();
+//extern char* APGetIfWlanName();
 
 extern u32 APGetSeqNum();
 extern u32 APGetControllerSeqNum();
@@ -90,18 +85,13 @@ extern u32 APGetAPIPAddr();
 extern u8* APGetAPMACAddr();
 extern u32 APGetAPDefaultGateway();
 
-extern int APGetHdSysLogModules();
-extern int APGetHdSysLogLevel();
-extern int APGetHdStdoutModules();
-extern int APGetHdStdoutLevel();
-
 extern char* APGetSSID();
 extern u8 APGetChannel();
 extern u8 APGetHardwareMode();
 extern u8 APGetSuppressSSID();
 extern u8 APGetSecurityOption();
 
-extern APWEP* APGetWEP();
+//extern APWEP* APGetWEP();
 extern APWPA* APGetWPA();
 
 void APInit();

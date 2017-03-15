@@ -567,7 +567,7 @@ APBool APAssembleSecurityOption(APProtocolMessage *msgPtr)
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SECURITY_OPTION);
 }
-
+/*
 APBool APAssembleWEP(APProtocolMessage *msgPtr) 
 {
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleWEP()");
@@ -671,7 +671,7 @@ APBool APAssembleWPA(APProtocolMessage *msgPtr)
 	
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_WPA_INFO);
 }
-
+*/
 APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
@@ -747,7 +747,7 @@ APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr)
 	}
 	return AP_TRUE;
 }
-
+/*
 APBool APParseWEP(APProtocolMessage *msgPtr, int len, APWEP *valPtr)
 {
 	int i;
@@ -826,7 +826,7 @@ APBool APParseWPA(APProtocolMessage *msgPtr, int len, APWPA *valPtr)
 	}
 	return AP_TRUE;
 }
-
+*/
 APBool APAssembleResultCode(APProtocolMessage *msgPtr, u16 code) 
 {
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleResultCode()");
