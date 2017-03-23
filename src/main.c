@@ -18,7 +18,7 @@ int main()
 {
 	APStateTransition nextState = AP_ENTER_DISCOVERY;
 
-	APInit();
+	APInitProtocol();
 	APDefaultSettings();
 
 	if(!APInitErrorHandling()) {
@@ -76,6 +76,7 @@ int main()
 					APLog("Use static controller addr to register: %u.%u.%u.%u", (u8)(gControllerIPAddr >> 24),\
 		 				(u8)(gControllerIPAddr >> 16),  (u8)(gControllerIPAddr >> 8),  (u8)(gControllerIPAddr >> 0));
 				} else {
+					APLog("Static address is not specified");
 					gDiscoveryType = DISCOVERY_TPYE_DISCOVERY;
 				}
 				break;
@@ -86,8 +87,9 @@ int main()
 					APLog("Use default gateway addr to register: %u.%u.%u.%u", (u8)(gControllerIPAddr >> 24),\
 		 				(u8)(gControllerIPAddr >> 16),  (u8)(gControllerIPAddr >> 8),  (u8)(gControllerIPAddr >> 0));
 			 	} else {
-					 gDiscoveryType = DISCOVERY_TPYE_DISCOVERY;
-				 }
+					APLog("Default gateway is not set");
+					gDiscoveryType = DISCOVERY_TPYE_DISCOVERY;
+				}
 			 //case DISCOVERY_TPYE_DNS:
 			 default:
 			 	break;
@@ -105,7 +107,7 @@ int main()
 				nextState = APEnterRegister();
 				break;
 			case AP_ENTER_RUN:
-				//nextState = APEnterRun();
+				nextState = APEnterRun();
 				break;
 			case AP_ENTER_DOWN:
 				// nextState = APEnterDown();

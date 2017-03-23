@@ -9,6 +9,10 @@ extern char* gIfEthName;
 extern u32 gSeqNum;
 extern u32 gControllerSeqNum;
 
+extern int gRetransmitInterval;
+extern int gKeepAliveInterval;
+extern int gMaxRetransmit;
+
 extern u16 gAPID;
 extern u8 gDiscoveryType;
 extern u8 gRegisteredService;
@@ -64,6 +68,10 @@ extern APWPA gWPA;
 extern char* APGetIfEthName();
 //extern char* APGetIfWlanName();
 
+extern int APGetRetransmitInterval();
+extern int APGetKeepAliveInterval();
+extern int APGetMaxRetransmit();
+
 extern u32 APGetSeqNum();
 extern u32 APGetControllerSeqNum();
 
@@ -94,7 +102,7 @@ extern u8 APGetSecurityOption();
 //extern APWEP* APGetWEP();
 extern APWPA* APGetWPA();
 
-void APInit();
+void APInitProtocol();
 
 
 #endif // AP_H

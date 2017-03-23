@@ -1,26 +1,34 @@
-CFLAGS = -g
+include $(TOPDIR)/rules.mk
 
-all: common.o protocol.o network.o setting.o ap.o error.o log.o discovery.o register.o main.o
-	gcc common.o protocol.o network.o setting.o ap.o error.o log.o discovery.o register.o main.o -o AP
-common.o: common.c common.h
-	gcc -c common.c
-protocol: protocol.c protocol.h
-	gcc -c protocol.c
-network: network.c network.h
-	gcc -c network.c
-setting: setting.c setting.h
-	gcc -c setting.c
-ap: ap.c ap.h
-	gcc -c ap.c
-error: error.c error.h
-	gcc -c error.c
-log: log.c log.h
-	gcc -c log.c
-discovery: discovery.c
-	gcc -c discovery.c
-register: register.c
-	gcc -c register.c
-main: main.c
-	gcc -g -c main.c
-clean:
-	rm -f *.o *.log *.tmp AP
+PKG_NAME:=acamp
+PKG_RELEASE:=0.3
+
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
+
+include $(INCLUDE_DIR)/package.mk
+
+define Package/acamp
+	SECTION:=utils
+	CATEGORY:=Utilities
+	TITLE:=acamp
+	DEPENDS:=+libuci
+endef
+
+define Package/acamp/description
+	acamp agent for ap.
+endef
+
+define Build/Prepare
+	echo "ACAMP Package/Prepare"
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src/* $(PKG_BUILD_DIR)/
+endef
+
+define Package/acamp/install
+	echo "ACAMP Package/install"
+	$(INSTALL_DIR) $(1)/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/acamp $(1)/bin/
+endef
+
+$(eval $(call BuildPackage,acamp))
+

@@ -17,7 +17,7 @@ typedef struct sockaddr_in APNetworkAddress;
 extern APSocket gSocket;
 extern APSocket gSocketBroad;
 
-APBool APNetworkInitIfname();
+//APBool APNetworkInitIfname();
 APBool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGateway);
 APBool APNetworkInitControllerAddr(u32 controllerAddr);
 APBool APNetworkInitBroadcast();
@@ -31,6 +31,6 @@ APBool APNetworkReceive(u8* buffer,
 					 int bufferLen, APNetworkAddress* addr, int* readLenPtr);
 APBool APNetworkReceiveFromBroad(u8* buffer,
 					 int bufferLen, APNetworkAddress* addr, int* readLenPtr);
-void APAddSocketToEpoll(int epollfd, int fd);
+//void APAddSocketToEpoll(int epollfd, int fd);
 
 #endif

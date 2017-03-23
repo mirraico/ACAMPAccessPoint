@@ -4,6 +4,7 @@ APSocket gSocket = -1;
 APSocket gSocketBroad = -1;
 APNetworkAddress gControllerSockaddr;
 
+/*
 APBool APNetworkInitIfname()
 {
     struct ifaddrs *ifaddr, *ifa;
@@ -25,7 +26,7 @@ APBool APNetworkInitIfname()
             strncpy(gIfEthName, ifa->ifa_name, IF_NAMESIZE);
 			APDebugLog(5, "Eth name: %s", gIfEthName);
 		}
-		/*
+		
         else if(strncmp(ifa->ifa_name, "wl", 2) == 0) //wl
         {
 			AP_CREATE_OBJECT_SIZE_ERR(gIfWlanName, (IF_NAMESIZE+1), return AP_FALSE;);
@@ -34,13 +35,14 @@ APBool APNetworkInitIfname()
             strncpy(gIfWlanName, ifa->ifa_name, IF_NAMESIZE);
 			APDebugLog(5, "Wlan name: %s", gIfWlanName);
         }
-		*/
+		
         ifa = ifa->ifa_next;
     }
     free(ifaddr);
     //return (gIfEthName && gIfWlanName) ? AP_TRUE : AP_FALSE;
     return gIfEthName ? AP_TRUE : AP_FALSE;
 }
+*/
 
 /**
  * inner function, get local ip address and default gateway
@@ -114,8 +116,9 @@ void APNetworkParseRoutes(struct nlmsghdr *nlHdr, u32* localIP, u32* localDefaul
 	}
 
 	/* use wired ethernet to connect with controller */
-	if(strncmp(prtInfo->ifName, "en", 2) != 0 && strncmp(prtInfo->ifName, "eth", 3) != 0) return;
+	// if(strncmp(prtInfo->ifName, "en", 2) != 0 && strncmp(prtInfo->ifName, "eth", 3) != 0) return;
 	// if(strncmp(prtInfo->ifName, "wl", 2) != 0) return;
+	if(strcmp(prtInfo->ifName, gIfEthName) != 0) return;
 
 	if (prtInfo->dstAddr.s_addr == 0)
 		*localDefaultGateway = ntohl((prtInfo->gateWay).s_addr);
@@ -323,6 +326,7 @@ APBool APNetworkTimedPollRead(APSocket sock, struct timeval *timeout) {
 	return AP_TRUE;
 }
 
+/*
 int APSetNonBlocking(int fd)
 {
     int old_option = fcntl(fd, F_GETFL);
@@ -339,3 +343,4 @@ void APAddSocketToEpoll(int epollfd, int fd)
     epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event);
     APSetNonBlocking(fd);
 }
+*/

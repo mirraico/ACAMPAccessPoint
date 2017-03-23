@@ -14,12 +14,12 @@ typedef struct {
 int rejected;
 
 int gRegisterCount;
-int gMaxRegister = 3;
-int gRegisterInterval = 2;
+int gMaxRegister;
+int gRegisterInterval;
 
 u16 recvAPID;
 u8 recvRegisteredService;
-
+u32 recvControllerSeqNum;
 
 APBool APAssembleRegisterRequest(APProtocolMessage *messagesPtr)
 {
@@ -117,8 +117,8 @@ APBool APParseRegisterResponse(char *msg,
                     return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
 				if(
 					result != RESULT_SUCCESS &&
-					result != RESULT_FAILURE &&
-					result != RESULT_UNRECOGNIZED_ELEM
+					result != RESULT_FAILURE 
+					//result != RESULT_UNRECOGNIZED_ELEM
 				) {
 					APErrorLog("Unrecognized Result Code");
 					/* needn't' return but go on */
@@ -213,6 +213,16 @@ APBool APParseRegisterResponse(char *msg,
                     return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
                 successFlag |= 0x40;
 				break;
+            case MSGELEMTYPE_CONTROLLER_NEXTSEQ:
+                if(successFlag & 0x80) {
+                    APParseRepeatedMsgElem(&completeMsg, len);
+                    APErrorLog("Repeated Message Element");
+                    break;
+                }
+				if(!(APParseControllerNextSeq(&completeMsg, len, &recvControllerSeqNum)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                successFlag |= 0x80;
+				break;
 			
 			default:
                 APParseUnrecognizedMsgElem(&completeMsg, len);
@@ -222,7 +232,7 @@ APBool APParseRegisterResponse(char *msg,
 		}
 	}
 
-	if(successFlag != 0x7F && failureFlag != 0x03) { //incomplete message
+	if(successFlag != 0xFF && failureFlag != 0x03) { //incomplete message
         APErrorLog("Incomplete Message Element in Register Response");
         return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseRegisterResponse()");
     }
@@ -240,9 +250,9 @@ APBool APParseRegisterResponse(char *msg,
 			case REASON_INVALID_VERSION:
 				APLog("Controller rejected the Register Request, the reason is protocol version does not match");
 				return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
-			case REASON_REPEATED_REGISTER:
-				APLog("Controller rejected the Register Request, the reason is duplicated service request");
-				return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
+			// case REASON_REPEATED_REGISTER:
+			// 	APLog("Controller rejected the Register Request, the reason is duplicated service request");
+			// 	return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
 			case REASON_INSUFFICIENT_RESOURCE:
 				APLog("Controller rejected the Register Request, because there is no enough resources");
 				return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
@@ -253,14 +263,14 @@ APBool APParseRegisterResponse(char *msg,
 		return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
 	}
 
-	if(result == RESULT_UNRECOGNIZED_ELEM) { //TODO: RESULT_UNRECOGNIZED_ELEM
-		APErrorLog("This Result is not currently being processed");
-        return APErrorRaise(AP_ERROR_GENERAL, "APParseRegisterResponse()");
-	}
+	// if(result == RESULT_UNRECOGNIZED_ELEM) { //TODO: RESULT_UNRECOGNIZED_ELEM
+	// 	APErrorLog("This Result is not currently being processed");
+    //     return APErrorRaise(AP_ERROR_GENERAL, "APParseRegisterResponse()");
+	// }
 
 	/* accept */
 	/* If accepted, The message should contain only some specified element */
-	if(successFlag != 0x7F || failureFlag != 0x01) {
+	if(successFlag != 0xFF || failureFlag != 0x01) {
 		APErrorLog("The Message carrying some wrong information");
 		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseRegisterResponse()");
 	}
@@ -268,6 +278,10 @@ APBool APParseRegisterResponse(char *msg,
 	if(gRegisteredService != recvRegisteredService) {
         APErrorLog("The service is different from the requested one");
 		return APErrorRaise(AP_ERROR_WARNING, "APParseRegisterResponse()");
+	}
+
+	if(controlVal.apid != recvAPID) {
+        APErrorLog("The apid in message is different from the one in message header");
 	}
 
 	if(gControllerName == NULL || strcmp(gControllerName, recvControllerInfo.name) != 0) {
@@ -406,6 +420,8 @@ APStateTransition APEnterRegister()
 	APLog("######### Register State #########");
 
     gRegisterCount = 0;
+	gMaxRegister = gMaxRetransmit;
+	gRegisterInterval = gRetransmitInterval;
 
     if(!APNetworkInitControllerAddr(gControllerIPAddr)) {
         APErrorLog("Init singlecast socket failed");
@@ -416,6 +432,7 @@ APStateTransition APEnterRegister()
     {
         if(gRegisterCount == gMaxRegister) {
             APLog("No Register Responses for 3 times");
+        	APSeqNumIncrement();
 			return AP_ENTER_DOWN;
         }
         
@@ -438,19 +455,25 @@ APStateTransition APEnterRegister()
 
         /* wait for Responses */
         if(!APErr(APReadRegisterResponse())) {
-        	APSeqNumIncrement();
 			if(rejected) return AP_ENTER_DOWN; //rejected, do not need to repeated request
+			gRegisterInterval *= 2;
+			if(gRegisterInterval > (APGetKeepAliveInterval() / 2)) {
+				gRegisterInterval = APGetKeepAliveInterval() / 2;
+			}
+	    	APDebugLog(5, "Adjust the register interval to %d sec", gRegisterInterval);
 			continue; // no response or invalid response
 		}
-        APSeqNumIncrement();
 
         //set apid
     	APLog("Accept valid Register Response and assigned APID is %d", recvAPID);
+    	APLog("Controller Next Seq Num is %d", recvControllerSeqNum);
         APSetAPID(recvAPID);
+        APSetControllerSeqNum(recvControllerSeqNum);
         APLog("Registered service successfully");
         break;
     }
 
+    APSeqNumIncrement();
     APLog("The register state is finished");
     return AP_ENTER_RUN;
 }

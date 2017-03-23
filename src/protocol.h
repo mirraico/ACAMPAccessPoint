@@ -70,14 +70,14 @@ typedef struct {
 #define MSGTYPE_UNREGISTER_RESPONSE 0x0104
 #define MSGTYPE_CONFIGURATION_REQUEST 0x0201
 #define MSGTYPE_CONFIGURATION_RESPONSE 0x0202
-#define MSGTYPE_CONFIGURATION_UPDATE_REQUEST 0x0201
-#define MSGTYPE_CONFIGURATION_UPDATE_RESPONSE 0x0202
-#define MSGTYPE_SCAN_REQUEST 0x0301
-#define MSGTYPE_SCAN_RESPONSE 0x0302
-#define MSGTYPE_STATION_REQUEST 0x0303
-#define MSGTYPE_STATION_RESPONSE 0x0304
-#define MSGTYPE_STATISTIC_REQUEST 0x0305
-#define MSGTYPE_STATISTIC_RESPONSE 0x0306
+#define MSGTYPE_CONFIGURATION_UPDATE_REQUEST 0x0203
+#define MSGTYPE_CONFIGURATION_UPDATE_RESPONSE 0x0204
+//#define MSGTYPE_SCAN_REQUEST 0x0301
+//#define MSGTYPE_SCAN_RESPONSE 0x0302
+//#define MSGTYPE_STATION_REQUEST 0x0303
+//#define MSGTYPE_STATION_RESPONSE 0x0304
+//#define MSGTYPE_STATISTIC_REQUEST 0x0305
+//#define MSGTYPE_STATISTIC_RESPONSE 0x0306
 #define MSGTYPE_SYSTEM_REQUEST 0x0307
 #define MSGTYPE_SYSTEM_RESPONSE 0x0308
 
@@ -95,30 +95,36 @@ typedef struct {
 #define MSGELEMTYPE_AP_DESCRIPTOR 0x000b
 #define MSGELEMTYPE_AP_IP_ADDR 0x000c
 #define MSGELEMTYPE_AP_MAC_ADDR 0x000d
-#define MSGELEMTYPE_RETURNED_MSGELEM 0x000e
+//#define MSGELEMTYPE_RETURNED_MSGELEM 0x000e
+#define MSGELEMTYPE_CONTROLLER_NEXTSEQ 0x0010
+#define MSGELEMTYPE_DISIRED_CONF_LIST 0x0011
 #define MSGELEMTYPE_SSID 0x0101
 #define MSGELEMTYPE_CHANNEL 0x0102
 #define MSGELEMTYPE_HARDWARE_MODE 0x0103
 #define MSGELEMTYPE_SUPPRESS_SSID 0x0104
 #define MSGELEMTYPE_SECURITY_OPTION 0x0105
 #define MSGELEMTYPE_MACFILTER_MODE 0x0106
-#define MSGELEMTYPE_TX_POWER 0x0107
+#define MSGELEMTYPE_MACFILTER_LIST 0x0107
+//#define MSGELEMTYPE_TX_POWER 0x0108
 //#define MSGELEMTYPE_WEP_INFO 0x0201
 #define MSGELEMTYPE_WPA_PWD 0x0202
 //#define MSGELEMTYPE_WPA_AUTH 0x0203
-#define MSGELEMTYPE_ADD_MACFILTER 0x0301
-#define MSGELEMTYPE_DEL_MACFILTER 0x0302
-#define MSGELEMTYPE_CLEAR_MACFILTER 0x0303
+#define MSGELEMTYPE_ADD_MACFILTER 0x0501
+#define MSGELEMTYPE_DEL_MACFILTER 0x0502
+#define MSGELEMTYPE_CLEAR_MACFILTER 0x0503
+#define MSGELEMTYPE_SYSTEM_COMMAND 0x0401
+//#define MSGELEMTYPE_SCANNED_WLAN_INFO 0x0402
+//#define MSGELEMTYPE_STATION_INFO 0x0403
+//#define MSGELEMTYPE_STATISTICS 0x0404
 
 /* result code */
 #define RESULT_SUCCESS 0x0000
 #define RESULT_FAILURE 0x0001
-#define RESULT_UNRECOGNIZED_ELEM 0x0002
+//#define RESULT_UNRECOGNIZED_REQ 0x0002
 
 /* reason code */
 #define REASON_INVALID_VERSION 0x0101
-#define REASON_REPEATED_REGISTER 0x0102
-#define REASON_INSUFFICIENT_RESOURCE 0x0103
+#define REASON_INSUFFICIENT_RESOURCE 0x0102
 
 /* registered service */
 #define REGISTERED_SERVICE_CONF_STA 0x00
@@ -128,6 +134,9 @@ typedef struct {
 #define DISCOVERY_TPYE_STATIC 1
 #define DISCOVERY_TPYE_DEFAULT_GATE 2
 //#define DISCOVERY_TPYE_DNS 3
+
+/* returned msg elem */
+//#define RETERNED_ELEM_UNRECOGNIZED_ELEM 0x0000
 
 /* hardware mode */
 #define HWMODE_A 0
@@ -142,7 +151,9 @@ typedef struct {
 /* security option */
 #define SECURITY_OPEN 0
 //#define SECURITY_WEP 1
-#define SECURITY_WPA 2
+#define SECURITY_WPA_WPA2_MIXED 2
+#define SECURITY_WPA 3
+#define SECURITY_WPA2 4
 
 /* wep type 
 #define WEPTYPE_CHAR5 1
@@ -159,6 +170,17 @@ typedef struct {
 #define WPA_PAIRWIRECIPHER_TKIP_CCMP 2
 */
 
+/* mac filter */
+#define FILTER_NONE 0
+#define FILTER_ACCEPT_ONLY 1
+#define FILTER_DENY 2
+
+/* system command */
+#define SYSTEM_WLAN_DOWN 0
+#define SYSTEM_WLAN_UP 1
+#define SYSTEM_WLAN_RESTART 2
+#define SYSTEM_NETWORK_RESTART 3
+#define SYSTEM_SYSTEM_RESTART 4
 
 /* fsm */
 typedef enum {
@@ -177,7 +199,8 @@ typedef enum {
  */
 #define		AP_INIT_PROTOCOL(mess) {\
 							(mess).msg = NULL;\
-							(mess).offset = 0; }
+							(mess).offset = 0;\
+							(mess).type = 0; }
 
 /**
  * initialize APProtocolMessage structure, including memory allocation and clear, for required size
@@ -188,7 +211,8 @@ typedef enum {
 #define		AP_INIT_PROTOCOL_MESSAGE(mess, size, err) {\
 							AP_CREATE_OBJECT_SIZE_ERR(((mess).msg), (size), err);\
 							AP_ZERO_MEMORY(((mess).msg), (size));\
-							(mess).offset = 0; }
+							(mess).offset = 0;\
+							(mess).type = 0; }
 
 /**
  * free APProtocolMessage structure, including releasing memory
@@ -198,7 +222,8 @@ typedef enum {
 #define		AP_FREE_PROTOCOL_MESSAGE(mess) {\
  							AP_FREE_OBJECT(((mess).msg));\
 							(mess).msg = NULL;\
-							(mess).offset = 0; }
+							(mess).offset = 0;\
+							(mess).type = 0; }
 
 /**
  * create a array of APProtocolMessage structure, but not include memory allocation. commonly used in msg element
@@ -256,6 +281,7 @@ APBool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr);
 APBool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **valPtr);
 APBool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr);
 APBool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseControllerNextSeq(APProtocolMessage *msgPtr, int len, u32 *valPtr);
 
 APBool APAssembleRegisteredService(APProtocolMessage *msgPtr);
 APBool APAssembleAPName(APProtocolMessage *msgPtr);

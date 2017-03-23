@@ -178,7 +178,7 @@ APBool APParseSettingsFile()
 			AP_ZERO_MEMORY(gIfEthName, len + 1);
 			AP_COPY_MEMORY(gIfEthName, value, len);
 
-			APDebugLog(5, "Eth Interface Name: %s", gIfEthName);
+			APDebugLog(5, "CONF Eth Interface Name: %s", gIfEthName);
 			AP_FREE_OBJECT(line);
 			continue;
 		}

@@ -21,6 +21,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
+#include <uci.h>
+#include <libubox/uloop.h>
 
 typedef enum  {
 	AP_FALSE = 0,

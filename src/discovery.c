@@ -280,6 +280,7 @@ APStateTransition APEnterDiscovery()
 
         if(gDiscoveryCount == gMaxDiscovery) {
             APLog("No Discovery Responses for 3 times");
+            APSeqNumIncrement();
 			return AP_ENTER_DOWN;
         }
         
@@ -302,10 +303,8 @@ APStateTransition APEnterDiscovery()
 
         /* wait for Responses */
         if(!APErr(APReadDiscoveryResponse())) {
-            APSeqNumIncrement();
 			continue; // no available controller
 		}
-        APSeqNumIncrement();
 
         //choose one controller
         if(!APErr(APEvaluateController())) {
@@ -316,6 +315,7 @@ APStateTransition APEnterDiscovery()
         break;
     }
 
+    APSeqNumIncrement();
     APLog("The discovery state is finished");
     return AP_ENTER_REGISTER;
 }
