@@ -27,17 +27,21 @@ u32 gAPIPAddr;
 u8 gAPMACAddr[6];
 u32 gAPDefaultGateway;
 
-char* gSSID;
-u8 gChannel;
-u8 gHardwareMode;
-u8 gSuppressSSID;
-u8 gSecurityOption;
+/* all wireless conf */
+struct wlconf *wlconf;
+APBool wlflag;
+
+// char* gSSID;
+// u8 gChannel;
+// u8 gHardwareMode;
+// u8 gSuppressSSID;
+// u8 gSecurityOption;
 
 //APWEP gWEP;
 //int WEP_LEN[7] = {0, 5, 13, 16, 10, 26, 32};
-APWPA gWPA;
+// APWPA gWPA;
 
-__inline__ char* APGetIfEthName() { return gIfEthName; }
+// __inline__ char* APGetIfEthName() { return gIfEthName; }
 //__inline__ char* APGetIfWlanName() { return gIfWlanName; }
 
 __inline__ u32 APGetSeqNum() { return gSeqNum; }
@@ -66,14 +70,14 @@ __inline__ u32 APGetAPIPAddr() { return gAPIPAddr; }
 __inline__ u8* APGetAPMACAddr() { return gAPMACAddr; }
 __inline__ u32 APGetAPDefaultGateway() { return gAPDefaultGateway; }
 
-__inline__ char* APGetSSID() { return gSSID; }
-__inline__ u8 APGetChannel() { return gChannel; }
-__inline__ u8 APGetHardwareMode() { return gHardwareMode; }
-__inline__ u8 APGetSuppressSSID() { return gSuppressSSID; }
-__inline__ u8 APGetSecurityOption() { return gSecurityOption; }
+// __inline__ char* APGetSSID() { return gSSID; }
+// __inline__ u8 APGetChannel() { return gChannel; }
+// __inline__ u8 APGetHardwareMode() { return gHardwareMode; }
+// __inline__ u8 APGetSuppressSSID() { return gSuppressSSID; }
+// __inline__ u8 APGetSecurityOption() { return gSecurityOption; }
 
 //__inline__ APWEP* APGetWEP() { return &gWEP; }
-__inline__ APWPA* APGetWPA() { return &gWPA; }
+// __inline__ APWPA* APGetWPA() { return &gWPA; }
 
 
 /**

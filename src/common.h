@@ -23,6 +23,7 @@
 #include <sys/epoll.h>
 #include <uci.h>
 #include <libubox/uloop.h>
+#include "wlconf.h"
 
 typedef enum  {
 	AP_FALSE = 0,
@@ -46,7 +47,7 @@ typedef enum  {
 
 
 int APTimevalSubtract(struct timeval *res, const struct timeval *x, const struct timeval *y);
-
+void APMACStringToHex(char *str, int* hex);
 
 typedef u_int64_t u64;
 typedef u_int32_t u32;

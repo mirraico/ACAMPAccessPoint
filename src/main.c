@@ -10,6 +10,7 @@ void APDestroy()
 	APDebugLog(3, "Start destroying AP");
 	APNetworkCloseSocket(gSocket);
 	APNetworkCloseSocket(gSocketBroad);
+	wlconf_free(wlconf);
 	APLog("AP is down");
 	APCloseLogFile();
 }
@@ -17,6 +18,8 @@ void APDestroy()
 int main()
 {
 	APStateTransition nextState = AP_ENTER_DISCOVERY;
+
+	wlconf = wlconf_alloc();
 
 	APInitProtocol();
 	APDefaultSettings();
@@ -31,6 +34,10 @@ int main()
 		APErrorLog("Can't read setting file");
 		exit(1);
 	}
+
+	wlconf->change_commit(wlconf);
+	if(wlflag) system("wifi restart");
+	else system("wifi down");
 
 	// if(!APCheckSettings()) {
 	// 	APErrorLog("There may exist illegal assignment");
@@ -110,7 +117,6 @@ int main()
 				nextState = APEnterRun();
 				break;
 			case AP_ENTER_DOWN:
-				// nextState = APEnterDown();
 				APDestroy();
 				return 0;
 				break;

@@ -526,15 +526,14 @@ APBool APParseRegisteredService(APProtocolMessage *msgPtr, int len, u8 *valPtr)
 	return AP_TRUE;
 }
 
+
 APBool APAssembleSSID(APProtocolMessage *msgPtr) 
 {
-	char* str;
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSSID()");
-	str = APGetSSID();
 	
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSSID()"););
-	APDebugLog(5, "Assemble SSID: %s", str);
-	APProtocolStoreStr(msgPtr, str);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(wlconf->conf->ssid), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSSID()"););
+	APDebugLog(5, "Assemble SSID: %s", wlconf->conf->ssid);
+	APProtocolStoreStr(msgPtr, wlconf->conf->ssid);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SSID);
 }
@@ -544,8 +543,8 @@ APBool APAssembleChannel(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleChannel()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleChannel()"););
-	APDebugLog(5, "Assemble Channel: %u", APGetChannel());
-	APProtocolStore8(msgPtr, APGetChannel());
+	APDebugLog(5, "Assemble Channel: %u", wlconf->conf->channel);
+	APProtocolStore8(msgPtr, wlconf->conf->channel);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_CHANNEL);
 }
@@ -554,9 +553,16 @@ APBool APAssembleHardwareMode(APProtocolMessage *msgPtr)
 {
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleHardwareMode()");
 	
+	u8 hwMode = 0xFF;
+	if(!strcmp(wlconf->conf->hwmode, ONLY_A)) hwMode = HWMODE_A;
+	else if(!strcmp(wlconf->conf->hwmode, ONLY_B)) hwMode = HWMODE_B;
+	else if(!strcmp(wlconf->conf->hwmode, ONLY_G)) hwMode = HWMODE_G;
+	else if(!strcmp(wlconf->conf->hwmode, ONLY_N)) hwMode = HWMODE_N;
+	if(hwMode == 0xFF) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleHardwareMode()");
+
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleHardwareMode()"););
-	APDebugLog(5, "Assemble Hardware Mode: %u", APGetHardwareMode());
-	APProtocolStore8(msgPtr, APGetHardwareMode());
+	APDebugLog(5, "Assemble Hardware Mode: %u", hwMode);
+	APProtocolStore8(msgPtr, hwMode);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_HARDWARE_MODE);
 }
@@ -565,9 +571,11 @@ APBool APAssembleSuppressSSID(APProtocolMessage *msgPtr)
 {
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSuppressSSID()");
 	
+	u8 suppress = wlconf->conf->hidden ? 1 : 0;
+
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSuppressSSID()"););
-	APDebugLog(5, "Assemble Suppress SSID: %u", APGetSuppressSSID());
-	APProtocolStore8(msgPtr, APGetSuppressSSID());
+	APDebugLog(5, "Assemble Suppress SSID: %u", suppress);
+	APProtocolStore8(msgPtr, suppress);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SUPPRESS_SSID);
 }
@@ -576,12 +584,89 @@ APBool APAssembleSecurityOption(APProtocolMessage *msgPtr)
 {
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSecurityOption()");
 	
+	u8 security = 0xFF;
+	if(wlconf->conf->encryption == NULL || strlen(wlconf->conf->encryption) == 0) security = SECURITY_OPEN;
+	else if(!strcmp(wlconf->conf->encryption, NO_ENCRYPTION)) security = SECURITY_OPEN;
+	else if(!strcmp(wlconf->conf->encryption, WPA_WPA2_MIXED)) security = SECURITY_WPA_WPA2_MIXED;
+	else if(!strcmp(wlconf->conf->encryption, WPA_PSK)) security = SECURITY_WPA;
+	else if(!strcmp(wlconf->conf->encryption, WPA2_PSK)) security = SECURITY_WPA2;
+	if(security == 0xFF) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSecurityOption()");
+
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSecurityOption()"););
-	APDebugLog(5, "Assemble Security Option: %u", APGetSecurityOption());
-	APProtocolStore8(msgPtr, APGetSecurityOption());
+	APDebugLog(5, "Assemble Security Option: %u", security);
+	APProtocolStore8(msgPtr, security);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SECURITY_OPTION);
 }
+
+APBool APAssembleMACFilterMode(APProtocolMessage *msgPtr)
+{
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleMACFilterMode()");
+	
+	u8 mode = 0xFF;
+	if(wlconf->conf->macfilter == NULL || strlen(wlconf->conf->macfilter) == 0) mode = FILTER_NONE;
+	else if(!strcmp(wlconf->conf->macfilter, MAC_FILTER_NONE)) mode = FILTER_NONE;
+	else if(!strcmp(wlconf->conf->macfilter, MAC_FILTER_ALLOW)) mode = FILTER_ACCEPT_ONLY;
+	else if(!strcmp(wlconf->conf->macfilter, MAC_FILTER_DENY)) mode = FILTER_DENY;
+	if(mode == 0xFF) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleMACFilterMode()");
+
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleMACFilterMode()"););
+	APDebugLog(5, "Assemble MAC Filter Mode: %u", mode);
+	APProtocolStore8(msgPtr, mode);
+
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_MACFILTER_MODE);
+}
+
+APBool APAssembleMACFilterList(APProtocolMessage *msgPtr)
+{
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleMACFilterList()");
+	
+	int list_num = wlconf->conf->macfilter_list->listsize;
+	if(list_num == 0) {
+		APDebugLog(5, "Assemble MAC Filter List Size: 0");
+		return APAssembleMsgElem(msgPtr, MSGELEMTYPE_MACFILTER_MODE);
+	} 
+
+	APDebugLog(5, "Assemble MAC Filter List Size: %d", list_num);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, list_num * 6, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleMACFilterList()"););
+
+	struct maclist_node *node;
+	mlist_foreach_element(wlconf->conf->macfilter_list, node)
+	{
+		int i;
+		int mac[6];
+		APMACStringToHex(node->macaddr, mac);
+		for(i = 0; i < 6; i++) {
+			APProtocolStore8(msgPtr, mac[i]);
+		}
+		APDebugLog(5, "Assemble MAC Filter List: %s", node->macaddr);
+	}
+
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_MACFILTER_LIST);
+}
+
+APBool APAssembleTxPower(APProtocolMessage *msgPtr) 
+{
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleTxPower()");
+	
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleTxPower()"););
+	APDebugLog(5, "Assemble Tx Power: %u", wlconf->conf->txpower);
+	APProtocolStore8(msgPtr, wlconf->conf->txpower);
+
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_TX_POWER);
+}
+
+APBool APAssembleWPAPassword(APProtocolMessage *msgPtr) 
+{
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleWPAPassword()");
+	
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(wlconf->conf->key), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleWPAPassword()"););
+	APDebugLog(5, "Assemble WPA Password: %s", wlconf->conf->key);
+	APProtocolStoreStr(msgPtr, wlconf->conf->key);
+
+	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_WPA_PWD);
+}
+
 /*
 APBool APAssembleWEP(APProtocolMessage *msgPtr) 
 {
@@ -687,6 +772,27 @@ APBool APAssembleWPA(APProtocolMessage *msgPtr)
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_WPA_INFO);
 }
 */
+
+APBool APParseDesiredConfList(APProtocolMessage *msgPtr, int len, u8 **valPtr)
+{
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseDesoredConfList()");
+	
+	*valPtr = APProtocolRetrieveRawBytes(msgPtr, len);
+
+	// while(pos < len) {
+	// 	u16 type = APProtocolRetrieve16(msgPtr);
+	// 	APDebugLog(5, "Parse Desired Conf List: 0x%04x", type);
+	// 	AP_COPY_MEMORY(valPtr + pos, &type, 2);
+	// 	pos += 2;
+	// }
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseDesoredConfList()");
+	}
+}
+
+/*
 APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
@@ -762,6 +868,7 @@ APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr)
 	}
 	return AP_TRUE;
 }
+*/
 /*
 APBool APParseWEP(APProtocolMessage *msgPtr, int len, APWEP *valPtr)
 {
@@ -841,7 +948,7 @@ APBool APParseWPA(APProtocolMessage *msgPtr, int len, APWPA *valPtr)
 	}
 	return AP_TRUE;
 }
-*/
+
 APBool APAssembleResultCode(APProtocolMessage *msgPtr, u16 code) 
 {
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleResultCode()");
@@ -852,3 +959,4 @@ APBool APAssembleResultCode(APProtocolMessage *msgPtr, u16 code)
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_RESULT_CODE);
 }
+*/

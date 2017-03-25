@@ -215,48 +215,136 @@ APBool APParseSettingsFile()
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
+		if (!strcmp(APExtractTag(line), "WLAN"))
+		{
+			int flag = APExtractIntVaule(pos+1);
+			
+			if(!flag) wlflag = AP_FALSE;
+			
+			APDebugLog(5, "CONF MAC Filter: Reset");
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
 		if (!strcmp(APExtractTag(line), "SSID"))
 		{
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			AP_CREATE_STRING_SIZE_ERR(gSSID, len + 1, return AP_FALSE;);
-			AP_ZERO_MEMORY(gSSID, len + 1);
-			AP_COPY_MEMORY(gSSID, value, len);
+			char *ssid;
+			AP_CREATE_STRING_SIZE_ERR(ssid, len + 1, return AP_FALSE;);
+			AP_ZERO_MEMORY(ssid, len + 1);
+			AP_COPY_MEMORY(ssid, value, len);
+			wlconf->set_ssid(wlconf, ssid);
 
-			APDebugLog(5, "CONF SSID: %s", gSSID);
+			APDebugLog(5, "CONF SSID: %s", ssid);
+			AP_FREE_OBJECT(ssid);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "SUPPRESS_SSID"))
 		{
-			gSuppressSSID = APExtractIntVaule(pos+1);
+			int suppressSSID = APExtractIntVaule(pos+1);
+
+			if(suppressSSID == SUPPRESS_SSID_ENABLED) {
+				wlconf->set_ssid_hidden(wlconf, true);
+			} else {
+				wlconf->set_ssid_hidden(wlconf, false);
+			}
 			
-			APDebugLog(5, "CONF Suppress SSID: %u", gSuppressSSID);
+			APDebugLog(5, "CONF Suppress SSID: %u", suppressSSID);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "HW_MODE"))
 		{
-			gHardwareMode = APExtractIntVaule(pos+1);
-			
-			APDebugLog(5, "CONF Hardware Mode: %u", gHardwareMode);
+			int hwMode = APExtractIntVaule(pos+1);
+			switch(hwMode)
+			{
+				case HWMODE_A:
+					wlconf->set_hwmode(wlconf, ONLY_A);
+					break;
+				case HWMODE_B:
+					wlconf->set_hwmode(wlconf, ONLY_B);
+					break;
+				case HWMODE_G:
+					wlconf->set_hwmode(wlconf, ONLY_G);
+					break;
+				case HWMODE_N:
+					wlconf->set_hwmode(wlconf, ONLY_N);
+					break;
+			}
+
+			APDebugLog(5, "CONF Hardware Mode: %u", hwMode);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "CHANNEL"))
 		{
-			gChannel = APExtractIntVaule(pos+1);
+			int channel = APExtractIntVaule(pos+1);
 			
-			APDebugLog(5, "CONF Channel: %u", gChannel);
+			wlconf->set_channel(wlconf, channel);
+			
+			APDebugLog(5, "CONF Channel: %d", channel);
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+		if (!strcmp(APExtractTag(line), "TX_POWER"))
+		{
+			int tx_power = APExtractIntVaule(pos+1);
+			
+			wlconf->set_txpower(wlconf, tx_power);
+			
+			APDebugLog(5, "CONF Tx Power: %d", tx_power);
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "SECURITY_OPTION"))
 		{
-			gSecurityOption = APExtractIntVaule(pos+1);
+			int securityOption = APExtractIntVaule(pos+1);
 			
-			APDebugLog(5, "CONF Security Option: %u", gSecurityOption);
+			switch(securityOption)
+			{
+				case SECURITY_OPEN:
+					wlconf->set_encryption(wlconf, NO_ENCRYPTION);
+					break;
+				case SECURITY_WPA_WPA2_MIXED:
+					wlconf->set_encryption(wlconf, WPA_WPA2_MIXED);
+					break;
+				case SECURITY_WPA:
+					wlconf->set_encryption(wlconf, WPA_PSK);
+					break;
+				case SECURITY_WPA2:
+					wlconf->set_encryption(wlconf, WPA2_PSK);
+					break;
+			}
+
+			APDebugLog(5, "CONF Security Option: %u", securityOption);
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+		if (!strcmp(APExtractTag(line), "WPA_PASSPHRASE"))
+		{
+			char* value = APExtractStringVaule(pos+1);
+			int len = strlen(value);
+			
+			char *password;
+			AP_CREATE_STRING_SIZE_ERR(password, len + 1, return AP_FALSE;);
+			AP_ZERO_MEMORY(password, len + 1);
+			AP_COPY_MEMORY(password, value, len);
+			wlconf->set_key(wlconf, password);
+
+			APDebugLog(5, "CONF WPA Password: %s", password);
+			AP_FREE_OBJECT(password);
+			AP_FREE_OBJECT(line);
+			continue;	
+		}
+		if (!strcmp(APExtractTag(line), "RESET_MAC_FILTER"))
+		{
+			int reset = APExtractIntVaule(pos+1);
+			
+			if(reset) wlconf->set_macfilter(wlconf, MAC_FILTER_NONE);
+			
+			APDebugLog(5, "CONF MAC Filter: Reset");
 			AP_FREE_OBJECT(line);
 			continue;	
 		}
@@ -406,19 +494,6 @@ APBool APParseSettingsFile()
 			continue;	
 		}
 		*/
-		if (!strcmp(APExtractTag(line), "WPA_PASSPHRASE"))
-		{
-			char* value = APExtractStringVaule(pos+1);
-			int len = strlen(value);
-			
-			AP_CREATE_STRING_SIZE_ERR(gWPA.password, len + 1, return AP_FALSE;);
-			AP_ZERO_MEMORY(gWPA.password, len + 1);
-			AP_COPY_MEMORY(gWPA.password, value, len);
-
-			APDebugLog(5, "CONF WPA Password: %s", gWPA.password);
-			AP_FREE_OBJECT(line);
-			continue;	
-		}
 		/*
 		if (!strcmp(APExtractTag(line), "WPA_PAIRWIRE"))
 		{
@@ -494,8 +569,9 @@ void APDefaultSettings()
 	gAPDescriptor = "no descriptor";
 
 	/* init in APNetworkInitIfname() */
-	gIfEthName = NULL;
+	gIfEthName = "br-lan";
 	//gIfWlanName = NULL;
+	wlflag = AP_TRUE;
 
 	/* IP, MAC and default gateway addr will be automatically obtained soon by APNetworkInitLocalAddr() */
 	gAPIPAddr = 0;
@@ -508,31 +584,41 @@ void APDefaultSettings()
 	gStaticControllerIPAddr = 0; //static Controller IP addr
 	gRegisteredService = REGISTERED_SERVICE_CONF_STA; //configuration and station service
 
-	gSSID = "ap_ssid";
-	gSuppressSSID = SUPPRESS_SSID_DISABLED;
-	gHardwareMode = HWMODE_G;
-	gChannel = 7;
-	gSecurityOption = SECURITY_OPEN;
-
-/*
-	gWEP.default_key = 0;
-	gWEP.key0_type = 0;
-	gWEP.key0 = NULL;
-	gWEP.key1_type = 0;
-	gWEP.key1 = NULL;
-	gWEP.key2_type = 0;
-	gWEP.key2 = NULL;
-	gWEP.key3_type = 0;
-	gWEP.key3 = NULL;
-*/
-
-	gWPA.password = NULL;
-	//gWPA.pairwire_cipher = WPA_PAIRWIRECIPHER_TKIP_CCMP;
-
 	gControllerName = NULL;
 	gControllerDescriptor = NULL;
 	gControllerIPAddr = 0; 
 	for(i = 0; i < 6; i++) {
 		gControllerMACAddr[i] = 0;
 	}
+
+	// wlconf->set_ssid(wlconf, "openwrt1");
+	// wlconf->set_ssid_hidden(wlconf, false);
+	// wlconf->set_channel(wlconf, 7);
+	// wlconf->set_hwmode(wlconf, ONLY_G);
+	// wlconf->set_encryption(wlconf, NO_ENCRYPTION);
+	// wlconf->set_txpower(wlconf, 18);
+	// /* MAC Filter configuration */
+	// wlconf->set_macfilter(wlconf, MAC_FILTER_NONE);
+
+
+	// gSSID = "ap_ssid";
+	// gSuppressSSID = SUPPRESS_SSID_DISABLED;
+	// gHardwareMode = HWMODE_G;
+	// gChannel = 7;
+	// gSecurityOption = SECURITY_OPEN;
+
+
+	// gWEP.default_key = 0;
+	// gWEP.key0_type = 0;
+	// gWEP.key0 = NULL;
+	// gWEP.key1_type = 0;
+	// gWEP.key1 = NULL;
+	// gWEP.key2_type = 0;
+	// gWEP.key2 = NULL;
+	// gWEP.key3_type = 0;
+	// gWEP.key3 = NULL;
+
+
+	// gWPA.password = NULL;
+	//gWPA.pairwire_cipher = WPA_PAIRWIRECIPHER_TKIP_CCMP;
 }

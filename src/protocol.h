@@ -97,7 +97,7 @@ typedef struct {
 #define MSGELEMTYPE_AP_MAC_ADDR 0x000d
 //#define MSGELEMTYPE_RETURNED_MSGELEM 0x000e
 #define MSGELEMTYPE_CONTROLLER_NEXTSEQ 0x0010
-#define MSGELEMTYPE_DISIRED_CONF_LIST 0x0011
+#define MSGELEMTYPE_DESIRED_CONF_LIST 0x0011
 #define MSGELEMTYPE_SSID 0x0101
 #define MSGELEMTYPE_CHANNEL 0x0102
 #define MSGELEMTYPE_HARDWARE_MODE 0x0103
@@ -105,7 +105,7 @@ typedef struct {
 #define MSGELEMTYPE_SECURITY_OPTION 0x0105
 #define MSGELEMTYPE_MACFILTER_MODE 0x0106
 #define MSGELEMTYPE_MACFILTER_LIST 0x0107
-//#define MSGELEMTYPE_TX_POWER 0x0108
+#define MSGELEMTYPE_TX_POWER 0x0108
 //#define MSGELEMTYPE_WEP_INFO 0x0201
 #define MSGELEMTYPE_WPA_PWD 0x0202
 //#define MSGELEMTYPE_WPA_AUTH 0x0203
@@ -142,7 +142,7 @@ typedef struct {
 #define HWMODE_A 0
 #define HWMODE_B 1
 #define HWMODE_G 2
-#define HWMODE_AD 3
+#define HWMODE_N 3
 
 /* suppress ssid */
 #define SUPPRESS_SSID_DISABLED 0
@@ -300,17 +300,22 @@ APBool APAssembleChannel(APProtocolMessage *msgPtr);
 APBool APAssembleHardwareMode(APProtocolMessage *msgPtr);
 APBool APAssembleSuppressSSID(APProtocolMessage *msgPtr);
 APBool APAssembleSecurityOption(APProtocolMessage *msgPtr);
+APBool APAssembleMACFilterMode(APProtocolMessage *msgPtr);
+APBool APAssembleMACFilterList(APProtocolMessage *msgPtr);
+APBool APAssembleTxPower(APProtocolMessage *msgPtr);
+APBool APAssembleWPAPassword(APProtocolMessage *msgPtr);
 //APBool APAssembleWEP(APProtocolMessage *msgPtr);
 //APBool APAssembleWPA(APProtocolMessage *msgPtr);
 
-APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr);
-APBool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-APBool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-APBool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseDesiredConfList(APProtocolMessage *msgPtr, int len, u8 **valPtr);
+// APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr);
+// APBool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+// APBool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+// APBool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+// APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 //APBool APParseWEP(APProtocolMessage *msgPtr, int len, APWEP *valPtr);
 //APBool APParseWPA(APProtocolMessage *msgPtr, int len, APWPA *valPtr);
 
-APBool APAssembleResultCode(APProtocolMessage *msgPtr, u16 code);
+// APBool APAssembleResultCode(APProtocolMessage *msgPtr, u16 code);
 
 #endif

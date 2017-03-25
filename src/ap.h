@@ -30,11 +30,14 @@ extern u32 gAPIPAddr;
 extern u8 gAPMACAddr[6];
 extern u32 gAPDefaultGateway;
 
-extern char* gSSID;
-extern u8 gChannel;
-extern u8 gHardwareMode;
-extern u8 gSuppressSSID;
-extern u8 gSecurityOption;
+extern struct wlconf *wlconf;
+extern APBool wlflag;
+
+// extern char* gSSID;
+// extern u8 gChannel;
+// extern u8 gHardwareMode;
+// extern u8 gSuppressSSID;
+// extern u8 gSecurityOption;
 
 /* wep 
 typedef struct {
@@ -93,14 +96,14 @@ extern u32 APGetAPIPAddr();
 extern u8* APGetAPMACAddr();
 extern u32 APGetAPDefaultGateway();
 
-extern char* APGetSSID();
-extern u8 APGetChannel();
-extern u8 APGetHardwareMode();
-extern u8 APGetSuppressSSID();
-extern u8 APGetSecurityOption();
+// extern char* APGetSSID();
+// extern u8 APGetChannel();
+// extern u8 APGetHardwareMode();
+// extern u8 APGetSuppressSSID();
+// extern u8 APGetSecurityOption();
 
 //extern APWEP* APGetWEP();
-extern APWPA* APGetWPA();
+// extern APWPA* APGetWPA();
 
 void APInitProtocol();
 

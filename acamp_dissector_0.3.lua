@@ -52,7 +52,7 @@ do
 		[0x0105] = "Security Option",
 		[0x0106] = "MAC Filter Mode",
 		[0x0107] = "MAC Filter List",
-		-- [0x0108] = "Tx Power",
+		[0x0108] = "Tx Power",
 		[0x0202] = "WPA Password",
 		[0x0501] = "Add MAC Filter List",
 		[0x0502] = "Delete MAC Filter List",
@@ -98,6 +98,7 @@ do
 	local f_element_security_option = ProtoField.uint8("ACAMP.SecurityOption", "Security Option", base.DEC, {[0]="Open", [2]="WPA/WPA2 Mixed", [3]="WPA", [4]="WPA2"})
 	local f_element_filter_mode = ProtoField.uint8("ACAMP.MACFilterMode", "MAC Filter Mode", base.DEC, {[0]="None", [1]="Accept List Only", [2]="Deny List"})
 	local f_filter_mac_addr = ProtoField.ether("ACAMP.MACFilter", "MAC Address")
+	local f_element_txpower = ProtoField.uint8("ACAMP.TxPower", "Tx Power")
 	-- local f_wep_default_key = ProtoField.uint8("ACAMP.DefaultKey", "Default Key", base.DEC)
 	-- local f_wep_key_count = ProtoField.uint8("ACAMP.WEPKeyCount", "Key Count", base.DEC)
 	-- local f_wep_key_num = ProtoField.uint8("ACAMP.WEPKeyNum", "Key Num", base.DEC)
@@ -186,6 +187,9 @@ do
 				p_mac_list = p_mac_list + 6
 			end
 		end,
+		[0x0108] = function(v_element, te, p_elem, element_len)
+			te:add(f_element_txpower, v_element(p_elem + 4, element_len))
+		end,
 		--[[
 		[0x0201] = function(v_element, te, p_elem, element_len)
 			local type_len = {[1]=5, [2]=13, [3]=16, [4]=10, [5]=26, [6]=32}
@@ -243,7 +247,7 @@ do
 								f_element_controller_name, f_element_controller_descriptor, f_element_controller_ip_addr, f_element_controller_mac_addr,
 								f_element_ap_name, f_element_ap_descriptor, f_element_ap_ip_addr, f_element_ap_mac_addr,f_element_controller_seq,f_list_desired_conf,
 								f_element_ssid, f_element_channel, f_element_hw_mode, f_element_suppress_ssid, f_element_security_option, f_element_filter_mode, f_filter_mac_addr,
-								f_element_wpa_password, f_element_system_command}
+								f_element_txpower, f_element_wpa_password, f_element_system_command}
 
 	local data_dis = Dissector.get("data")
 

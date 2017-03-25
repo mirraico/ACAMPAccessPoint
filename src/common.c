@@ -25,3 +25,26 @@ int APTimevalSubtract(struct timeval *res, const struct timeval *x, const struct
 	// return 1 if result is negative (x < y)
 	return ((x->tv_sec < z.tv_sec) || ((x->tv_sec == z.tv_sec) && (x->tv_usec < z.tv_usec)));
 }
+
+u8 charToHex(char c)
+{
+    switch(c) 
+	{  
+		case '0'...'9':  
+			return (u8)atoi(&c);  
+		case 'a'...'f':  
+			return 0xa + (c-'a');  
+		case 'A'...'F':  
+			return 0xa + (c-'A');  
+		default:  
+			return 0;
+    }
+}
+
+void APMACStringToHex(char *str, int* hex) 
+{
+	int i;
+	for(i = 0; i < 6; i++) {
+		hex[i] = (charToHex(str[i*3]) << 4) + charToHex(str[i*3 + 1]);
+	}
+}
