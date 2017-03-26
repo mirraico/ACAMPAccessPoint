@@ -90,6 +90,23 @@ APBool APParseKeepAliveResponse()
     return AP_TRUE;
 }
 
+APBool APAssembleUnregisterResponse(APProtocolMessage *messagesPtr)
+{
+	if(messagesPtr == NULL) APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleUngisterResponse()");
+	
+	APProtocolMessage *msgElems;
+	int msgElemCount = 0;
+	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleUngisterResponse()"););
+	
+	return APAssembleControlMessage(messagesPtr, 
+				 APGetAPID(),
+				 APGetControllerSeqNum(),
+				 MSGTYPE_UNREGISTER_RESPONSE,
+				 msgElems,
+				 msgElemCount
+	);
+}
+
 APBool APAssembleSystemResponse(APProtocolMessage *messagesPtr)
 {
 	if(messagesPtr == NULL) APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSystemResponse()");
@@ -723,8 +740,25 @@ APBool APReceiveMessageInRunState()
                 break;
             }
             case MSGTYPE_UNREGISTER_REQUEST:
-                //TODO: 
+            {
+                APLog("Accept Unregister Request");
+                uloop_end(); //goto AP_DOWN
+
+                APProtocolMessage responseMsg;
+                AP_INIT_PROTOCOL(responseMsg);
+                if(!APErr(APAssembleUnregisterResponse(&responseMsg))) {
+                    APErrorLog("Failed to assemble Unregister Response");
+                    return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
+                }
+                APLog("Send Unregister Response");
+                if(!APErr(APNetworkSend(responseMsg))) {
+                    APErrorLog("Failed to send Unregister Response");
+                    return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
+                }
+                AP_FREE_PROTOCOL_MESSAGE(cacheMsg);
+                uloop_timeout_cancel(&tKeepAlive);
                 break;
+            }
             default:
                 return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
         }
