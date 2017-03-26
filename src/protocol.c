@@ -526,7 +526,6 @@ APBool APParseRegisteredService(APProtocolMessage *msgPtr, int len, u8 *valPtr)
 	return AP_TRUE;
 }
 
-
 APBool APAssembleSSID(APProtocolMessage *msgPtr) 
 {
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSSID()");
@@ -701,7 +700,7 @@ APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr)
 	}
 	return AP_TRUE;
 }
-/*
+
 APBool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
@@ -761,4 +760,76 @@ APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr)
 	}
 	return AP_TRUE;
 }
-*/
+
+APBool APParseMACFilterMode(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+{	
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseMACFilterMode()");
+	
+	*valPtr = APProtocolRetrieve8(msgPtr);
+	APDebugLog(5, "Parse MAC Filter Mode: %u", *valPtr);
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseMACFilterMode()");
+	}
+	return AP_TRUE;
+}
+
+APBool APParseTxPower(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+{	
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseTxPower()");
+	
+	*valPtr = APProtocolRetrieve8(msgPtr);
+	APDebugLog(5, "Parse Tx Power: %u", *valPtr);
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseTxPower()");
+	}
+	return AP_TRUE;
+}
+
+APBool APParseWPAPassword(APProtocolMessage *msgPtr, int len, char **valPtr) 
+{	
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseWPAPassword()");
+	
+	*valPtr = APProtocolRetrieveStr(msgPtr, len);
+	if(valPtr == NULL) return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APParseWPAPassword()");
+	APDebugLog(5, "Parse WPA Password: %s", *valPtr);
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseWPAPassword()");
+	}
+	return AP_TRUE;
+}
+
+APBool APParseMACList(APProtocolMessage *msgPtr, int len, char ***valPtr)
+{
+	int oldOffset = msgPtr->offset;
+	u8 mac[6];
+	int pos = 0, cnt = 0;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseMACList()");
+
+	while(pos < len) 
+	{
+		mac[pos % 6] = APProtocolRetrieve8(msgPtr);
+		if(pos % 6 == 5) 
+		{
+			char *str;
+			AP_CREATE_STRING_SIZE_ERR(str, 18, return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseMACList()"););
+			sprintf(str, "%02x:%02x:%02x:%02x:%02x:%02x\0", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+			(*valPtr)[cnt++] = str;
+			APDebugLog(5, "Parse MAC List: %02x:%02x:%02x:%02x:%02x:%02x\0", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+		}
+		pos++;
+	}
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseMACList()");
+	}
+	return AP_TRUE;
+}

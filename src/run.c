@@ -90,6 +90,231 @@ APBool APParseKeepAliveResponse()
     return AP_TRUE;
 }
 
+APBool APAssembleConfigurationUpdateResponse(APProtocolMessage *messagesPtr)
+{
+	if(messagesPtr == NULL) APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleConfigurationResponse()");
+	
+	APProtocolMessage *msgElems;
+	int msgElemCount = 0;
+	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleConfigurationResponse()"););
+	
+	return APAssembleControlMessage(messagesPtr, 
+				 APGetAPID(),
+				 APGetControllerSeqNum(),
+				 MSGTYPE_CONFIGURATION_UPDATE_RESPONSE,
+				 msgElems,
+				 msgElemCount
+	);
+}
+
+APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msgLen)
+{
+    APLog("Parse Configuration Update Request");
+
+    u16 elemFlag = 0;
+
+    /* parse message elements */
+	while(completeMsg->offset < msgLen) 
+    {
+		u16 type = 0;
+		u16 len = 0;
+
+		APParseFormatMsgElem(completeMsg, &type, &len);
+	    // APDebugLog(3, "Parsing Message Element: %u, len: %u", type, len);
+        switch(type) 
+        {
+            case MSGELEMTYPE_SSID:
+            {
+                char *ssid;
+                if(!(APParseSSID(completeMsg, len, &ssid)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                wlconf->set_ssid(wlconf, ssid);
+                AP_FREE_OBJECT(ssid);
+				break;
+            }
+            case MSGELEMTYPE_CHANNEL:
+            {
+                u8 channel;
+                if(!(APParseChannel(completeMsg, len, &channel)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                wlconf->set_channel(wlconf, channel);
+				break;
+            }
+            case MSGELEMTYPE_HARDWARE_MODE:
+            {
+                u8 hw_mode;
+                if(!(APParseHardwareMode(completeMsg, len, &hw_mode)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                switch(hw_mode)
+                {
+                    case HWMODE_A:
+                        wlconf->set_hwmode(wlconf, ONLY_A);
+                        break;
+                    case HWMODE_B:
+                        wlconf->set_hwmode(wlconf, ONLY_B);
+                        break;
+                    case HWMODE_G:
+                        wlconf->set_hwmode(wlconf, ONLY_G);
+                        break;
+                    case HWMODE_N:
+                        wlconf->set_hwmode(wlconf, ONLY_N);
+                        break;
+                    default:
+                        break;
+                }
+				break;
+            }
+            case MSGELEMTYPE_SUPPRESS_SSID:
+            {
+                u8 suppress;
+                if(!(APParseSuppressSSID(completeMsg, len, &suppress)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                if(suppress == SUPPRESS_SSID_DISABLED) wlconf->set_ssid_hidden(wlconf, false);
+                else wlconf->set_ssid_hidden(wlconf, true);
+				break;
+            }
+            case MSGELEMTYPE_SECURITY_OPTION:
+            {
+                u8 security;
+                if(!(APParseSecurityOption(completeMsg, len, &security)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                switch(security)
+                {
+                    case SECURITY_OPEN:
+                        wlconf->set_encryption(wlconf, NO_ENCRYPTION);
+                        break;
+                    case SECURITY_WPA_WPA2_MIXED:
+                        wlconf->set_encryption(wlconf, WPA_WPA2_MIXED);
+                        break;
+                    case SECURITY_WPA2:
+                        wlconf->set_encryption(wlconf, WPA2_PSK);
+                        break;
+                    case SECURITY_WPA:
+                        wlconf->set_encryption(wlconf, WPA_PSK);
+                        break;
+                    default:
+                        break;
+                }
+				break;
+            }
+            case MSGELEMTYPE_MACFILTER_MODE:
+            {
+                u8 mode;
+                if(!(APParseMACFilterMode(completeMsg, len, &mode)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                switch(mode)
+                {
+                    case FILTER_NONE:
+                        wlconf->set_macfilter(wlconf, MAC_FILTER_NONE);
+                        break;
+                    case FILTER_ACCEPT_ONLY:
+                        wlconf->set_macfilter(wlconf, MAC_FILTER_ALLOW);
+                        break;
+                    case FILTER_DENY:
+                        wlconf->set_macfilter(wlconf, MAC_FILTER_DENY);
+                        break;
+                    default:
+                        break;
+                }
+				break;
+            }
+            case MSGELEMTYPE_TX_POWER:
+            {
+                u8 tx_power;
+                if(!(APParseTxPower(completeMsg, len, &tx_power)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                wlconf->set_txpower(wlconf, tx_power);
+				break;
+            }
+            case MSGELEMTYPE_WPA_PWD:
+            {
+                char *pwd;
+                if(!(APParseWPAPassword(completeMsg, len, &pwd)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                wlconf->set_key(wlconf, pwd);
+                AP_FREE_OBJECT(pwd);
+				break;
+            }
+            case MSGELEMTYPE_ADD_MACFILTER:
+            {
+                int i;
+                if(len % 6) {
+                    APErrorLog("Message Element Malformed in MAC Addr");
+                    break;
+                }
+                int num = len / 6;
+                char **maclist;
+                AP_CREATE_ARRAY_ERR(maclist, len, char*, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APParseMACList()");)
+                if(!(APParseMACList(completeMsg, len, &maclist)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                for(i = 0; i < num; i++) {
+                    wlconf->add_macfilterlist(wlconf, maclist[i]);
+                    APDebugLog(5, "Add MAC Filter List: %s", maclist[i]);
+                    AP_FREE_OBJECT(maclist[i]);
+                }
+                AP_FREE_OBJECT(maclist);
+				break;
+            }
+            case MSGELEMTYPE_DEL_MACFILTER:
+            {
+                int i;
+                if(len % 6) {
+                    APErrorLog("Message Element Malformed in MAC Addr");
+                    break;
+                }
+                int num = len / 6;
+                char **maclist;
+                AP_CREATE_ARRAY_ERR(maclist, len, char*, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APParseMACList()");)
+                if(!(APParseMACList(completeMsg, len, &maclist)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                for(i = 0; i < num; i++) {
+                    wlconf->del_macfilterlist(wlconf, maclist[i]);
+                    APDebugLog(5, "Delete MAC Filter List: %s", maclist[i]);
+                    AP_FREE_OBJECT(maclist[i]);
+                }
+                AP_FREE_OBJECT(maclist);
+				break;
+            }
+            case MSGELEMTYPE_CLEAR_MACFILTER:
+            {
+                wlconf->clear_macfilterlist(wlconf);
+                APDebugLog(5, "Clear MAC Filter List");
+				break;
+            }
+            case MSGELEMTYPE_RESET_MACFILTER:
+            {
+                int i;
+                if(len % 6) {
+                    APErrorLog("Message Element Malformed in MAC Addr");
+                    break;
+                }
+                int num = len / 6;
+                char **maclist;
+                AP_CREATE_ARRAY_ERR(maclist, len, char*, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APParseMACList()");)
+                if(!(APParseMACList(completeMsg, len, &maclist)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+                wlconf->clear_macfilterlist(wlconf);
+                for(i = 0; i < num; i++) {
+                    wlconf->add_macfilterlist(wlconf, maclist[i]);
+                    APDebugLog(5, "Reset & Add MAC Filter List: %s", maclist[i]);
+                    AP_FREE_OBJECT(maclist[i]);
+                }
+                AP_FREE_OBJECT(maclist);
+				break;
+            }
+            default:
+                APParseUnrecognizedMsgElem(completeMsg, len);
+                APErrorLog("Unrecognized Message Element");
+				break;
+        }
+    }
+
+    wlconf->change_commit(wlconf);
+    system("wifi restart");
+    APLog("Accept Configuration Update Request");
+    return AP_TRUE;
+}
+
 APBool APAssembleConfigurationResponse(APProtocolMessage *messagesPtr, u8** listPtr, int listSize)
 {
     int k = -1;
@@ -346,7 +571,7 @@ APBool APReceiveMessageInRunState()
                 AP_FREE_OBJECT(list);
 
                 AP_FREE_PROTOCOL_MESSAGE(cacheMsg);
-                AP_INIT_PROTOCOL_MESSAGE(cacheMsg, responseMsg.offset, APErrorLog("Failed to init Cache Message"); uloop_end(); return;);
+                AP_INIT_PROTOCOL_MESSAGE(cacheMsg, responseMsg.offset, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APReceiveMessageInRunState()"););
                 APProtocolStoreMessage(&cacheMsg, &responseMsg);
                 cacheMsg.type = MSGTYPE_CONFIGURATION_RESPONSE; //easy to match request
                 AP_FREE_PROTOCOL_MESSAGE(responseMsg);
@@ -357,7 +582,31 @@ APBool APReceiveMessageInRunState()
                 break;
             }
             case MSGTYPE_CONFIGURATION_UPDATE_REQUEST:
+                if(!APErr(APParseConfigurationUpdateRequest(&completeMsg, controlVal.msgLen))) {
+                    return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
+                }
 
+                APProtocolMessage responseMsg;
+                AP_INIT_PROTOCOL(responseMsg);
+                if(!APErr(APAssembleConfigurationUpdateResponse(&responseMsg))) {
+                    APErrorLog("Failed to assemble Configuration Update Response");
+                    return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
+                }
+                APLog("Send Configuration Update Response");
+                if(!APErr(APNetworkSend(responseMsg))) {
+                    APErrorLog("Failed to send Configuration Update Response");
+                    return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
+                }
+
+                AP_FREE_PROTOCOL_MESSAGE(cacheMsg);
+                AP_INIT_PROTOCOL_MESSAGE(cacheMsg, responseMsg.offset, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APReceiveMessageInRunState()"););
+                APProtocolStoreMessage(&cacheMsg, &responseMsg);
+                cacheMsg.type = MSGTYPE_CONFIGURATION_UPDATE_RESPONSE; //easy to match request
+                AP_FREE_PROTOCOL_MESSAGE(responseMsg);
+
+                APControllerSeqNumIncrement();
+                uloop_timeout_cancel(&tKeepAlive);
+                uloop_timeout_set(&tKeepAlive, gKeepAliveInterval * 1000);
                 break;
             case MSGTYPE_SYSTEM_REQUEST:
                 //TODO: 
@@ -433,31 +682,4 @@ APStateTransition APEnterRun()
     uloop_done();
 
 	return AP_ENTER_DOWN;
-
-    // struct epoll_event events[MAX_EVENT_NUMBER];
-    // int epollfd = epoll_create(5);
-    // if(epollfd == -1) {
-    //     APErrorLog("EPOLL init failed");
-    //     return AP_ENTER_DOWN;
-    // }
-    // APAddSocketToEpoll(epollfd, gSocket);
-    // APDebugLog(3, "Epoll Initialization successful");
-
-    // AP_REPEAT_FOREVER
-    // {
-    //     int epoll_num = epoll_wait(epollfd, events, MAX_EVENT_NUMBER, -1);
-    //     int i;
-    //     if(epoll_num < 0)
-    //     {
-    //         APErrorLog("Epoll Runtime error");
-    //         return AP_ENTER_DOWN;
-    //     }
-    //     for(i = 0; i < epoll_num; i++)
-    //     {
-    //         int sockfd = events[i].data.fd;
-    //         if(sockfd == gSocket) {
-    //             APErr(APReceiveMessageInRunState());
-    //         }
-    //     }
-    // }
 }

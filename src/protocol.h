@@ -110,6 +110,7 @@ typedef struct {
 #define MSGELEMTYPE_ADD_MACFILTER 0x0501
 #define MSGELEMTYPE_DEL_MACFILTER 0x0502
 #define MSGELEMTYPE_CLEAR_MACFILTER 0x0503
+#define MSGELEMTYPE_RESET_MACFILTER 0x0504
 #define MSGELEMTYPE_SYSTEM_COMMAND 0x0401
 //#define MSGELEMTYPE_SCANNED_WLAN_INFO 0x0402
 //#define MSGELEMTYPE_STATION_INFO 0x0403
@@ -287,9 +288,13 @@ APBool APAssembleWPAPassword(APProtocolMessage *msgPtr);
 
 APBool APParseDesiredConfList(APProtocolMessage *msgPtr, int len, u8 **valPtr);
 APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr);
-// APBool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-// APBool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-// APBool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-// APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseMACFilterMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseTxPower(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+APBool APParseWPAPassword(APProtocolMessage *msgPtr, int len, char **valPtr);
+APBool APParseMACList(APProtocolMessage *msgPtr, int len, char ***valPtr);
 
 #endif

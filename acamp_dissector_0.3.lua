@@ -57,6 +57,7 @@ do
 		[0x0501] = "Add MAC Filter List",
 		[0x0502] = "Delete MAC Filter List",
 		[0x0503] = "Clear MAC Filter List",
+		[0x0504] = "Reset MAC Filter List",
 		[0x0401] = "System Command",
 		-- [0x0402] = "Scanned WLAN Info",
 		-- [0x0403] = "Station Info",
@@ -99,16 +100,7 @@ do
 	local f_element_filter_mode = ProtoField.uint8("ACAMP.MACFilterMode", "MAC Filter Mode", base.DEC, {[0]="None", [1]="Accept List Only", [2]="Deny List"})
 	local f_filter_mac_addr = ProtoField.ether("ACAMP.MACFilter", "MAC Address")
 	local f_element_txpower = ProtoField.uint8("ACAMP.TxPower", "Tx Power")
-	-- local f_wep_default_key = ProtoField.uint8("ACAMP.DefaultKey", "Default Key", base.DEC)
-	-- local f_wep_key_count = ProtoField.uint8("ACAMP.WEPKeyCount", "Key Count", base.DEC)
-	-- local f_wep_key_num = ProtoField.uint8("ACAMP.WEPKeyNum", "Key Num", base.DEC)
-	-- local f_wep_key_type = ProtoField.uint8("ACAMP.WEPKeyType", "Key Type", base.DEC, {[1]="Char 5", [2]="Char 13", [3]="Char 16", [4]="Hex 10", [5]="Hex 26", [6]="Hex 32"})
-	-- local f_wep_key = ProtoField.string("ACAMP.WEPKey", "Key")
-	-- local f_wpa_version = ProtoField.uint8("ACAMP.WPAVersion", "WPA Version", base.DEC, {[1]="WPA", [2]="IEEE 802.11i/RSN (WPA2)"})
 	local f_element_wpa_password = ProtoField.string("ACAMP.WPAPassword", "WPA Password")
-	-- local f_wpa_pairwire_cipher = ProtoField.uint8("ACAMP.WPAPairwireCipher", "WPA Pairwire Cipher", base.DEC, {[0]="TKIP", [1]="CCMP", [2]="TKIP CCMP"})
-	-- local f_wpa_key_len = ProtoField.uint16("ACAMP.WPAKeyLen", "Key Len", base.DEC)
-	-- local f_wpa_group_rekey = ProtoField.uint32("ACAMP.WPAGroupRekey", "Group Rekey", base.DEC)
 	local f_element_system_command = ProtoField.uint8("ACAMP.SystemCommand", "System Command", base.DEC, {[0]="WLAN Down", [1]="WLAN Up", [2]="WLAN Restart", [3]="Network Restart", [4]="System Restart"})
 
 
@@ -190,33 +182,6 @@ do
 		[0x0108] = function(v_element, te, p_elem, element_len)
 			te:add(f_element_txpower, v_element(p_elem + 4, element_len))
 		end,
-		--[[
-		[0x0201] = function(v_element, te, p_elem, element_len)
-			local type_len = {[1]=5, [2]=13, [3]=16, [4]=10, [5]=26, [6]=32}
-			
-			local p_wep = 4
-			te:add(f_wep_default_key, v_element(p_elem + p_wep, 1))
-			te:add(f_wep_key_count, v_element(p_elem + p_wep + 1, 1))
-			local wep_key_count = v_element(p_elem + p_wep + 1, 1):uint()
-			p_wep = p_wep + 2
-			local i = 0
-			while i < wep_key_count do
-				local wep_key_totlen = 2 -- num & type
-				local wep_key_num = v_element(p_elem + p_wep, 1):uint()
-				local wep_key_type = v_element(p_elem + p_wep + 1, 1):uint()
-				wep_key_totlen = wep_key_totlen + type_len[wep_key_type]
-				local v_wep = v_element(p_elem + p_wep, wep_key_totlen)
-
-				local twep = te.add(te, v_wep, "WEP Key " .. wep_key_num)
-				twep:add(f_wep_key_num, v_wep(0, 1))
-				twep:add(f_wep_key_type, v_wep(1, 1))
-				twep:add(f_wep_key, v_wep(2, type_len[wep_key_type]))
-
-				p_wep = p_wep + wep_key_totlen
-				i = i + 1
-			end
-		end,
-		--]]
 		[0x0202] = function(v_element, te, p_elem, element_len)
 			te:add(f_element_wpa_password, v_element(p_elem + 4, element_len))
 		end,
@@ -235,6 +200,13 @@ do
 			end
 		end,
 		-- [0x0503] = empty
+		[0x0504] = function(v_element, te, p_elem, element_len)
+			local p_mac_list = 0
+			while p_mac_list < element_len do
+				te:add(f_filter_mac_addr, v_element(p_elem + 4 + p_mac_list, 6))
+				p_mac_list = p_mac_list + 6
+			end
+		end,
 		[0x0401] = function(v_element, te, p_elem, element_len)
 			te:add(f_element_system_command, v_element(p_elem + 4, element_len))
 		end,
