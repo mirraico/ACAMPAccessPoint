@@ -39,19 +39,9 @@ int main()
 	if(wlflag) system("wifi restart");
 	else system("wifi down");
 
-	// if(!APCheckSettings()) {
-	// 	APErrorLog("There may exist illegal assignment");
-	// 	exit(1);
-	// }
-
 	APInitLogFile();
 	APLog("Finished reading the setting file");
 	
-	// if(!APNetworkInitIfname()) {
-	// 	APErrorLog("Can't obtain Ethernet interface");
-	// 	//APErrorLog("Can't obtain Ethernet or Wlan interface name");
-	// 	exit(1);
-	// }
 	if(gIfEthName == NULL) {
 		APErrorLog("Can't obtain Ethernet interface");
 		exit(1);
@@ -97,7 +87,6 @@ int main()
 					APLog("Default gateway is not set");
 					gDiscoveryType = DISCOVERY_TPYE_DISCOVERY;
 				}
-			 //case DISCOVERY_TPYE_DNS:
 			 default:
 			 	break;
 		}
@@ -105,8 +94,10 @@ int main()
 	
 
 	/* start acamp state machine */	
-	AP_REPEAT_FOREVER {
-		switch(nextState) {
+	AP_REPEAT_FOREVER 
+	{
+		switch(nextState) 
+		{
 			case AP_ENTER_DISCOVERY:
 				nextState = APEnterDiscovery();
 				break;

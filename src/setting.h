@@ -12,7 +12,6 @@ extern FILE* gSettingsFile;
 
 APBool APParseSettingsFile();
 void APDefaultSettings();
-// APBool APCheckSettings();
 
 
 #endif // SETTING_H

@@ -106,9 +106,7 @@ typedef struct {
 #define MSGELEMTYPE_MACFILTER_MODE 0x0106
 #define MSGELEMTYPE_MACFILTER_LIST 0x0107
 #define MSGELEMTYPE_TX_POWER 0x0108
-//#define MSGELEMTYPE_WEP_INFO 0x0201
 #define MSGELEMTYPE_WPA_PWD 0x0202
-//#define MSGELEMTYPE_WPA_AUTH 0x0203
 #define MSGELEMTYPE_ADD_MACFILTER 0x0501
 #define MSGELEMTYPE_DEL_MACFILTER 0x0502
 #define MSGELEMTYPE_CLEAR_MACFILTER 0x0503
@@ -133,7 +131,6 @@ typedef struct {
 #define DISCOVERY_TPYE_DISCOVERY 0
 #define DISCOVERY_TPYE_STATIC 1
 #define DISCOVERY_TPYE_DEFAULT_GATE 2
-//#define DISCOVERY_TPYE_DNS 3
 
 /* returned msg elem */
 //#define RETERNED_ELEM_UNRECOGNIZED_ELEM 0x0000
@@ -155,21 +152,6 @@ typedef struct {
 #define SECURITY_WPA 3
 #define SECURITY_WPA2 4
 
-/* wep type 
-#define WEPTYPE_CHAR5 1
-#define WEPTYPE_CHAR13 2
-#define WEPTYPE_CHAR16 3
-#define WEPTYPE_HEX10 4
-#define WEPTYPE_HEX26 5
-#define WEPTYPE_HEX32 6
-*/
-
-/* wpa pairwire cipher 
-#define WPA_PAIRWIRECIPHER_TKIP 0
-#define WPA_PAIRWIRECIPHER_CCMP 1
-#define WPA_PAIRWIRECIPHER_TKIP_CCMP 2
-*/
-
 /* mac filter */
 #define FILTER_NONE 0
 #define FILTER_ACCEPT_ONLY 1
@@ -187,8 +169,6 @@ typedef enum {
 	AP_ENTER_DOWN,
 	AP_ENTER_DISCOVERY,
 	AP_ENTER_REGISTER,
-	//AP_ENTER_CONFIGURE,
-	//AP_ENTER_CONFIGURE_RETRY,
 	AP_ENTER_RUN
 } APStateTransition;
 
@@ -304,18 +284,12 @@ APBool APAssembleMACFilterMode(APProtocolMessage *msgPtr);
 APBool APAssembleMACFilterList(APProtocolMessage *msgPtr);
 APBool APAssembleTxPower(APProtocolMessage *msgPtr);
 APBool APAssembleWPAPassword(APProtocolMessage *msgPtr);
-//APBool APAssembleWEP(APProtocolMessage *msgPtr);
-//APBool APAssembleWPA(APProtocolMessage *msgPtr);
 
 APBool APParseDesiredConfList(APProtocolMessage *msgPtr, int len, u8 **valPtr);
-// APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr);
+APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr);
 // APBool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 // APBool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 // APBool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 // APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-//APBool APParseWEP(APProtocolMessage *msgPtr, int len, APWEP *valPtr);
-//APBool APParseWPA(APProtocolMessage *msgPtr, int len, APWPA *valPtr);
-
-// APBool APAssembleResultCode(APProtocolMessage *msgPtr, u16 code);
 
 #endif
