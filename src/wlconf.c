@@ -5,6 +5,12 @@
 
 static int add_member(struct maclist *list, char *macaddr)
 {
+	struct maclist_node *ptr = list->head;
+	while(ptr != NULL)
+	{
+		if(!strcmp(ptr->macaddr, macaddr)) return 0;
+		ptr = ptr->next;
+	}
 	struct maclist_node *node = malloc(sizeof(struct maclist_node));
 	strcpy(node->macaddr, macaddr);
 	node->next = NULL;
@@ -57,6 +63,25 @@ static int del_member(struct maclist *list, char *macaddr)
 	}
 	printf ("macaddr not found:%s\n", macaddr);
 	return -1;
+}
+
+static int clear_member(struct maclist *list)
+{
+	if (list->listsize == 0)
+	{
+		return 0;
+	}
+	struct maclist_node *ptr = list->head;
+	struct maclist_node *qtr = list->head->next;
+	while (true)
+	{
+		free(ptr);
+		if(qtr == NULL) break;
+		ptr = qtr;
+		qtr = ptr->next;
+	}
+	list->head = NULL;
+	return 0;
 }
 
 static void free_maclist(struct maclist *list)
@@ -504,6 +529,7 @@ static void init_conf(struct wlconf *wlconf)
 
 static int update(struct wlconf *wlconf)
 {
+	clear_member(wlconf->conf->macfilter_list);
 	uci_unload(wlconf->ctx, wlconf->pkg);
 	if (uci_load(wlconf->ctx, "wireless", &(wlconf->pkg)) != UCI_OK)
 	{

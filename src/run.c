@@ -8,7 +8,7 @@
 
 struct uloop_fd fdSocket;
 struct uloop_timeout tKeepAlive;
-struct uloop_timeout tRretransmit;
+struct uloop_timeout tRetransmit;
 APProtocolMessage retransmitMsg;
 int retransmitInterval;
 int retransmitCount;
@@ -29,7 +29,7 @@ static void APRretransmitHandler(struct uloop_timeout *t)
     if(retransmitInterval > gKeepAliveInterval / 2) {
         retransmitInterval = gKeepAliveInterval / 2;
     }
-    uloop_timeout_set(&tRretransmit, retransmitInterval * 1000);
+    uloop_timeout_set(&tRetransmit, retransmitInterval * 1000);
     APDebugLog(5, "Adjust the retransmit interval to %d sec and retransmit", retransmitInterval);
     if(!APErr(APNetworkSend(retransmitMsg))) {
         APErrorLog("Failed to retransmit Request");
@@ -72,14 +72,14 @@ static void APKeepAliveHandler(struct uloop_timeout *t)
         return;
     }
 
-    AP_INIT_PROTOCOL_MESSAGE(retransmitMsg, sendMsg.offset, APErrorLog("Failed to init Keep Alive Request"); uloop_end(); return;);
+    AP_INIT_PROTOCOL_MESSAGE(retransmitMsg, sendMsg.offset, APErrorLog("Failed to init Retransmit Message"); uloop_end(); return;);
     APProtocolStoreMessage(&retransmitMsg, &sendMsg);
     retransmitMsg.type = MSGTYPE_KEEPALIVE_REQUEST; //easy to match response
     AP_FREE_PROTOCOL_MESSAGE(sendMsg);
     
     retransmitInterval = 3;
     retransmitCount = 0;
-    uloop_timeout_set(&tRretransmit, retransmitInterval * 1000);
+    uloop_timeout_set(&tRetransmit, retransmitInterval * 1000);
 }
 
 APBool APParseKeepAliveResponse()
@@ -299,8 +299,19 @@ APBool APReceiveMessageInRunState()
     if(is_req) {
         if(controlVal.seqNum == APGetControllerSeqNum() - 1) {
             APDebugLog(3, "Receive a message that has been responsed");
-            //TODO:  pan duan lei xing zai hui fu
+            if(cacheMsg.type == 0 || controlVal.msgType + 1 != cacheMsg.type) {
+                APErrorLog("The received message does not match the cache message");
+                return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+            }
 
+            APDebugLog(3, "Send Cache Message");
+            if(!APErr(APNetworkSend(cacheMsg))) {
+                APErrorLog("Failed to send Cache Message");
+                return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
+            }
+
+            uloop_timeout_cancel(&tKeepAlive);
+            uloop_timeout_set(&tKeepAlive, gKeepAliveInterval * 1000);
             return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
         }
         if(controlVal.seqNum != APGetControllerSeqNum()) {
@@ -332,9 +343,17 @@ APBool APReceiveMessageInRunState()
                     APErrorLog("Failed to send Configuration Response");
                     return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
                 }
-
                 AP_FREE_OBJECT(list);
+
+                AP_FREE_PROTOCOL_MESSAGE(cacheMsg);
+                AP_INIT_PROTOCOL_MESSAGE(cacheMsg, responseMsg.offset, APErrorLog("Failed to init Cache Message"); uloop_end(); return;);
+                APProtocolStoreMessage(&cacheMsg, &responseMsg);
+                cacheMsg.type = MSGTYPE_CONFIGURATION_RESPONSE; //easy to match request
+                AP_FREE_PROTOCOL_MESSAGE(responseMsg);
+
                 APControllerSeqNumIncrement();
+                uloop_timeout_cancel(&tKeepAlive);
+                uloop_timeout_set(&tKeepAlive, gKeepAliveInterval * 1000);
                 break;
             }
             case MSGTYPE_CONFIGURATION_UPDATE_REQUEST:
@@ -360,7 +379,7 @@ APBool APReceiveMessageInRunState()
             return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
         }
         if(retransmitMsg.type == 0 || controlVal.msgType != retransmitMsg.type + 1) {
-            APErrorLog("The type of message received is invalid");
+            APErrorLog("The received message does not match the send message");
             return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
         }
         switch(controlVal.msgType)
@@ -369,7 +388,7 @@ APBool APReceiveMessageInRunState()
                 if(!APErr(APParseKeepAliveResponse())) {
                     return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
                 }
-                uloop_timeout_cancel(&tRretransmit);
+                uloop_timeout_cancel(&tRetransmit);
                 AP_FREE_PROTOCOL_MESSAGE(retransmitMsg);
                 APSeqNumIncrement();
                 break;
@@ -395,9 +414,13 @@ APStateTransition APEnterRun()
     APLog("");	
 	APLog("######### Run State #########");
 
+    AP_FREE_PROTOCOL_MESSAGE(cacheMsg);
+    AP_FREE_PROTOCOL_MESSAGE(retransmitMsg);
+
+
     uloop_init();
 
-    tRretransmit.cb = APRretransmitHandler;
+    tRetransmit.cb = APRretransmitHandler;
 	tKeepAlive.cb = APKeepAliveHandler;
     uloop_timeout_set(&tKeepAlive, 100); //send a keep alive req soon
 
