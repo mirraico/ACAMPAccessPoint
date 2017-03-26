@@ -6,7 +6,7 @@ SDN（软件定义网络）是一种核心思想将控制与数据分离的新�
 2. 对SDN架构的WLAN网络中的AP运行状况进行监测，统计数据进行收集  
 
 #### 内容  
-AP端主要实现与控制器onos之间的ACAMP协议通信，使用c/uci做实现  
+AP端主要实现与控制器onos之间的ACAMP协议通信，使用c/uci做实现，现协议部分已经全部实现  
 1. src/ -> acamp代理源码  
 2. setting.conf -> acamp代理运行所需的配置文件
 3. acamp_0.3_ar71xx.ipk -> 交叉编译完成的ipk  
