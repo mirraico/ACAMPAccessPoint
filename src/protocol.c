@@ -833,3 +833,18 @@ APBool APParseMACList(APProtocolMessage *msgPtr, int len, char ***valPtr)
 	}
 	return AP_TRUE;
 }
+
+APBool APParseSystemCommand(APProtocolMessage *msgPtr, int len, u8 *valPtr)
+{
+	int oldOffset = msgPtr->offset;
+	if(msgPtr == NULL || valPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APParseSystemRequest()");
+	
+	*valPtr = APProtocolRetrieve8(msgPtr);
+	APDebugLog(5, "Parse System Command: %u", *valPtr);
+
+	if((msgPtr->offset - oldOffset) != len) {
+		APErrorLog("Message Element Malformed");
+		return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseSystemRequest()");
+	}
+	return AP_TRUE;
+}

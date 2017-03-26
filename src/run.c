@@ -90,6 +90,87 @@ APBool APParseKeepAliveResponse()
     return AP_TRUE;
 }
 
+APBool APAssembleSystemResponse(APProtocolMessage *messagesPtr)
+{
+	if(messagesPtr == NULL) APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleSystemResponse()");
+	
+	APProtocolMessage *msgElems;
+	int msgElemCount = 0;
+	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleSystemResponse()"););
+	
+	return APAssembleControlMessage(messagesPtr, 
+				 APGetAPID(),
+				 APGetControllerSeqNum(),
+				 MSGTYPE_SYSTEM_RESPONSE,
+				 msgElems,
+				 msgElemCount
+	);
+}
+
+APBool APParseSystemRequest(APProtocolMessage *completeMsg, u16 msgLen)
+{
+    APLog("Parse System Request");
+
+    u8 command;
+    u16 elemFlag = 0;
+
+    /* parse message elements */
+	while(completeMsg->offset < msgLen) 
+    {
+		u16 type = 0;
+		u16 len = 0;
+
+		APParseFormatMsgElem(completeMsg, &type, &len);
+	    // APDebugLog(3, "Parsing Message Element: %u, len: %u", type, len);
+        switch(type) 
+        {
+            case MSGELEMTYPE_SYSTEM_COMMAND:
+                if(elemFlag & 0x01) {
+                    APParseRepeatedMsgElem(completeMsg, len);
+                    APErrorLog("Repeated Message Element");
+                    break;
+                }
+
+                if(!(APParseSystemCommand(completeMsg, len, &command)))
+                    return APErrorRaise(AP_ERROR_BUTNORAISE, NULL);
+
+                elemFlag |= 0x01;
+				break;
+            default:
+                APParseUnrecognizedMsgElem(completeMsg, len);
+                APErrorLog("Unrecognized Message Element");
+				break;
+        }
+    }
+    if(elemFlag != 0x01) { //incomplete message
+        APErrorLog("Incomplete Message Element in System Request");
+        return APErrorRaise(AP_ERROR_INVALID_FORMAT, "APParseSystemRequest()");
+    }
+
+    APLog("Accept System Request");
+
+    switch(command)
+    {
+        case SYSTEM_WLAN_DOWN:
+            system("wifi down");
+            APDebugLog(3, "WLAN Down");
+            break;
+        case SYSTEM_WLAN_UP:
+            system("wifi up");
+            APDebugLog(3, "WLAN Up");
+            break;
+        case SYSTEM_WLAN_RESTART:
+            system("wifi restart");
+            APDebugLog(3, "Restart WLAN");
+            break;
+        case SYSTEM_NETWORK_RESTART:
+            system("/etc/init.d/network restart");
+            APDebugLog(3, "Restart network");
+            break;
+    }
+    return AP_TRUE;
+}
+
 APBool APAssembleConfigurationUpdateResponse(APProtocolMessage *messagesPtr)
 {
 	if(messagesPtr == NULL) APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleConfigurationResponse()");
@@ -309,9 +390,11 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
         }
     }
 
+    APLog("Accept Configuration Update Request");
+
     wlconf->change_commit(wlconf);
     system("wifi restart");
-    APLog("Accept Configuration Update Request");
+    APDebugLog(3, "Restart WLAN");
     return AP_TRUE;
 }
 
@@ -582,6 +665,7 @@ APBool APReceiveMessageInRunState()
                 break;
             }
             case MSGTYPE_CONFIGURATION_UPDATE_REQUEST:
+            {
                 if(!APErr(APParseConfigurationUpdateRequest(&completeMsg, controlVal.msgLen))) {
                     return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
                 }
@@ -608,9 +692,36 @@ APBool APReceiveMessageInRunState()
                 uloop_timeout_cancel(&tKeepAlive);
                 uloop_timeout_set(&tKeepAlive, gKeepAliveInterval * 1000);
                 break;
+            }
             case MSGTYPE_SYSTEM_REQUEST:
-                //TODO: 
+            {
+                if(!APErr(APParseSystemRequest(&completeMsg, controlVal.msgLen))) {
+                    return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
+                }
+
+                APProtocolMessage responseMsg;
+                AP_INIT_PROTOCOL(responseMsg);
+                if(!APErr(APAssembleSystemResponse(&responseMsg))) {
+                    APErrorLog("Failed to assemble System Response");
+                    return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
+                }
+                APLog("Send System Response");
+                if(!APErr(APNetworkSend(responseMsg))) {
+                    APErrorLog("Failed to send System Response");
+                    return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
+                }
+
+                AP_FREE_PROTOCOL_MESSAGE(cacheMsg);
+                AP_INIT_PROTOCOL_MESSAGE(cacheMsg, responseMsg.offset, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APReceiveMessageInRunState()"););
+                APProtocolStoreMessage(&cacheMsg, &responseMsg);
+                cacheMsg.type = MSGTYPE_SYSTEM_RESPONSE; //easy to match request
+                AP_FREE_PROTOCOL_MESSAGE(responseMsg);
+
+                APControllerSeqNumIncrement();
+                uloop_timeout_cancel(&tKeepAlive);
+                uloop_timeout_set(&tKeepAlive, gKeepAliveInterval * 1000);
                 break;
+            }
             case MSGTYPE_UNREGISTER_REQUEST:
                 //TODO: 
                 break;

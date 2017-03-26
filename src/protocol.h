@@ -163,7 +163,7 @@ typedef struct {
 #define SYSTEM_WLAN_UP 1
 #define SYSTEM_WLAN_RESTART 2
 #define SYSTEM_NETWORK_RESTART 3
-#define SYSTEM_SYSTEM_RESTART 4
+//#define SYSTEM_SYSTEM_RESTART 4
 
 /* fsm */
 typedef enum {
@@ -296,5 +296,6 @@ APBool APParseMACFilterMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 APBool APParseTxPower(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 APBool APParseWPAPassword(APProtocolMessage *msgPtr, int len, char **valPtr);
 APBool APParseMACList(APProtocolMessage *msgPtr, int len, char ***valPtr);
+APBool APParseSystemCommand(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 
 #endif
