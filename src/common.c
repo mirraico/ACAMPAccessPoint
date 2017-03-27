@@ -28,7 +28,7 @@ int APTimevalSubtract(struct timeval *res, const struct timeval *x, const struct
 
 u8 charToHex(char c)
 {
-    switch(c) 
+	switch(c) 
 	{  
 		case '0'...'9':  
 			return (u8)atoi(&c);  
@@ -38,7 +38,7 @@ u8 charToHex(char c)
 			return 0xa + (c-'A');  
 		default:  
 			return 0;
-    }
+	}
 }
 
 void APMACStringToHex(char *str, int* hex) 

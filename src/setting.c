@@ -378,7 +378,7 @@ void APDefaultSettings()
 	}
 	gAPDefaultGateway = 0;
 
-    gDiscoveryType = DISCOVERY_TPYE_DISCOVERY; //broadcast discovery
+	gDiscoveryType = DISCOVERY_TPYE_DISCOVERY; //broadcast discovery
 	gStaticControllerIPAddr = 0; //static Controller IP addr
 	gRegisteredService = REGISTERED_SERVICE_CONF_STA; //configuration and station service
 

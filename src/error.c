@@ -24,7 +24,7 @@ APBool APErrorRaise(APErrorCode code, const char *msg)
 
 APErrorCode APGetLastErrorCode() 
 {
-    return gLastErrorDataPtr == NULL ? AP_ERROR_NONE : gLastErrorDataPtr->code;
+	return gLastErrorDataPtr == NULL ? AP_ERROR_NONE : gLastErrorDataPtr->code;
 }
 
 APBool APHandleLastError()
