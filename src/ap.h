@@ -35,32 +35,12 @@ extern APBool wlflag;
 #define APSeqNumIncrement()         gSeqNum++
 #define APControllerSeqNumIncrement()         gControllerSeqNum++
 
-extern char* APGetIfEthName();
-
-extern int APGetRetransmitInterval();
-extern int APGetKeepAliveInterval();
-extern int APGetMaxRetransmit();
-
 extern u32 APGetSeqNum();
 extern u32 APGetControllerSeqNum();
+void APSetControllerSeqNum(u32 controllerSeqNum);
 
 extern u16 APGetAPID();
 extern void APSetAPID(u16 apid);
-extern u8 APGetDiscoveryType();
-extern u8 APGetRegisteredService();
-
-extern u32 APGetStaticControllerIPAddr(); 
-
-extern char* APGetControllerName();
-extern char* APGetControllerDescriptor();
-extern u32 APGetControllerIPAddr(); 
-extern u8* APGetControllerMACAddr();
-
-extern char* APGetAPName();
-extern char* APGetAPDescriptor();
-extern u32 APGetAPIPAddr();
-extern u8* APGetAPMACAddr();
-extern u32 APGetAPDefaultGateway();
 
 void APInitProtocol();
 

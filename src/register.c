@@ -457,8 +457,8 @@ APStateTransition APEnterRegister()
 		if(!APErr(APReadRegisterResponse())) {
 			if(rejected) return AP_ENTER_DOWN; //rejected, do not need to repeated request
 			gRegisterInterval *= 2;
-			if(gRegisterInterval > (APGetKeepAliveInterval() / 2)) {
-				gRegisterInterval = APGetKeepAliveInterval() / 2;
+			if(gRegisterInterval > (gKeepAliveInterval / 2)) {
+				gRegisterInterval = gKeepAliveInterval / 2;
 			}
 			APDebugLog(5, "Adjust the register interval to %d sec", gRegisterInterval);
 			continue; // no response or invalid response

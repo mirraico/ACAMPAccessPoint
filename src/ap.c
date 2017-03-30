@@ -1,7 +1,5 @@
 #include "ap.h"
 
-char* gIfEthName;
-
 u32 gSeqNum;
 u32 gControllerSeqNum;
 
@@ -13,18 +11,18 @@ u16 gAPID;
 u8 gDiscoveryType;
 u8 gRegisteredService;
 
+char* gIfEthName;
 u32 gStaticControllerIPAddr; 
+u32 gControllerIPAddr; 
+u8 gControllerMACAddr[6];
+u32 gAPIPAddr;
+u8 gAPMACAddr[6];
+u32 gAPDefaultGateway; //unused
 
 char* gControllerName;
 char* gControllerDescriptor;
-u32 gControllerIPAddr; 
-u8 gControllerMACAddr[6];
-
 char* gAPName;
 char* gAPDescriptor;
-u32 gAPIPAddr;
-u8 gAPMACAddr[6];
-u32 gAPDefaultGateway;
 
 /* all wireless conf */
 struct wlconf *wlconf;
@@ -34,27 +32,8 @@ __inline__ u32 APGetSeqNum() { return gSeqNum; }
 __inline__ u32 APGetControllerSeqNum() { return gControllerSeqNum; }
 void APSetControllerSeqNum(u32 controllerSeqNum) { gControllerSeqNum = controllerSeqNum; }
 
-__inline__ int APGetRetransmitInterval() { return gRetransmitInterval; }
-__inline__ int APGetKeepAliveInterval() { return gKeepAliveInterval; }
-__inline__ int APGetMaxRetransmit() { return gMaxRetransmit; }
-
 __inline__ u16 APGetAPID() { return gAPID; }
 void APSetAPID(u16 apid) { gAPID = apid; }
-__inline__ u8 APGetDiscoveryType() { return gDiscoveryType; }
-__inline__ u8 APGetRegisteredService() { return gRegisteredService; }
-
-__inline__ u32 APGetStaticControllerIPAddr() { return gStaticControllerIPAddr; }
-
-__inline__ char* APGetControllerName() { return gControllerName; }
-__inline__ char* APGetControllerDescriptor() { return gControllerDescriptor; }
-__inline__ u32 APGetControllerIPAddr() { return gControllerIPAddr; }
-__inline__ u8* APGetControllerMACAddr() { return gControllerMACAddr; }
-
-__inline__ char* APGetAPName() { return gAPName; }
-__inline__ char* APGetAPDescriptor() { return gAPDescriptor; }
-__inline__ u32 APGetAPIPAddr() { return gAPIPAddr; }
-__inline__ u8* APGetAPMACAddr() { return gAPMACAddr; }
-__inline__ u32 APGetAPDefaultGateway() { return gAPDefaultGateway; }
 
 /**
  * init ap, including seqnum, apid, etc, and set random seed

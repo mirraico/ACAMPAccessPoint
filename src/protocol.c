@@ -394,8 +394,8 @@ APBool APAssembleRegisteredService(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleRegisteredService()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleRegisteredService()"););
-	APDebugLog(5, "Assemble Registered Service: 0x%02x", APGetRegisteredService());
-	APProtocolStore8(msgPtr, APGetRegisteredService());
+	APDebugLog(5, "Assemble Registered Service: 0x%02x", gRegisteredService);
+	APProtocolStore8(msgPtr, gRegisteredService);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_REGISTERED_SERVICE);
 }
@@ -404,7 +404,7 @@ APBool APAssembleAPName(APProtocolMessage *msgPtr)
 {
 	char* str;
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleAPName()");
-	str = APGetAPName();
+	str = gAPName;
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleAPName()"););
 	APDebugLog(5, "Assemble AP Name: %s", str);
@@ -417,7 +417,7 @@ APBool APAssembleAPDescriptor(APProtocolMessage *msgPtr)
 {
 	char* str;
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleAPDescriptor()");
-	str = APGetAPDescriptor();
+	str = gAPDescriptor;
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleAPDescriptor()"););
 	APDebugLog(5, "Assemble AP Descriptor: %s", str);
@@ -429,7 +429,7 @@ APBool APAssembleAPDescriptor(APProtocolMessage *msgPtr)
 APBool APAssembleAPIPAddr(APProtocolMessage *msgPtr) 
 {
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleAPIPAddr()");
-	u32 ip = APGetAPIPAddr();
+	u32 ip = gAPIPAddr;
 
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 4, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleAPIPAddr()"););
 	APDebugLog(5, "Assemble AP IPAddr: %u.%u.%u.%u", (u8)(ip >> 24), (u8)(ip >> 16),\
@@ -443,7 +443,7 @@ APBool APAssembleAPMACAddr(APProtocolMessage *msgPtr)
 {
 	int i;
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleAPMACAddr()");
-	u8 *mac = APGetAPMACAddr();
+	u8 *mac = gAPMACAddr;
 
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 6, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleAPMACAddr()"););
 	APDebugLog(5, "Assemble AP MACAddr: %02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1],\
@@ -460,8 +460,8 @@ APBool APAssembleDiscoveryType(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleDiscoveryType()");
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return APErrorRaise(AP_ERROR_OUT_OF_MEMORY, "APAssembleDiscoveryType()"););
-	APDebugLog(5, "Assemble Discovery Type: 0x%02x", APGetDiscoveryType());
-	APProtocolStore8(msgPtr, APGetDiscoveryType());
+	APDebugLog(5, "Assemble Discovery Type: 0x%02x", gDiscoveryType);
+	APProtocolStore8(msgPtr, gDiscoveryType);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_DISCOVERY_TYPE);
 }
