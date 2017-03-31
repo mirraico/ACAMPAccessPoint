@@ -623,7 +623,7 @@ APBool APAssembleMACFilterList(APProtocolMessage *msgPtr)
 	int list_num = wlconf->conf->macfilter_list->listsize;
 	if(list_num == 0) {
 		APDebugLog(5, "Assemble MAC Filter List Size: 0");
-		return APAssembleMsgElem(msgPtr, MSGELEMTYPE_MACFILTER_MODE);
+		return APAssembleMsgElem(msgPtr, MSGELEMTYPE_MACFILTER_LIST);
 	} 
 
 	APDebugLog(5, "Assemble MAC Filter List Size: %d", list_num);
