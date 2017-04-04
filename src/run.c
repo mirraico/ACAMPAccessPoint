@@ -209,8 +209,6 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 {
 	APLog("Parse Configuration Update Request");
 
-	u16 elemFlag = 0;
-
 	/* parse message elements */
 	while(completeMsg->offset < msgLen) 
 	{
