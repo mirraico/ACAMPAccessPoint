@@ -11,7 +11,7 @@ do
 		[0x0003] = "Discovery Request",
 		[0x0004] = "Discovery Response",
 		[0x0101] = "Register Request",
-		[0x0102] = "Register Reponse",
+		[0x0102] = "Register Response",
 		[0x0103] = "Unregister Request",
 		[0x0104] = "Unregister Response",
 		[0x0201] = "Configuration Request",
