@@ -413,12 +413,11 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 	return AP_TRUE;
 }
 
-APBool APAssembleConfigurationResponse(APProtocolMessage *messagesPtr, u8** listPtr, int listSize)
+APBool APAssembleConfigurationResponse(APProtocolMessage *messagesPtr, u8* list, int listSize)
 {
 	int k = -1;
 	int pos = 0;
 	u16 desiredType = 0;
-	u8* list = *listPtr;
 	if(messagesPtr == NULL) APErrorRaise(AP_ERROR_WRONG_ARG, "APAssembleConfigurationResponse()");
 	
 	APProtocolMessage *msgElems;
@@ -512,7 +511,7 @@ APBool APAssembleConfigurationResponse(APProtocolMessage *messagesPtr, u8** list
 		pos += 2;
 	}
 
-	AP_FREE_OBJECT(list);
+	//AP_FREE_OBJECT(list);
 	
 	return APAssembleControlMessage(messagesPtr, 
 				 APGetAPID(),
@@ -657,7 +656,7 @@ APBool APReceiveMessageInRunState()
 
 				APProtocolMessage responseMsg;
 				AP_INIT_PROTOCOL(responseMsg);
-				if(!APErr(APAssembleConfigurationResponse(&responseMsg, &list, listSize))) {
+				if(!APErr(APAssembleConfigurationResponse(&responseMsg, list, listSize))) {
 					APErrorLog("Failed to assemble Configuration Response");
 					return APErrorRaise(AP_ERROR_NOOUTPUT, NULL);
 				}
