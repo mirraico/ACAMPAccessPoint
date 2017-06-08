@@ -37,7 +37,7 @@
 #define	random_int(min, max) { (min) + (rand() % ((max)-(min))); }
 
 
-int timeval_subtract(struct timeval *res, const struct timeval *x, const struct timeval *y);
+int tv_subtract(struct timeval *res, const struct timeval *x, const struct timeval *y);
 void mac_to_hex(char *str, int* hex);
 
 typedef u_int64_t u64;

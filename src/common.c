@@ -1,6 +1,6 @@
 #include "common.h"
 
-int timeval_subtract(struct timeval *res, const struct timeval *x, const struct timeval *y)
+int tv_subtract(struct timeval *res, const struct timeval *x, const struct timeval *y)
 {
 	int nsec;
 	struct timeval z=*y;

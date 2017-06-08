@@ -3,46 +3,38 @@
 
 #include "common.h"
 
-extern char* gIfEthName;
+extern u32 ap_seqnum;
+extern u32 controller_seqnum;
 
-extern u32 gSeqNum;
-extern u32 gControllerSeqNum;
+extern int retransmit_interval;
+extern int keepalive_interval;
+extern int max_retransmit;
 
-extern int gRetransmitInterval;
-extern int gKeepAliveInterval;
-extern int gMaxRetransmit;
+extern u16 ap_apid;
+extern u8 ap_discovery_type;
+extern u8 ap_register_service;
 
-extern u16 gAPID;
-extern u8 gDiscoveryType;
-extern u8 gRegisteredService;
+extern char* ap_ethname;
+extern u32 static_controller_ip; 
+extern u32 controller_ip; 
+extern u8 controller_mac[6];
+extern u32 ap_ip;
+extern u8 ap_mac[6];
+extern u32 ap_default_gw; //unused
 
-extern u32 gStaticControllerIPAddr; 
+extern char* controller_name;
+extern char* controller_des;
+extern char* ap_name;
+extern char* ap_des;
 
-extern char* gControllerName;
-extern char* gControllerDescriptor;
-extern u32 gControllerIPAddr; 
-extern u8 gControllerMACAddr[6];
-
-extern char* gAPName;
-extern char* gAPDescriptor;
-extern u32 gAPIPAddr;
-extern u8 gAPMACAddr[6];
-extern u32 gAPDefaultGateway;
-
+/* all wireless conf */
 extern struct wlconf *wlconf;
 extern bool wlflag;
 
-#define APSeqNumIncrement()         gSeqNum++
-#define APControllerSeqNumIncrement()         gControllerSeqNum++
+#define ap_seqnum_inc()         ap_seqnum++
+#define controller_seqnum_inc()         controller_seqnum++
 
-extern u32 APGetSeqNum();
-extern u32 APGetControllerSeqNum();
-void APSetControllerSeqNum(u32 controllerSeqNum);
-
-extern u16 APGetAPID();
-extern void APSetAPID(u16 apid);
-
-void APInitProtocol();
+void init_protocol();
 
 
 #endif // AP_H

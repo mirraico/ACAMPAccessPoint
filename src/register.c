@@ -46,8 +46,8 @@ bool APAssembleRegisterRequest(APProtocolMessage *messagesPtr)
 	}
 	
 	return APAssembleControlMessage(messagesPtr, 
-				 APGetAPID(),
-				 APGetSeqNum(),
+				 ap_apid,
+				 ap_seqnum,
 				 MSGTYPE_REGISTER_REQUEST,
 				 msgElems,
 				 msgElemCount
@@ -275,7 +275,7 @@ bool APParseRegisterResponse(char *msg,
 		return false;
 	}
 
-	if(gRegisteredService != recvRegisteredService) {
+	if(ap_register_service != recvRegisteredService) {
 		APErrorLog("The service is different from the requested one");
 		return false;
 	}
@@ -284,40 +284,40 @@ bool APParseRegisterResponse(char *msg,
 		APErrorLog("The apid in message is different from the one in message header");
 	}
 
-	if(gControllerName == NULL || strcmp(gControllerName, recvControllerInfo.name) != 0) {
-		if(gDiscoveryType == DISCOVERY_TPYE_DISCOVERY) APErrorLog("The Controller name has changed");
-		free_object(gControllerName);
-		create_object(gControllerName, (strlen(recvControllerInfo.name) + 1), return false;);
-		copy_memory(gControllerName, recvControllerInfo.name, strlen(recvControllerInfo.name));
-		gControllerName[strlen(recvControllerInfo.name)] = '\0';
+	if(controller_name == NULL || strcmp(controller_name, recvControllerInfo.name) != 0) {
+		if(ap_discovery_type == DISCOVERY_TPYE_DISCOVERY) APErrorLog("The Controller name has changed");
+		free_object(controller_name);
+		create_object(controller_name, (strlen(recvControllerInfo.name) + 1), return false;);
+		copy_memory(controller_name, recvControllerInfo.name, strlen(recvControllerInfo.name));
+		controller_name[strlen(recvControllerInfo.name)] = '\0';
 	}
 
-	if(gControllerDescriptor == NULL || strcmp(gControllerDescriptor, recvControllerInfo.descriptor) != 0) {
-		if(gDiscoveryType == DISCOVERY_TPYE_DISCOVERY) APErrorLog("The Controller descriptor has changed");
-		free_object(gControllerDescriptor);
-		create_object(gControllerDescriptor, (strlen(recvControllerInfo.descriptor) + 1), return false;);
-		copy_memory(gControllerDescriptor, recvControllerInfo.descriptor, strlen(recvControllerInfo.descriptor));
-		gControllerDescriptor[strlen(recvControllerInfo.descriptor)] = '\0';
+	if(controller_des == NULL || strcmp(controller_des, recvControllerInfo.descriptor) != 0) {
+		if(ap_discovery_type == DISCOVERY_TPYE_DISCOVERY) APErrorLog("The Controller descriptor has changed");
+		free_object(controller_des);
+		create_object(controller_des, (strlen(recvControllerInfo.descriptor) + 1), return false;);
+		copy_memory(controller_des, recvControllerInfo.descriptor, strlen(recvControllerInfo.descriptor));
+		controller_des[strlen(recvControllerInfo.descriptor)] = '\0';
 	}
 
-	if(gControllerIPAddr != recvControllerInfo.IPAddr) {
+	if(controller_ip != recvControllerInfo.IPAddr) {
 		APErrorLog("The Controller IP Addr has changed");
 		return false;
 	}
 
 	if(
-		gControllerMACAddr[0] != recvControllerInfo.MACAddr[0] ||
-		gControllerMACAddr[1] != recvControllerInfo.MACAddr[1] ||
-		gControllerMACAddr[2] != recvControllerInfo.MACAddr[2] ||
-		gControllerMACAddr[3] != recvControllerInfo.MACAddr[3] ||
-		gControllerMACAddr[4] != recvControllerInfo.MACAddr[4] ||
-		gControllerMACAddr[5] != recvControllerInfo.MACAddr[5]
+		controller_mac[0] != recvControllerInfo.MACAddr[0] ||
+		controller_mac[1] != recvControllerInfo.MACAddr[1] ||
+		controller_mac[2] != recvControllerInfo.MACAddr[2] ||
+		controller_mac[3] != recvControllerInfo.MACAddr[3] ||
+		controller_mac[4] != recvControllerInfo.MACAddr[4] ||
+		controller_mac[5] != recvControllerInfo.MACAddr[5]
 	) 
 	{
 		int i;
-		if(gDiscoveryType == DISCOVERY_TPYE_DISCOVERY) APErrorLog("The Controller MAC Addr has changed");
+		if(ap_discovery_type == DISCOVERY_TPYE_DISCOVERY) APErrorLog("The Controller MAC Addr has changed");
 		for(i = 0; i < 6; i++) {
-			gControllerMACAddr[i] = recvControllerInfo.MACAddr[i];
+			controller_mac[i] = recvControllerInfo.MACAddr[i];
 		}
 	}
 
@@ -344,13 +344,13 @@ bool APReceiveRegisterResponse()
 
 	recvAddr = ntohl(addr.sin_addr.s_addr);
 	/* verify the source of the message */
-	if(recvAddr != gControllerIPAddr) {
+	if(recvAddr != controller_ip) {
 		APErrorLog("Message from the illegal source address");
 		return false;
 	}
 	
 	/* check if it is a valid Register Response */
-	if(!(APParseRegisterResponse(buf, readBytes, APGetSeqNum()))) {
+	if(!(APParseRegisterResponse(buf, readBytes, ap_seqnum))) {
 		return false;
 	}
 
@@ -394,8 +394,8 @@ bool APReadRegisterResponse()
 
 		/* compute time and go on */
 		gettimeofday(&after, NULL);
-		timeval_subtract(&delta, &after, &before);
-		if(timeval_subtract(&new_timeout, &timeout, &delta) == 1) { 
+		tv_subtract(&delta, &after, &before);
+		if(tv_subtract(&new_timeout, &timeout, &delta) == 1) { 
 			/* time is over (including receive & pause) */
 			goto ap_time_over;
 		}
@@ -413,10 +413,10 @@ APStateTransition APEnterRegister()
 	APLog("######### Register State #########");
 
 	gRegisterCount = 0;
-	gMaxRegister = gMaxRetransmit;
-	gRegisterInterval = gRetransmitInterval;
+	gMaxRegister = max_retransmit;
+	gRegisterInterval = retransmit_interval;
 
-	if(!APNetworkInitControllerAddr(gControllerIPAddr)) {
+	if(!APNetworkInitControllerAddr(controller_ip)) {
 		APErrorLog("Init singlecast socket failed");
 		return AP_ENTER_DOWN;
 	}
@@ -425,7 +425,7 @@ APStateTransition APEnterRegister()
 	{
 		if(gRegisterCount == gMaxRegister) {
 			APLog("No Register Responses for 3 times");
-			APSeqNumIncrement();
+			ap_seqnum_inc();
 			return AP_ENTER_DOWN;
 		}
 		
@@ -450,8 +450,8 @@ APStateTransition APEnterRegister()
 		if(!(APReadRegisterResponse())) {
 			if(rejected) return AP_ENTER_DOWN; //rejected, do not need to repeated request
 			gRegisterInterval *= 2;
-			if(gRegisterInterval > (gKeepAliveInterval / 2)) {
-				gRegisterInterval = gKeepAliveInterval / 2;
+			if(gRegisterInterval > (keepalive_interval / 2)) {
+				gRegisterInterval = keepalive_interval / 2;
 			}
 			APDebugLog(5, "Adjust the register interval to %d sec", gRegisterInterval);
 			continue; // no response or invalid response
@@ -460,13 +460,13 @@ APStateTransition APEnterRegister()
 		//set apid
 		APLog("Accept valid Register Response and assigned APID is %d", recvAPID);
 		APLog("Controller Next Seq Num is %d", recvControllerSeqNum);
-		APSetAPID(recvAPID);
-		APSetControllerSeqNum(recvControllerSeqNum);
+		ap_apid = recvAPID;
+		controller_seqnum = recvControllerSeqNum;
 		APLog("Registered service successfully");
 		break;
 	}
 
-	APSeqNumIncrement();
+	ap_seqnum_inc();
 	APLog("The register state is finished");
 	return AP_ENTER_RUN;
 }

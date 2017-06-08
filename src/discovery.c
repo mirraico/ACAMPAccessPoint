@@ -25,17 +25,17 @@ bool APEvaluateController()
 {
 	int i;
 	/* now the strategy is choose the first */
-	create_object(gControllerName, (strlen(controllers[0].name) + 1), return false;);
-	copy_memory(gControllerName, controllers[0].name, strlen(controllers[0].name));
-	gControllerName[strlen(controllers[0].name)] = '\0';
+	create_object(controller_name, (strlen(controllers[0].name) + 1), return false;);
+	copy_memory(controller_name, controllers[0].name, strlen(controllers[0].name));
+	controller_name[strlen(controllers[0].name)] = '\0';
 
-	create_object(gControllerDescriptor, (strlen(controllers[0].descriptor) + 1), return false;);
-	copy_memory(gControllerDescriptor, controllers[0].descriptor, strlen(controllers[0].descriptor));
-	gControllerDescriptor[strlen(controllers[0].descriptor)] = '\0';
+	create_object(controller_des, (strlen(controllers[0].descriptor) + 1), return false;);
+	copy_memory(controller_des, controllers[0].descriptor, strlen(controllers[0].descriptor));
+	controller_des[strlen(controllers[0].descriptor)] = '\0';
 
-	gControllerIPAddr = controllers[0].IPAddr; 
+	controller_ip = controllers[0].IPAddr; 
 	for(i = 0; i < 6; i++) {
-		gControllerMACAddr[i] = controllers[0].MACAddr[i];
+		controller_mac[i] = controllers[0].MACAddr[i];
 	}
 	return true;
 }
@@ -49,8 +49,8 @@ bool APAssembleDiscoveryRequest(APProtocolMessage *messagesPtr)
 	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return false;);
 	
 	return APAssembleControlMessage(messagesPtr, 
-				 APGetAPID(),
-				 APGetSeqNum(),
+				 ap_apid,
+				 ap_seqnum,
 				 MSGTYPE_DISCOVERY_REQUEST,
 				 msgElems,
 				 msgElemCount
@@ -190,7 +190,7 @@ bool APReceiveDiscoveryResponse() {
 	  (u8)(recvAddr >> 8),  (u8)(recvAddr >> 0));
 	
 	/* check if it is a valid Discovery Response */
-	if(!(APParseDiscoveryResponse(buf, readBytes, APGetSeqNum(), controllerPtr))) {
+	if(!(APParseDiscoveryResponse(buf, readBytes, ap_seqnum, controllerPtr))) {
 		return false;
 	}
 
@@ -232,8 +232,8 @@ bool APReadDiscoveryResponse()
 		}
 		/* compute time and go on */
 		gettimeofday(&after, NULL);
-		timeval_subtract(&delta, &after, &before);
-		if(timeval_subtract(&new_timeout, &timeout, &delta) == 1) { 
+		tv_subtract(&delta, &after, &before);
+		if(tv_subtract(&new_timeout, &timeout, &delta) == 1) { 
 			/* time is over */
 			goto ap_time_over;
 		}
@@ -270,7 +270,7 @@ APStateTransition APEnterDiscovery()
 
 		if(gDiscoveryCount == gMaxDiscovery) {
 			APLog("No Discovery Responses for 3 times");
-			APSeqNumIncrement();
+			ap_seqnum_inc();
 			return AP_ENTER_DOWN;
 		}
 		
@@ -300,12 +300,12 @@ APStateTransition APEnterDiscovery()
 		if(!(APEvaluateController())) {
 			continue;
 		}
-		APLog("Picks a Controller from %u.%u.%u.%u", (u8)(gControllerIPAddr >> 24), (u8)(gControllerIPAddr >> 16),\
-			(u8)(gControllerIPAddr >> 8),  (u8)(gControllerIPAddr >> 0));
+		APLog("Picks a Controller from %u.%u.%u.%u", (u8)(controller_ip >> 24), (u8)(controller_ip >> 16),\
+			(u8)(controller_ip >> 8),  (u8)(controller_ip >> 0));
 		break;
 	}
 
-	APSeqNumIncrement();
+	ap_seqnum_inc();
 	APLog("The discovery state is finished");
 	return AP_ENTER_REGISTER;
 }

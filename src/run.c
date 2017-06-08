@@ -26,8 +26,8 @@ static void APRretransmitHandler(struct uloop_timeout *t)
 
 	APLog("There is no valid Response, times = %d, retransmit request", retransmitCount);
 	retransmitInterval *= 2;
-	if(retransmitInterval > gKeepAliveInterval / 2) {
-		retransmitInterval = gKeepAliveInterval / 2;
+	if(retransmitInterval > keepalive_interval / 2) {
+		retransmitInterval = keepalive_interval / 2;
 	}
 	uloop_timeout_set(&tRetransmit, retransmitInterval * 1000);
 	APDebugLog(5, "Adjust the retransmit interval to %d sec and retransmit", retransmitInterval);
@@ -48,8 +48,8 @@ bool APAssembleKeepAliveRequest(APProtocolMessage *messagesPtr)
 	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return false;);
 	
 	return APAssembleControlMessage(messagesPtr, 
-				 APGetAPID(),
-				 APGetSeqNum(),
+				 ap_apid,
+				 ap_seqnum,
 				 MSGTYPE_KEEPALIVE_REQUEST,
 				 msgElems,
 				 msgElemCount
@@ -85,7 +85,7 @@ static void APKeepAliveHandler(struct uloop_timeout *t)
 bool APParseKeepAliveResponse()
 {
 	uloop_timeout_cancel(&tKeepAlive);
-	uloop_timeout_set(&tKeepAlive, gKeepAliveInterval * 1000);
+	uloop_timeout_set(&tKeepAlive, keepalive_interval * 1000);
 	APLog("Accept Keep Alive Response");
 	return true;
 }
@@ -99,8 +99,8 @@ bool APAssembleUnregisterResponse(APProtocolMessage *messagesPtr)
 	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return false;);
 	
 	return APAssembleControlMessage(messagesPtr, 
-				 APGetAPID(),
-				 APGetControllerSeqNum(),
+				 ap_apid,
+				 controller_seqnum,
 				 MSGTYPE_UNREGISTER_RESPONSE,
 				 msgElems,
 				 msgElemCount
@@ -116,8 +116,8 @@ bool APAssembleSystemResponse(APProtocolMessage *messagesPtr)
 	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return false;);
 	
 	return APAssembleControlMessage(messagesPtr, 
-				 APGetAPID(),
-				 APGetControllerSeqNum(),
+				 ap_apid,
+				 controller_seqnum,
 				 MSGTYPE_SYSTEM_RESPONSE,
 				 msgElems,
 				 msgElemCount
@@ -197,8 +197,8 @@ bool APAssembleConfigurationUpdateResponse(APProtocolMessage *messagesPtr)
 	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return false;);
 	
 	return APAssembleControlMessage(messagesPtr, 
-				 APGetAPID(),
-				 APGetControllerSeqNum(),
+				 ap_apid,
+				 controller_seqnum,
 				 MSGTYPE_CONFIGURATION_UPDATE_RESPONSE,
 				 msgElems,
 				 msgElemCount
@@ -514,8 +514,8 @@ bool APAssembleConfigurationResponse(APProtocolMessage *messagesPtr, u8* list, i
 	//free_object(list);
 	
 	return APAssembleControlMessage(messagesPtr, 
-				 APGetAPID(),
-				 APGetControllerSeqNum(),
+				 ap_apid,
+				 controller_seqnum,
 				 MSGTYPE_CONFIGURATION_RESPONSE,
 				 msgElems,
 				 msgElemCount
@@ -589,7 +589,7 @@ bool APReceiveMessageInRunState()
 
 	recvAddr = ntohl(addr.sin_addr.s_addr);
 	/* verify the source of the message */
-	if(recvAddr != gControllerIPAddr) {
+	if(recvAddr != controller_ip) {
 		APErrorLog("Message from the illegal source address");
 		return false;
 	}
@@ -611,7 +611,7 @@ bool APReceiveMessageInRunState()
 		APErrorLog("ACAMP version or type is not Expected");
 		return false;
 	}
-	if(controlVal.apid != gAPID) {
+	if(controlVal.apid != ap_apid) {
 		APErrorLog("The apid in message is different from the one in message header");
 		return false;
 	}
@@ -619,7 +619,7 @@ bool APReceiveMessageInRunState()
 	int is_req = controlVal.msgType % 2; //odd type indicates the request message
 
 	if(is_req) {
-		if(controlVal.seqNum == APGetControllerSeqNum() - 1) {
+		if(controlVal.seqNum == controller_seqnum - 1) {
 			APDebugLog(3, "Receive a message that has been responsed");
 			if(cacheMsg.type == 0 || controlVal.msgType + 1 != cacheMsg.type) {
 				APErrorLog("The received message does not match the cache message");
@@ -633,11 +633,11 @@ bool APReceiveMessageInRunState()
 			}
 
 			uloop_timeout_cancel(&tKeepAlive);
-			uloop_timeout_set(&tKeepAlive, gKeepAliveInterval * 1000);
+			uloop_timeout_set(&tKeepAlive, keepalive_interval * 1000);
 			return false;
 		}
-		if(controlVal.seqNum != APGetControllerSeqNum()) {
-			if(controlVal.seqNum < APGetControllerSeqNum())
+		if(controlVal.seqNum != controller_seqnum) {
+			if(controlVal.seqNum < controller_seqnum)
 				APErrorLog("The serial number of the message is expired");
 			else
 				APErrorLog("The serial number of the message is invalid");
@@ -673,9 +673,9 @@ bool APReceiveMessageInRunState()
 				cacheMsg.type = MSGTYPE_CONFIGURATION_RESPONSE; //easy to match request
 				AP_FREE_PROTOCOL_MESSAGE(responseMsg);
 
-				APControllerSeqNumIncrement();
+				controller_seqnum_inc();
 				uloop_timeout_cancel(&tKeepAlive);
-				uloop_timeout_set(&tKeepAlive, gKeepAliveInterval * 1000);
+				uloop_timeout_set(&tKeepAlive, keepalive_interval * 1000);
 				break;
 			}
 			case MSGTYPE_CONFIGURATION_UPDATE_REQUEST:
@@ -702,9 +702,9 @@ bool APReceiveMessageInRunState()
 				cacheMsg.type = MSGTYPE_CONFIGURATION_UPDATE_RESPONSE; //easy to match request
 				AP_FREE_PROTOCOL_MESSAGE(responseMsg);
 
-				APControllerSeqNumIncrement();
+				controller_seqnum_inc();
 				uloop_timeout_cancel(&tKeepAlive);
-				uloop_timeout_set(&tKeepAlive, gKeepAliveInterval * 1000);
+				uloop_timeout_set(&tKeepAlive, keepalive_interval * 1000);
 				break;
 			}
 			case MSGTYPE_SYSTEM_REQUEST:
@@ -731,9 +731,9 @@ bool APReceiveMessageInRunState()
 				cacheMsg.type = MSGTYPE_SYSTEM_RESPONSE; //easy to match request
 				AP_FREE_PROTOCOL_MESSAGE(responseMsg);
 
-				APControllerSeqNumIncrement();
+				controller_seqnum_inc();
 				uloop_timeout_cancel(&tKeepAlive);
-				uloop_timeout_set(&tKeepAlive, gKeepAliveInterval * 1000);
+				uloop_timeout_set(&tKeepAlive, keepalive_interval * 1000);
 				break;
 			}
 			case MSGTYPE_UNREGISTER_REQUEST:
@@ -762,8 +762,8 @@ bool APReceiveMessageInRunState()
 
 
 	} else {
-		if(controlVal.seqNum != APGetSeqNum()) {
-			if(controlVal.seqNum < APGetSeqNum())
+		if(controlVal.seqNum != ap_seqnum) {
+			if(controlVal.seqNum < ap_seqnum)
 				APErrorLog("The serial number of the message is expired");
 			else
 				APErrorLog("The serial number of the message is invalid");
@@ -781,7 +781,7 @@ bool APReceiveMessageInRunState()
 				}
 				uloop_timeout_cancel(&tRetransmit);
 				AP_FREE_PROTOCOL_MESSAGE(retransmitMsg);
-				APSeqNumIncrement();
+				ap_seqnum_inc();
 				break;
 			default:
 				return false;

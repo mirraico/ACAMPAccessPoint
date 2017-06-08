@@ -78,11 +78,11 @@ void APNetworkParseRoutes(struct nlmsghdr *nlHdr, u32* localIP, u32* localDefaul
 	/* use wired ethernet to connect with controller */
 	// if(strncmp(prtInfo->ifName, "en", 2) != 0 && strncmp(prtInfo->ifName, "eth", 3) != 0) return;
 	// if(strncmp(prtInfo->ifName, "wl", 2) != 0) return;
-	if(strcmp(prtInfo->ifName, gIfEthName) != 0) return;
+	if(strcmp(prtInfo->ifName, ap_ethname) != 0) return;
 
 	if (prtInfo->dstAddr.s_addr == 0)
 		*localDefaultGateway = ntohl((prtInfo->gateWay).s_addr);
-		//sprintf(gAPDefaultGateway, (char *) inet_ntoa(prtInfo->gateWay));
+		//sprintf(ap_default_gw, (char *) inet_ntoa(prtInfo->gateWay));
 	//sprintf(gLocalAddr, (char *) inet_ntoa(prtInfo->srcAddr));
 	*localIP = ntohl((prtInfo->srcAddr).s_addr);
 
@@ -138,7 +138,7 @@ bool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGateway
 	struct ifreq ifr;
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
 	/* use wired ethernet to connect with controller */
-	strcpy(ifr.ifr_name, gIfEthName);
+	strcpy(ifr.ifr_name, ap_ethname);
 	if(!ioctl(sock, SIOCGIFHWADDR, &ifr)) {
 		memcpy(localMAC, ifr.ifr_hwaddr.sa_data, 6);
 	}

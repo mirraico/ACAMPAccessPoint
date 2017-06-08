@@ -394,8 +394,8 @@ bool APAssembleRegisteredService(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return false;
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return false;);
-	APDebugLog(5, "Assemble Registered Service: 0x%02x", gRegisteredService);
-	APProtocolStore8(msgPtr, gRegisteredService);
+	APDebugLog(5, "Assemble Registered Service: 0x%02x", ap_register_service);
+	APProtocolStore8(msgPtr, ap_register_service);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_REGISTERED_SERVICE);
 }
@@ -404,7 +404,7 @@ bool APAssembleAPName(APProtocolMessage *msgPtr)
 {
 	char* str;
 	if(msgPtr == NULL) return false;
-	str = gAPName;
+	str = ap_name;
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return false;);
 	APDebugLog(5, "Assemble AP Name: %s", str);
@@ -417,7 +417,7 @@ bool APAssembleAPDescriptor(APProtocolMessage *msgPtr)
 {
 	char* str;
 	if(msgPtr == NULL) return false;
-	str = gAPDescriptor;
+	str = ap_des;
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return false;);
 	APDebugLog(5, "Assemble AP Descriptor: %s", str);
@@ -429,7 +429,7 @@ bool APAssembleAPDescriptor(APProtocolMessage *msgPtr)
 bool APAssembleAPIPAddr(APProtocolMessage *msgPtr) 
 {
 	if(msgPtr == NULL) return false;
-	u32 ip = gAPIPAddr;
+	u32 ip = ap_ip;
 
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 4, return false;);
 	APDebugLog(5, "Assemble AP IPAddr: %u.%u.%u.%u", (u8)(ip >> 24), (u8)(ip >> 16),\
@@ -443,7 +443,7 @@ bool APAssembleAPMACAddr(APProtocolMessage *msgPtr)
 {
 	int i;
 	if(msgPtr == NULL) return false;
-	u8 *mac = gAPMACAddr;
+	u8 *mac = ap_mac;
 
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 6, return false;);
 	APDebugLog(5, "Assemble AP MACAddr: %02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1],\
@@ -460,8 +460,8 @@ bool APAssembleDiscoveryType(APProtocolMessage *msgPtr)
 	if(msgPtr == NULL) return false;
 	
 	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return false;);
-	APDebugLog(5, "Assemble Discovery Type: 0x%02x", gDiscoveryType);
-	APProtocolStore8(msgPtr, gDiscoveryType);
+	APDebugLog(5, "Assemble Discovery Type: 0x%02x", ap_discovery_type);
+	APProtocolStore8(msgPtr, ap_discovery_type);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_DISCOVERY_TYPE);
 }

@@ -1,52 +1,45 @@
 #include "ap.h"
 
-u32 gSeqNum;
-u32 gControllerSeqNum;
+u32 ap_seqnum;
+u32 controller_seqnum;
 
-int gRetransmitInterval;
-int gKeepAliveInterval;
-int gMaxRetransmit;
+int retransmit_interval;
+int keepalive_interval;
+int max_retransmit;
 
-u16 gAPID;
-u8 gDiscoveryType;
-u8 gRegisteredService;
+u16 ap_apid;
+u8 ap_discovery_type;
+u8 ap_register_service;
 
-char* gIfEthName;
-u32 gStaticControllerIPAddr; 
-u32 gControllerIPAddr; 
-u8 gControllerMACAddr[6];
-u32 gAPIPAddr;
-u8 gAPMACAddr[6];
-u32 gAPDefaultGateway; //unused
+char* ap_ethname;
+u32 static_controller_ip; 
+u32 controller_ip; 
+u8 controller_mac[6];
+u32 ap_ip;
+u8 ap_mac[6];
+u32 ap_default_gw; //unused
 
-char* gControllerName;
-char* gControllerDescriptor;
-char* gAPName;
-char* gAPDescriptor;
+char* controller_name;
+char* controller_des;
+char* ap_name;
+char* ap_des;
 
 /* all wireless conf */
 struct wlconf *wlconf;
 bool wlflag;
 
-__inline__ u32 APGetSeqNum() { return gSeqNum; }
-__inline__ u32 APGetControllerSeqNum() { return gControllerSeqNum; }
-void APSetControllerSeqNum(u32 controllerSeqNum) { gControllerSeqNum = controllerSeqNum; }
-
-__inline__ u16 APGetAPID() { return gAPID; }
-void APSetAPID(u16 apid) { gAPID = apid; }
-
 /**
  * init ap, including seqnum, apid, etc, and set random seed
  */
-void APInitProtocol()
+void init_protocol()
 {
 	srand( (unsigned)time( NULL ) );
 
-	gSeqNum = rand();
-	gAPID = 0;
+	ap_seqnum = rand();
+	ap_apid = 0;
 
-	gRetransmitInterval = 3;
-	gMaxRetransmit = 5;
-	gKeepAliveInterval = 30;
+	retransmit_interval = 3;
+	max_retransmit = 5;
+	keepalive_interval = 30;
 }
 

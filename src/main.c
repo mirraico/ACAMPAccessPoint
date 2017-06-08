@@ -21,7 +21,7 @@ int main()
 
 	wlconf = wlconf_alloc();
 
-	APInitProtocol();
+	init_protocol();
 	APDefaultSettings();
 
 	APLog("Start reading the setting file");
@@ -37,50 +37,50 @@ int main()
 	APInitLogFile();
 	APLog("Finished reading the setting file");
 	
-	if(gIfEthName == NULL) {
+	if(ap_ethname == NULL) {
 		APErrorLog("Can't obtain Ethernet interface");
 		exit(1);
 	}
 
-	if(!APNetworkInitLocalAddr(&gAPIPAddr, gAPMACAddr, &gAPDefaultGateway)) {
+	if(!APNetworkInitLocalAddr(&ap_ip, ap_mac, &ap_default_gw)) {
 		APErrorLog("Can't init local address");
 		exit(1);
 	}
 
-	APDebugLog(5, "Local IP: %u.%u.%u.%u", (u8)(gAPIPAddr >> 24), (u8)(gAPIPAddr >> 16),\
-	  (u8)(gAPIPAddr >> 8),  (u8)(gAPIPAddr >> 0));
-	APDebugLog(5, "Local MAC: %02x:%02x:%02x:%02x:%02x:%02x", gAPMACAddr[0], gAPMACAddr[1],\
-	 gAPMACAddr[2], gAPMACAddr[3], gAPMACAddr[4], gAPMACAddr[5]);
-	APDebugLog(5, "Local gateway: %u.%u.%u.%u", (u8)(gAPDefaultGateway >> 24), (u8)(gAPDefaultGateway >> 16),\
-	  (u8)(gAPDefaultGateway >> 8),  (u8)(gAPDefaultGateway >> 0));
+	APDebugLog(5, "Local IP: %u.%u.%u.%u", (u8)(ap_ip >> 24), (u8)(ap_ip >> 16),\
+	  (u8)(ap_ip >> 8),  (u8)(ap_ip >> 0));
+	APDebugLog(5, "Local MAC: %02x:%02x:%02x:%02x:%02x:%02x", ap_mac[0], ap_mac[1],\
+	 ap_mac[2], ap_mac[3], ap_mac[4], ap_mac[5]);
+	APDebugLog(5, "Local gateway: %u.%u.%u.%u", (u8)(ap_default_gw >> 24), (u8)(ap_default_gw >> 16),\
+	  (u8)(ap_default_gw >> 8),  (u8)(ap_default_gw >> 0));
 
 	APDebugLog(3, "All init is finished");
 	APLog("Starting AP...");
 
 	/* if Controller address is given, jump Discovery and use this address for register */
-	if(gDiscoveryType != DISCOVERY_TPYE_DISCOVERY) 
+	if(ap_discovery_type != DISCOVERY_TPYE_DISCOVERY) 
 	{
-		switch(gDiscoveryType) {
+		switch(ap_discovery_type) {
 			case DISCOVERY_TPYE_STATIC:
-				if(gStaticControllerIPAddr != 0) {
-					gControllerIPAddr = gStaticControllerIPAddr;
+				if(static_controller_ip != 0) {
+					controller_ip = static_controller_ip;
 					nextState = AP_ENTER_REGISTER;
-					APLog("Use static controller addr to register: %u.%u.%u.%u", (u8)(gControllerIPAddr >> 24),\
-		 				(u8)(gControllerIPAddr >> 16),  (u8)(gControllerIPAddr >> 8),  (u8)(gControllerIPAddr >> 0));
+					APLog("Use static controller addr to register: %u.%u.%u.%u", (u8)(controller_ip >> 24),\
+		 				(u8)(controller_ip >> 16),  (u8)(controller_ip >> 8),  (u8)(controller_ip >> 0));
 				} else {
 					APLog("Static address is not specified");
-					gDiscoveryType = DISCOVERY_TPYE_DISCOVERY;
+					ap_discovery_type = DISCOVERY_TPYE_DISCOVERY;
 				}
 				break;
 			case DISCOVERY_TPYE_DEFAULT_GATE:
-				if(gAPDefaultGateway != 0) {
-				 	gControllerIPAddr = gAPDefaultGateway;
+				if(ap_default_gw != 0) {
+				 	controller_ip = ap_default_gw;
 					nextState = AP_ENTER_REGISTER;
-					APLog("Use default gateway addr to register: %u.%u.%u.%u", (u8)(gControllerIPAddr >> 24),\
-		 				(u8)(gControllerIPAddr >> 16),  (u8)(gControllerIPAddr >> 8),  (u8)(gControllerIPAddr >> 0));
+					APLog("Use default gateway addr to register: %u.%u.%u.%u", (u8)(controller_ip >> 24),\
+		 				(u8)(controller_ip >> 16),  (u8)(controller_ip >> 8),  (u8)(controller_ip >> 0));
 			 	} else {
 					APLog("Default gateway is not set");
-					gDiscoveryType = DISCOVERY_TPYE_DISCOVERY;
+					ap_discovery_type = DISCOVERY_TPYE_DISCOVERY;
 				}
 			 default:
 			 	break;

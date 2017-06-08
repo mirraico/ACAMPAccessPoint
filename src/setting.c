@@ -148,11 +148,11 @@ bool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			create_string(gAPName, len + 1, return false;);
-			zero_memory(gAPName, len + 1);
-			copy_memory(gAPName, value, len);
+			create_string(ap_name, len + 1, return false;);
+			zero_memory(ap_name, len + 1);
+			copy_memory(ap_name, value, len);
 			
-			APDebugLog(5, "CONF AP Name: %s", gAPName);
+			APDebugLog(5, "CONF AP Name: %s", ap_name);
 			free_object(line);
 			continue;	
 		}
@@ -161,11 +161,11 @@ bool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			create_string(gAPDescriptor, len + 1, return false;);
-			zero_memory(gAPDescriptor, len + 1);
-			copy_memory(gAPDescriptor, value, len);
+			create_string(ap_des, len + 1, return false;);
+			zero_memory(ap_des, len + 1);
+			copy_memory(ap_des, value, len);
 
-			APDebugLog(5, "CONF AP Descriptor: %s", gAPDescriptor);
+			APDebugLog(5, "CONF AP Descriptor: %s", ap_des);
 			free_object(line);
 			continue;
 		}
@@ -174,19 +174,19 @@ bool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			create_string(gIfEthName, len + 1, return false;);
-			zero_memory(gIfEthName, len + 1);
-			copy_memory(gIfEthName, value, len);
+			create_string(ap_ethname, len + 1, return false;);
+			zero_memory(ap_ethname, len + 1);
+			copy_memory(ap_ethname, value, len);
 
-			APDebugLog(5, "CONF Eth Interface Name: %s", gIfEthName);
+			APDebugLog(5, "CONF Eth Interface Name: %s", ap_ethname);
 			free_object(line);
 			continue;
 		}
 		if (!strcmp(APExtractTag(line), "DISCOVERY_TYPE"))
 		{
-			gDiscoveryType = APExtractIntVaule(pos+1);
+			ap_discovery_type = APExtractIntVaule(pos+1);
 
-			APDebugLog(5, "CONF Discovery Type: %u", gDiscoveryType);
+			APDebugLog(5, "CONF Discovery Type: %u", ap_discovery_type);
 			free_object(line);
 			continue;	
 		}
@@ -199,19 +199,19 @@ bool APParseSettingsFile()
 			create_string(ip, len + 1, return false;);
 			zero_memory(ip, len + 1);
 			copy_memory(ip, value, len);
-			gStaticControllerIPAddr = ntohl(inet_addr(ip));
+			static_controller_ip = ntohl(inet_addr(ip));
 			free_object(ip);
 
-			APDebugLog(5, "CONF Static Controller IP Addr: %u.%u.%u.%u", (u8)(gStaticControllerIPAddr >> 24), (u8)(gStaticControllerIPAddr >> 16),\
-	  			(u8)(gStaticControllerIPAddr >> 8),  (u8)(gStaticControllerIPAddr >> 0));
+			APDebugLog(5, "CONF Static Controller IP Addr: %u.%u.%u.%u", (u8)(static_controller_ip >> 24), (u8)(static_controller_ip >> 16),\
+	  			(u8)(static_controller_ip >> 8),  (u8)(static_controller_ip >> 0));
 			free_object(line);
 			continue;
 		}
 		if (!strcmp(APExtractTag(line), "REGISTERED_SERVICE"))
 		{
-			gRegisteredService = APExtractIntVaule(pos+1);
+			ap_register_service = APExtractIntVaule(pos+1);
 			
-			APDebugLog(5, "CONF Registered Service: %u", gRegisteredService);
+			APDebugLog(5, "CONF Registered Service: %u", ap_register_service);
 			free_object(line);
 			continue;	
 		}
@@ -363,29 +363,29 @@ void APDefaultSettings()
 	gAPLogLevel = 0;
 	gAPStdoutLevel = 0;
 
-	gAPName = "unnamed AP";
-	gAPDescriptor = "no descriptor";
+	ap_name = "unnamed AP";
+	ap_des = "no descriptor";
 
 	/* init in APNetworkInitIfname() */
-	gIfEthName = "br-lan";
+	ap_ethname = "br-lan";
 	//gIfWlanName = NULL;
 	wlflag = true;
 
 	/* IP, MAC and default gateway addr will be automatically obtained soon by APNetworkInitLocalAddr() */
-	gAPIPAddr = 0;
+	ap_ip = 0;
 	for(i = 0; i < 6; i++) {
-		gAPMACAddr[i] = 0;
+		ap_mac[i] = 0;
 	}
-	gAPDefaultGateway = 0;
+	ap_default_gw = 0;
 
-	gDiscoveryType = DISCOVERY_TPYE_DISCOVERY; //broadcast discovery
-	gStaticControllerIPAddr = 0; //static Controller IP addr
-	gRegisteredService = REGISTERED_SERVICE_CONF_STA; //configuration and station service
+	ap_discovery_type = DISCOVERY_TPYE_DISCOVERY; //broadcast discovery
+	static_controller_ip = 0; //static Controller IP addr
+	ap_register_service = REGISTERED_SERVICE_CONF_STA; //configuration and station service
 
-	gControllerName = NULL;
-	gControllerDescriptor = NULL;
-	gControllerIPAddr = 0; 
+	controller_name = NULL;
+	controller_des = NULL;
+	controller_ip = 0; 
 	for(i = 0; i < 6; i++) {
-		gControllerMACAddr[i] = 0;
+		controller_mac[i] = 0;
 	}
 }
