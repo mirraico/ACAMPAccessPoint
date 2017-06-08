@@ -25,10 +25,10 @@ typedef struct {
 	u8 version;
 	u8 type;
 	u16 apid;
-	u32 seqNum;
-	u16 msgType;
-	u16 msgLen;
-} APHeaderVal;
+	u32 seq_num;
+	u16 msg_type;
+	u16 msg_len;
+} header_val;
 #define HEADER_LEN 16
 #define CURRENT_VERSION 0x03
 #define TYPE_CONTROL 0x00
@@ -48,7 +48,7 @@ typedef struct {
 	u16 type;
 	u16 len;
 	u8* data;
-} APElementVal;
+} element_val;
 #define ELEMENT_HEADER_LEN 4
 
 /* general type */
@@ -56,7 +56,7 @@ typedef struct {
 	u8 *msg;
 	int offset;
 	u16 type;
-}APProtocolMessage;
+}protocol_msg;
 
 
 /* msg type */
@@ -167,52 +167,52 @@ typedef struct {
 
 /* fsm */
 typedef enum {
-	AP_ENTER_DOWN,
-	AP_ENTER_DISCOVERY,
-	AP_ENTER_REGISTER,
-	AP_ENTER_RUN
-} APStateTransition;
+	ENTER_DOWN,
+	ENTER_DISCOVERY,
+	ENTER_REGISTER,
+	ENTER_RUN
+} state;
 
 /**
- * initialize APProtocolMessage structure, without any msg
- * after an APProtocolMessage being created, AP_INIT_PROTOCOL or AP_INIT_PROTOCOL_MESSAGE must be called immediately
+ * initialize protocol_msg structure, without any msg
+ * after an protocol_msg being created, init_protocol_msg or init_protocol_msg_size must be called immediately
  * @param  mess  [a not initialized value]
  */
-#define		AP_INIT_PROTOCOL(mess) {\
+#define		init_protocol_msg(mess) {\
 							(mess).msg = NULL;\
 							(mess).offset = 0;\
 							(mess).type = 0; }
 
 /**
- * initialize APProtocolMessage structure, including memory allocation and clear, for required size
- * after an APProtocolMessage being created, AP_INIT_PROTOCOL or AP_INIT_PROTOCOL_MESSAGE must be called immediately
+ * initialize protocol_msg structure, including memory allocation and clear, for required size
+ * after an protocol_msg being created, init_protocol_msg or init_protocol_msg_size must be called immediately
  * @param  mess  [a not initialized value]
  * @param  size  [required size]
  */
-#define		AP_INIT_PROTOCOL_MESSAGE(mess, size, err) {\
+#define		init_protocol_msg_size(mess, size, err) {\
 							create_object(((mess).msg), (size), err);\
 							zero_memory(((mess).msg), (size));\
 							(mess).offset = 0;\
 							(mess).type = 0; }
 
 /**
- * free APProtocolMessage structure, including releasing memory
- * before an APProtocolMessage, that is local value, being destoryed, this function must be called
+ * free protocol_msg structure, including releasing memory
+ * before an protocol_msg, that is local value, being destoryed, this function must be called
  * @param  mess  [value that need to be freed]
  */
-#define		AP_FREE_PROTOCOL_MESSAGE(mess) {\
+#define		free_protocol_msg(mess) {\
  							free_object(((mess).msg));\
 							(mess).msg = NULL;\
 							(mess).offset = 0;\
 							(mess).type = 0; }
 
 /**
- * create a array of APProtocolMessage structure, but not include memory allocation. commonly used in msg element
+ * create a array of protocol_msg structure, but not include memory allocation. commonly used in msg element
  * @param  ar_name  [name for array]
  * @param  ar_size  [required size for array]
  */
-#define 	AP_CREATE_PROTOCOL_ARRAY(ar_name, ar_size, err) {\
-							create_array(ar_name, ar_size, APProtocolMessage, err)\
+#define 	create_protocol_arr(ar_name, ar_size, err) {\
+							create_array(ar_name, ar_size, protocol_msg, err)\
 							int i;\
 							for(i=0;i<(ar_size); i++) {\
 								(ar_name)[i].msg = NULL;\
@@ -220,82 +220,82 @@ typedef enum {
 							} }
 
 /**
- * free a array of APProtocolMessage structure, it's worth mentioning that this action includes releasing memory
+ * free a array of protocol_msg structure, it's worth mentioning that this action includes releasing memory
  * @param  ar_name  [name for array]
  * @param  ar_size  [size of array]
  */
-#define 	AP_FREE_ARRAY_AND_PROTOCOL_MESSAGE(ar_name, ar_size) {\
+#define 	free_arr_and_protocol_msg(ar_name, ar_size) {\
 							int i;\
 							for(i=0;i<(ar_size); i++) {\
-								AP_FREE_PROTOCOL_MESSAGE((ar_name)[i]);\
+								free_protocol_msg((ar_name)[i]);\
 							}\
 							free_object(ar_name); }
 
 
-void APProtocolStore8(APProtocolMessage *msgPtr, u8 val);
-void APProtocolStore16(APProtocolMessage *msgPtr, u16 val);
-void APProtocolStore32(APProtocolMessage *msgPtr, u32 val);
-void APProtocolStoreStr(APProtocolMessage *msgPtr, char *str);
-void APProtocolStoreMessage(APProtocolMessage *msgPtr, APProtocolMessage *msgToStorePtr);
-void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len);
-void APProtocolStoreReserved(APProtocolMessage *msgPtr, int reservedLen);
+void store_8(protocol_msg *msg_p, u8 val);
+void store_16(protocol_msg *msg_p, u16 val);
+void store_32(protocol_msg *msg_p, u32 val);
+void store_str(protocol_msg *msg_p, char *str);
+void store_msg(protocol_msg *msg_p, protocol_msg *msgToStorePtr);
+void store_raw(protocol_msg *msg_p, u8 *bytes, int len);
+void store_reserved(protocol_msg *msg_p, int reservedLen);
 
-bool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type);
-bool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
-						 u16 msgType, APProtocolMessage *msgElems, int msgElemNum);
-bool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr);
+bool assemble_msgelem(protocol_msg *msg_p, u16 type);
+bool assemble_msg(protocol_msg *msg_p, u16 apid, u32 seq_num,
+						 u16 msg_type, protocol_msg *msgElems, int msgElemNum);
+bool assemble_header(protocol_msg *controlHdrPtr, header_val *valPtr);
 
-u8 APProtocolRetrieve8(APProtocolMessage *msgPtr);
-u16 APProtocolRetrieve16(APProtocolMessage *msgPtr);
-u32 APProtocolRetrieve32(APProtocolMessage *msgPtr);
-char *APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len);
-u8 *APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len);
-void APProtocolRetrieveReserved(APProtocolMessage *msgPtr, int reservedLen);
+u8 retrieve_8(protocol_msg *msg_p);
+u16 retrieve_16(protocol_msg *msg_p);
+u32 retrieve_32(protocol_msg *msg_p);
+char *retrieve_str(protocol_msg *msg_p, int len);
+u8 *retrieve_raw(protocol_msg *msg_p, int len);
+void retrieve_reserved(protocol_msg *msg_p, int reservedLen);
 
-bool APParseControlHeader(APProtocolMessage *msgPtr, APHeaderVal *valPtr);
-void APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len);
-void APParseUnrecognizedMsgElem(APProtocolMessage *msgPtr, int len);
-void APParseRepeatedMsgElem(APProtocolMessage *msgPtr, int len);
+bool parse_header(protocol_msg *msg_p, header_val *valPtr);
+void parse_msgelem(protocol_msg *msg_p, u16 *type, u16 *len);
+void parse_unrecognized_msgelem(protocol_msg *msg_p, int len);
+void parse_repeated_msgelem(protocol_msg *msg_p, int len);
 
 
-bool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr);
-bool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **valPtr);
-bool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr);
-bool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-bool APParseControllerNextSeq(APProtocolMessage *msgPtr, int len, u32 *valPtr);
+bool parse_controller_name(protocol_msg *msg_p, int len, char **valPtr);
+bool parse_controller_desc(protocol_msg *msg_p, int len, char **valPtr);
+bool parse_controller_ip(protocol_msg *msg_p, int len, u32 *valPtr);
+bool parse_controller_mac(protocol_msg *msg_p, int len, u8 *valPtr);
+bool parse_controller_nextseq(protocol_msg *msg_p, int len, u32 *valPtr);
 
-bool APAssembleRegisteredService(APProtocolMessage *msgPtr);
-bool APAssembleAPName(APProtocolMessage *msgPtr);
-bool APAssembleAPDescriptor(APProtocolMessage *msgPtr);
-bool APAssembleAPIPAddr(APProtocolMessage *msgPtr);
-bool APAssembleAPMACAddr(APProtocolMessage *msgPtr);
-bool APAssembleDiscoveryType(APProtocolMessage *msgPtr);
+bool assemble_register_service(protocol_msg *msg_p);
+bool assemble_ap_name(protocol_msg *msg_p);
+bool assemble_ap_desc(protocol_msg *msg_p);
+bool assemble_ap_ip(protocol_msg *msg_p);
+bool assemble_ap_mac(protocol_msg *msg_p);
+bool assemble_ap_discovery_type(protocol_msg *msg_p);
 
-bool APParseResultCode(APProtocolMessage *msgPtr, int len, u16 *valPtr);
-bool APParseReasonCode(APProtocolMessage *msgPtr, int len, u16 *valPtr);
-bool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr);
-bool APParseRegisteredService(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+bool parse_res_code(protocol_msg *msg_p, int len, u16 *valPtr);
+bool parse_reason_code(protocol_msg *msg_p, int len, u16 *valPtr);
+bool parse_assigned_apid(protocol_msg *msg_p, int len, u16 *valPtr);
+bool parse_register_service(protocol_msg *msg_p, int len, u8 *valPtr);
 
-bool APAssembleSSID(APProtocolMessage *msgPtr);
-bool APAssembleChannel(APProtocolMessage *msgPtr);
-bool APAssembleHardwareMode(APProtocolMessage *msgPtr);
-bool APAssembleSuppressSSID(APProtocolMessage *msgPtr);
-bool APAssembleSecurityOption(APProtocolMessage *msgPtr);
-bool APAssembleMACFilterMode(APProtocolMessage *msgPtr);
-bool APAssembleMACFilterList(APProtocolMessage *msgPtr);
-bool APAssembleTxPower(APProtocolMessage *msgPtr);
-bool APAssembleWPAPassword(APProtocolMessage *msgPtr);
+bool assemble_ssid(protocol_msg *msg_p);
+bool assemble_channel(protocol_msg *msg_p);
+bool assemble_hwmode(protocol_msg *msg_p);
+bool assemble_hide_ssid(protocol_msg *msg_p);
+bool assemble_sec_opt(protocol_msg *msg_p);
+bool assemble_macfilter_mode(protocol_msg *msg_p);
+bool assemble_macfilter_list(protocol_msg *msg_p);
+bool assemble_tx_power(protocol_msg *msg_p);
+bool assemble_wpa_pwd(protocol_msg *msg_p);
 
-bool APParseDesiredConfList(APProtocolMessage *msgPtr, int len, u8 **valPtr);
-bool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr);
-bool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-bool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-bool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-bool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-bool APParseMACFilterMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-bool APParseTxPower(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-bool APParseWPAPassword(APProtocolMessage *msgPtr, int len, char **valPtr);
-bool APParseMACList(APProtocolMessage *msgPtr, int len, char ***valPtr);
-bool APParseSystemCommand(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+bool parse_desired_conf_list(protocol_msg *msg_p, int len, u8 **valPtr);
+bool parse_ssid(protocol_msg *msg_p, int len, char **valPtr);
+bool parse_channel(protocol_msg *msg_p, int len, u8 *valPtr);
+bool parse_hwmode(protocol_msg *msg_p, int len, u8 *valPtr);
+bool parse_hide_ssid(protocol_msg *msg_p, int len, u8 *valPtr);
+bool parse_sec_opt(protocol_msg *msg_p, int len, u8 *valPtr);
+bool parse_macfilter_mode(protocol_msg *msg_p, int len, u8 *valPtr);
+bool parse_tx_power(protocol_msg *msg_p, int len, u8 *valPtr);
+bool parse_wpa_pwd(protocol_msg *msg_p, int len, char **valPtr);
+bool parse_mac_list(protocol_msg *msg_p, int len, char ***valPtr);
+bool parse_sys_cmd(protocol_msg *msg_p, int len, u8 *valPtr);
 
 #endif

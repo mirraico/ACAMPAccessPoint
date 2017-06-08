@@ -11,20 +11,20 @@ void APDestroy()
 	close_socket(ap_socket);
 	close_socket(ap_socket_br);
 	wlconf_free(wlconf);
-	log("AP is down");
+	log_i("AP is down");
 	destroy_log();
 }
 
 int main()
 {
-	APStateTransition nextState = AP_ENTER_DISCOVERY;
+	state nextState = ENTER_DISCOVERY;
 
 	wlconf = wlconf_alloc();
 
 	init_protocol();
 	APDefaultSettings();
 
-	log("Start reading the setting file");
+	log_i("Start reading the setting file");
 	if(!APParseSettingsFile()) {
 		log_e("Can't read setting file");
 		exit(1);
@@ -35,7 +35,7 @@ int main()
 	else system("wifi down");
 
 	init_log();
-	log("Finished reading the setting file");
+	log_i("Finished reading the setting file");
 	
 	if(ap_ethname == NULL) {
 		log_e("Can't obtain Ethernet interface");
@@ -55,7 +55,7 @@ int main()
 	  (u8)(ap_default_gw >> 8),  (u8)(ap_default_gw >> 0));
 
 	log_d(3, "All init is finished");
-	log("Starting AP...");
+	log_i("Starting AP...");
 
 	/* if Controller address is given, jump Discovery and use this address for register */
 	if(ap_discovery_type != DISCOVERY_TPYE_DISCOVERY) 
@@ -64,22 +64,22 @@ int main()
 			case DISCOVERY_TPYE_STATIC:
 				if(static_controller_ip != 0) {
 					controller_ip = static_controller_ip;
-					nextState = AP_ENTER_REGISTER;
-					log("Use static controller addr to register: %u.%u.%u.%u", (u8)(controller_ip >> 24),\
+					nextState = ENTER_REGISTER;
+					log_i("Use static controller addr to register: %u.%u.%u.%u", (u8)(controller_ip >> 24),\
 		 				(u8)(controller_ip >> 16),  (u8)(controller_ip >> 8),  (u8)(controller_ip >> 0));
 				} else {
-					log("Static address is not specified");
+					log_i("Static address is not specified");
 					ap_discovery_type = DISCOVERY_TPYE_DISCOVERY;
 				}
 				break;
 			case DISCOVERY_TPYE_DEFAULT_GATE:
 				if(ap_default_gw != 0) {
 				 	controller_ip = ap_default_gw;
-					nextState = AP_ENTER_REGISTER;
-					log("Use default gateway addr to register: %u.%u.%u.%u", (u8)(controller_ip >> 24),\
+					nextState = ENTER_REGISTER;
+					log_i("Use default gateway addr to register: %u.%u.%u.%u", (u8)(controller_ip >> 24),\
 		 				(u8)(controller_ip >> 16),  (u8)(controller_ip >> 8),  (u8)(controller_ip >> 0));
 			 	} else {
-					log("Default gateway is not set");
+					log_i("Default gateway is not set");
 					ap_discovery_type = DISCOVERY_TPYE_DISCOVERY;
 				}
 			 default:
@@ -93,16 +93,16 @@ int main()
 	{
 		switch(nextState) 
 		{
-			case AP_ENTER_DISCOVERY:
+			case ENTER_DISCOVERY:
 				nextState = APEnterDiscovery();
 				break;
-			case AP_ENTER_REGISTER:
+			case ENTER_REGISTER:
 				nextState = APEnterRegister();
 				break;
-			case AP_ENTER_RUN:
+			case ENTER_RUN:
 				nextState = APEnterRun();
 				break;
-			case AP_ENTER_DOWN:
+			case ENTER_DOWN:
 				APDestroy();
 				return 0;
 				break;

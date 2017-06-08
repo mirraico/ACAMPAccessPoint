@@ -11,7 +11,7 @@ void init_log()
 	if(log_filename == NULL) 
 	{
 		log_file = NULL;
-		log("The Log File is disabled");
+		log_i("The log_i File is disabled");
 		return;
 	}
 	if((log_file = fopen(log_filename, "w")) == NULL) 
@@ -66,7 +66,7 @@ __inline__ void _log_d(int level, const char *format, va_list args)
 	free_object(logstr);
 }
 
-__inline__ void log(const char *format, ...)
+__inline__ void log_i(const char *format, ...)
 {
 	va_list args;
 	

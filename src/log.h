@@ -9,7 +9,7 @@ extern int log_stdlev;
 
 void init_log();
 void destroy_log();
-extern void log(const char *format, ...);
+extern void log_i(const char *format, ...);
 extern void log_e(const char *format, ...);
 extern void log_d(int level, const char *format, ...);
 

@@ -29,7 +29,7 @@ struct wlconf *wlconf;
 bool wlflag;
 
 /**
- * init ap, including seqnum, apid, etc, and set random seed
+ * init ap, including seq_num, apid, etc, and set random seed
  */
 void init_protocol()
 {

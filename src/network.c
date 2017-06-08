@@ -15,10 +15,10 @@ static struct sockaddr_in controller_sockaddr;
 static int read_nl_sock(int sock_fd, char *buf_ptr, unsigned int seq_num, unsigned int pid)
 {
 	struct nlmsghdr *nlhdr;
-	int readLen = 0, msgLen = 0;
+	int readLen = 0, msg_len = 0;
 	do 
 	{
-		if ((readLen = recv(sock_fd, buf_ptr, 8192 - msgLen, 0)) < 0) return -1;
+		if ((readLen = recv(sock_fd, buf_ptr, 8192 - msg_len, 0)) < 0) return -1;
 		nlhdr = (struct nlmsghdr *) buf_ptr;
 
 		if ((NLMSG_OK(nlhdr, readLen) == 0)
@@ -29,12 +29,12 @@ static int read_nl_sock(int sock_fd, char *buf_ptr, unsigned int seq_num, unsign
 			break;
 		} else {
 			buf_ptr += readLen;
-			msgLen += readLen;
+			msg_len += readLen;
 		}
 
 		if ((nlhdr->nlmsg_flags & NLM_F_MULTI) == 0) break;
 	} while ((nlhdr->nlmsg_seq != seq_num) || (nlhdr->nlmsg_pid != pid));
-	return msgLen;
+	return msg_len;
 }
 
 /**
@@ -181,7 +181,7 @@ void close_socket(int s)
  * @param  sendMsg [msg]
  * @return         [whether the operation is success or not]
  */
-bool send_udp(APProtocolMessage sendMsg) 
+bool send_udp(protocol_msg sendMsg) 
 {
 	if(sendMsg.msg == NULL) 
 		return false;
@@ -196,7 +196,7 @@ bool send_udp(APProtocolMessage sendMsg)
  * @param  sendMsg [msg]
  * @return         [whether the operation is success or not]
  */
-bool send_udp_br(APProtocolMessage sendMsg) 
+bool send_udp_br(protocol_msg sendMsg) 
 {
 	if(sendMsg.msg == NULL) 
 		return false;
