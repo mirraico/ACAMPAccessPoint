@@ -21,14 +21,14 @@ u16 recvAPID;
 u8 recvRegisteredService;
 u32 recvControllerSeqNum;
 
-APBool APAssembleRegisterRequest(APProtocolMessage *messagesPtr)
+bool APAssembleRegisterRequest(APProtocolMessage *messagesPtr)
 {
 	int k = -1;
-	if(messagesPtr == NULL) return AP_FALSE;
+	if(messagesPtr == NULL) return false;
 	
 	APProtocolMessage *msgElems;
 	int msgElemCount = 6;
-	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return AP_FALSE;);
+	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return false;);
 
 	if(
 	   (!(APAssembleRegisteredService(&(msgElems[++k])))) ||
@@ -41,8 +41,8 @@ APBool APAssembleRegisterRequest(APProtocolMessage *messagesPtr)
 	{
 		int i;
 		for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
-		AP_FREE_OBJECT(msgElems);
-		return AP_FALSE;
+		free_object(msgElems);
+		return false;
 	}
 	
 	return APAssembleControlMessage(messagesPtr, 
@@ -54,7 +54,7 @@ APBool APAssembleRegisterRequest(APProtocolMessage *messagesPtr)
 	);
 }
 
-APBool APParseRegisterResponse(char *msg, 
+bool APParseRegisterResponse(char *msg, 
 					   int len,
 					   int currentSeqNum) 
 {
@@ -67,10 +67,10 @@ APBool APParseRegisterResponse(char *msg,
 	u16 successFlag = 0;
 	u16 failureFlag = 0;
 
-	rejected = AP_FALSE;
+	rejected = false;
 	
 	if(msg == NULL) 
-		return AP_FALSE;
+		return false;
 	
 	APLog("Parse Register Response");
 	
@@ -79,21 +79,21 @@ APBool APParseRegisterResponse(char *msg,
 	
 	if(!(APParseControlHeader(&completeMsg, &controlVal))) {
 		APErrorLog("Failed to parse header");
-		return AP_FALSE;
+		return false;
 	}
 	
 	/* not as expected */
 	if(controlVal.version != CURRENT_VERSION || controlVal.type != TYPE_CONTROL) {
 		APErrorLog("ACAMP version or type is not Expected");
-		return AP_FALSE;
+		return false;
 	}
 	if(controlVal.seqNum != currentSeqNum) {
 		APErrorLog("Sequence Number of Response doesn't match Request");
-		return AP_FALSE;
+		return false;
 	}
 	if(controlVal.msgType != MSGTYPE_REGISTER_RESPONSE) {
 		APErrorLog("Message is not Register Response as Expected");
-		return AP_FALSE;
+		return false;
 	}
 
 	/* parse message elements */
@@ -114,7 +114,7 @@ APBool APParseRegisterResponse(char *msg,
 					break;
 				}
 				if(!(APParseResultCode(&completeMsg, len, &result)))
-					return AP_FALSE;
+					return false;
 				if(
 					result != RESULT_SUCCESS &&
 					result != RESULT_FAILURE 
@@ -133,7 +133,7 @@ APBool APParseRegisterResponse(char *msg,
 					break;
 				}
 				if(!(APParseReasonCode(&completeMsg, len, &reason)))
-					return AP_FALSE;
+					return false;
 				/* consider unknown reason */
 				// if(
 				// 	reason != REASON_INVALID_VERSION &&
@@ -153,7 +153,7 @@ APBool APParseRegisterResponse(char *msg,
 					break;
 				}
 				if(!(APParseRegisteredService(&completeMsg, len, &recvRegisteredService)))
-					return AP_FALSE;
+					return false;
 				if(
 					recvRegisteredService != REGISTERED_SERVICE_CONF_STA
 				) {
@@ -170,7 +170,7 @@ APBool APParseRegisterResponse(char *msg,
 					break;
 				}
 				if(!(APParseAssignedAPID(&completeMsg, len, &recvAPID)))
-					return AP_FALSE;
+					return false;
 				successFlag |= 0x04;
 				break;
 			case MSGELEMTYPE_CONTROLLER_NAME:
@@ -180,7 +180,7 @@ APBool APParseRegisterResponse(char *msg,
 					break;
 				}
 				if(!(APParseControllerName(&completeMsg, len, &recvControllerInfo.name)))
-					return AP_FALSE;
+					return false;
 				successFlag |= 0x08;
 				break;
 			case MSGELEMTYPE_CONTROLLER_DESCRIPTOR:
@@ -190,7 +190,7 @@ APBool APParseRegisterResponse(char *msg,
 					break;
 				}
 				if(!(APParseControllerDescriptor(&completeMsg, len, &recvControllerInfo.descriptor)))
-					return AP_FALSE;
+					return false;
 				successFlag |= 0x10;
 				break;
 			case MSGELEMTYPE_CONTROLLER_IP_ADDR:
@@ -200,7 +200,7 @@ APBool APParseRegisterResponse(char *msg,
 					break;
 				}
 				if(!(APParseControllerIPAddr(&completeMsg, len, &recvControllerInfo.IPAddr)))
-					return AP_FALSE;
+					return false;
 				successFlag |= 0x20;
 				break;
 			case MSGELEMTYPE_CONTROLLER_MAC_ADDR:
@@ -210,7 +210,7 @@ APBool APParseRegisterResponse(char *msg,
 					break;
 				}
 				if(!(APParseControllerMACAddr(&completeMsg, len, recvControllerInfo.MACAddr)))
-					return AP_FALSE;
+					return false;
 				successFlag |= 0x40;
 				break;
 			case MSGELEMTYPE_CONTROLLER_NEXTSEQ:
@@ -220,7 +220,7 @@ APBool APParseRegisterResponse(char *msg,
 					break;
 				}
 				if(!(APParseControllerNextSeq(&completeMsg, len, &recvControllerSeqNum)))
-					return AP_FALSE;
+					return false;
 				successFlag |= 0x80;
 				break;
 			
@@ -234,7 +234,7 @@ APBool APParseRegisterResponse(char *msg,
 
 	if(successFlag != 0xFF && failureFlag != 0x03) { //incomplete message
 		APErrorLog("Incomplete Message Element in Register Response");
-		return AP_FALSE;
+		return false;
 	}
 
 	/* reject */
@@ -243,41 +243,41 @@ APBool APParseRegisterResponse(char *msg,
 		/* If rejected, The message should contain only result & reason element */
 		if(failureFlag != 0x03 || successFlag != 0x01) {
 			APErrorLog("The Message carrying some wrong information");
-			return AP_FALSE;
+			return false;
 		}
-		rejected = AP_TRUE;
+		rejected = true;
 		switch(reason) {
 			case REASON_INVALID_VERSION:
 				APLog("Controller rejected the Register Request, the reason is protocol version does not match");
-				return AP_FALSE;
+				return false;
 			// case REASON_REPEATED_REGISTER:
 			// 	APLog("Controller rejected the Register Request, the reason is duplicated service request");
-			// 	return AP_FALSE;
+			// 	return false;
 			case REASON_INSUFFICIENT_RESOURCE:
 				APLog("Controller rejected the Register Request, because there is no enough resources");
-				return AP_FALSE;
+				return false;
 			default:
 				APLog("Controller rejected the Register Request, for unknown reasons");
-				return AP_FALSE;
+				return false;
 		}
-		return AP_FALSE;
+		return false;
 	}
 
 	// if(result == RESULT_UNRECOGNIZED_ELEM) { //TODO: RESULT_UNRECOGNIZED_ELEM
 	// 	APErrorLog("This Result is not currently being processed");
-	//     return AP_FALSE;
+	//     return false;
 	// }
 
 	/* accept */
 	/* If accepted, The message should contain only some specified element */
 	if(successFlag != 0xFF || failureFlag != 0x01) {
 		APErrorLog("The Message carrying some wrong information");
-		return AP_FALSE;
+		return false;
 	}
 
 	if(gRegisteredService != recvRegisteredService) {
 		APErrorLog("The service is different from the requested one");
-		return AP_FALSE;
+		return false;
 	}
 
 	if(controlVal.apid != recvAPID) {
@@ -286,23 +286,23 @@ APBool APParseRegisterResponse(char *msg,
 
 	if(gControllerName == NULL || strcmp(gControllerName, recvControllerInfo.name) != 0) {
 		if(gDiscoveryType == DISCOVERY_TPYE_DISCOVERY) APErrorLog("The Controller name has changed");
-		AP_FREE_OBJECT(gControllerName);
-		AP_CREATE_OBJECT_SIZE_ERR(gControllerName, (strlen(recvControllerInfo.name) + 1), return AP_FALSE;);
-		AP_COPY_MEMORY(gControllerName, recvControllerInfo.name, strlen(recvControllerInfo.name));
+		free_object(gControllerName);
+		create_object(gControllerName, (strlen(recvControllerInfo.name) + 1), return false;);
+		copy_memory(gControllerName, recvControllerInfo.name, strlen(recvControllerInfo.name));
 		gControllerName[strlen(recvControllerInfo.name)] = '\0';
 	}
 
 	if(gControllerDescriptor == NULL || strcmp(gControllerDescriptor, recvControllerInfo.descriptor) != 0) {
 		if(gDiscoveryType == DISCOVERY_TPYE_DISCOVERY) APErrorLog("The Controller descriptor has changed");
-		AP_FREE_OBJECT(gControllerDescriptor);
-		AP_CREATE_OBJECT_SIZE_ERR(gControllerDescriptor, (strlen(recvControllerInfo.descriptor) + 1), return AP_FALSE;);
-		AP_COPY_MEMORY(gControllerDescriptor, recvControllerInfo.descriptor, strlen(recvControllerInfo.descriptor));
+		free_object(gControllerDescriptor);
+		create_object(gControllerDescriptor, (strlen(recvControllerInfo.descriptor) + 1), return false;);
+		copy_memory(gControllerDescriptor, recvControllerInfo.descriptor, strlen(recvControllerInfo.descriptor));
 		gControllerDescriptor[strlen(recvControllerInfo.descriptor)] = '\0';
 	}
 
 	if(gControllerIPAddr != recvControllerInfo.IPAddr) {
 		APErrorLog("The Controller IP Addr has changed");
-		return AP_FALSE;
+		return false;
 	}
 
 	if(
@@ -321,12 +321,12 @@ APBool APParseRegisterResponse(char *msg,
 		}
 	}
 
-	return AP_TRUE;
+	return true;
 }
 
-APBool APReceiveRegisterResponse() 
+bool APReceiveRegisterResponse() 
 {
-	char buf[AP_BUFFER_SIZE];
+	char buf[BUFFER_SIZE];
 	APNetworkAddress addr;
 	int readBytes;
 	u32 recvAddr;
@@ -335,32 +335,32 @@ APBool APReceiveRegisterResponse()
 	
 	/* receive the datagram */
 	if(!(APNetworkReceive(buf,
-					 AP_BUFFER_SIZE - 1,
+					 BUFFER_SIZE - 1,
 					 &addr,
 					 &readBytes))) {
 		APErrorLog("Receive Register Response failed");
-		return AP_FALSE;
+		return false;
 	}
 
 	recvAddr = ntohl(addr.sin_addr.s_addr);
 	/* verify the source of the message */
 	if(recvAddr != gControllerIPAddr) {
 		APErrorLog("Message from the illegal source address");
-		return AP_FALSE;
+		return false;
 	}
 	
 	/* check if it is a valid Register Response */
 	if(!(APParseRegisterResponse(buf, readBytes, APGetSeqNum()))) {
-		return AP_FALSE;
+		return false;
 	}
 
-	if(rejected) return AP_FALSE;
+	if(rejected) return false;
 	APDebugLog(3, "Accept Register Response");
 	
-	return AP_TRUE;
+	return true;
 }
 
-APBool APReadRegisterResponse() 
+bool APReadRegisterResponse() 
 {
 
 	struct timeval timeout, new_timeout, before, after, delta;
@@ -371,9 +371,9 @@ APBool APReadRegisterResponse()
 	gettimeofday(&before, NULL); // set current time
 	
 
-	AP_REPEAT_FOREVER 
+	while(1) 
 	{
-		APBool success = false;
+		bool success = false;
 
 		if(APNetworkTimedPollRead(gSocket, &new_timeout)) 
 		{
@@ -384,18 +384,18 @@ APBool APReadRegisterResponse()
 
 		
 		if((APReceiveRegisterResponse())) {
-			return AP_TRUE;
+			return true;
 		}
 
 		/* if rejected, break */
 		if(rejected) {
-			return AP_FALSE;
+			return false;
 		}
 
 		/* compute time and go on */
 		gettimeofday(&after, NULL);
-		APTimevalSubtract(&delta, &after, &before);
-		if(APTimevalSubtract(&new_timeout, &timeout, &delta) == 1) { 
+		timeval_subtract(&delta, &after, &before);
+		if(timeval_subtract(&new_timeout, &timeout, &delta) == 1) { 
 			/* time is over (including receive & pause) */
 			goto ap_time_over;
 		}
@@ -404,7 +404,7 @@ APBool APReadRegisterResponse()
 		APDebugLog(3, "Timer expired during read register response");
 	
 	APLog("There is no valid Response");
-	return AP_FALSE;
+	return false;
 }
 
 APStateTransition APEnterRegister() 
@@ -421,7 +421,7 @@ APStateTransition APEnterRegister()
 		return AP_ENTER_DOWN;
 	}
 
-	AP_REPEAT_FOREVER
+	while(1)
 	{
 		if(gRegisterCount == gMaxRegister) {
 			APLog("No Register Responses for 3 times");

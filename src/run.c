@@ -38,14 +38,14 @@ static void APRretransmitHandler(struct uloop_timeout *t)
 	}
 }
 
-APBool APAssembleKeepAliveRequest(APProtocolMessage *messagesPtr)
+bool APAssembleKeepAliveRequest(APProtocolMessage *messagesPtr)
 {
 	int k = -1;
-	if(messagesPtr == NULL) return AP_FALSE;
+	if(messagesPtr == NULL) return false;
 	
 	APProtocolMessage *msgElems;
 	int msgElemCount = 0;
-	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return AP_FALSE;);
+	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return false;);
 	
 	return APAssembleControlMessage(messagesPtr, 
 				 APGetAPID(),
@@ -82,21 +82,21 @@ static void APKeepAliveHandler(struct uloop_timeout *t)
 	uloop_timeout_set(&tRetransmit, retransmitInterval * 1000);
 }
 
-APBool APParseKeepAliveResponse()
+bool APParseKeepAliveResponse()
 {
 	uloop_timeout_cancel(&tKeepAlive);
 	uloop_timeout_set(&tKeepAlive, gKeepAliveInterval * 1000);
 	APLog("Accept Keep Alive Response");
-	return AP_TRUE;
+	return true;
 }
 
-APBool APAssembleUnregisterResponse(APProtocolMessage *messagesPtr)
+bool APAssembleUnregisterResponse(APProtocolMessage *messagesPtr)
 {
-	if(messagesPtr == NULL) return AP_FALSE;
+	if(messagesPtr == NULL) return false;
 	
 	APProtocolMessage *msgElems;
 	int msgElemCount = 0;
-	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return AP_FALSE;);
+	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return false;);
 	
 	return APAssembleControlMessage(messagesPtr, 
 				 APGetAPID(),
@@ -107,13 +107,13 @@ APBool APAssembleUnregisterResponse(APProtocolMessage *messagesPtr)
 	);
 }
 
-APBool APAssembleSystemResponse(APProtocolMessage *messagesPtr)
+bool APAssembleSystemResponse(APProtocolMessage *messagesPtr)
 {
-	if(messagesPtr == NULL) return AP_FALSE;
+	if(messagesPtr == NULL) return false;
 	
 	APProtocolMessage *msgElems;
 	int msgElemCount = 0;
-	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return AP_FALSE;);
+	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return false;);
 	
 	return APAssembleControlMessage(messagesPtr, 
 				 APGetAPID(),
@@ -124,7 +124,7 @@ APBool APAssembleSystemResponse(APProtocolMessage *messagesPtr)
 	);
 }
 
-APBool APParseSystemRequest(APProtocolMessage *completeMsg, u16 msgLen)
+bool APParseSystemRequest(APProtocolMessage *completeMsg, u16 msgLen)
 {
 	APLog("Parse System Request");
 
@@ -149,7 +149,7 @@ APBool APParseSystemRequest(APProtocolMessage *completeMsg, u16 msgLen)
 				}
 
 				if(!(APParseSystemCommand(completeMsg, len, &command)))
-					return AP_FALSE;
+					return false;
 
 				elemFlag |= 0x01;
 				break;
@@ -161,7 +161,7 @@ APBool APParseSystemRequest(APProtocolMessage *completeMsg, u16 msgLen)
 	}
 	if(elemFlag != 0x01) { //incomplete message
 		APErrorLog("Incomplete Message Element in System Request");
-		return AP_FALSE;
+		return false;
 	}
 
 	APLog("Accept System Request");
@@ -185,16 +185,16 @@ APBool APParseSystemRequest(APProtocolMessage *completeMsg, u16 msgLen)
 			APDebugLog(3, "Restart network");
 			break;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APAssembleConfigurationUpdateResponse(APProtocolMessage *messagesPtr)
+bool APAssembleConfigurationUpdateResponse(APProtocolMessage *messagesPtr)
 {
-	if(messagesPtr == NULL) return AP_FALSE;
+	if(messagesPtr == NULL) return false;
 	
 	APProtocolMessage *msgElems;
 	int msgElemCount = 0;
-	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return AP_FALSE;);
+	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return false;);
 	
 	return APAssembleControlMessage(messagesPtr, 
 				 APGetAPID(),
@@ -205,7 +205,7 @@ APBool APAssembleConfigurationUpdateResponse(APProtocolMessage *messagesPtr)
 	);
 }
 
-APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msgLen)
+bool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msgLen)
 {
 	APLog("Parse Configuration Update Request");
 
@@ -223,16 +223,16 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 			{
 				char *ssid;
 				if(!(APParseSSID(completeMsg, len, &ssid)))
-					return AP_FALSE;
+					return false;
 				wlconf->set_ssid(wlconf, ssid);
-				AP_FREE_OBJECT(ssid);
+				free_object(ssid);
 				break;
 			}
 			case MSGELEMTYPE_CHANNEL:
 			{
 				u8 channel;
 				if(!(APParseChannel(completeMsg, len, &channel)))
-					return AP_FALSE;
+					return false;
 				wlconf->set_channel(wlconf, channel);
 				break;
 			}
@@ -240,7 +240,7 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 			{
 				u8 hw_mode;
 				if(!(APParseHardwareMode(completeMsg, len, &hw_mode)))
-					return AP_FALSE;
+					return false;
 				switch(hw_mode)
 				{
 					case HWMODE_A:
@@ -264,7 +264,7 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 			{
 				u8 suppress;
 				if(!(APParseSuppressSSID(completeMsg, len, &suppress)))
-					return AP_FALSE;
+					return false;
 				if(suppress == SUPPRESS_SSID_DISABLED) wlconf->set_ssid_hidden(wlconf, false);
 				else wlconf->set_ssid_hidden(wlconf, true);
 				break;
@@ -273,7 +273,7 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 			{
 				u8 security;
 				if(!(APParseSecurityOption(completeMsg, len, &security)))
-					return AP_FALSE;
+					return false;
 				switch(security)
 				{
 					case SECURITY_OPEN:
@@ -297,7 +297,7 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 			{
 				u8 mode;
 				if(!(APParseMACFilterMode(completeMsg, len, &mode)))
-					return AP_FALSE;
+					return false;
 				switch(mode)
 				{
 					case FILTER_NONE:
@@ -318,7 +318,7 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 			{
 				u8 tx_power;
 				if(!(APParseTxPower(completeMsg, len, &tx_power)))
-					return AP_FALSE;
+					return false;
 				wlconf->set_txpower(wlconf, tx_power);
 				break;
 			}
@@ -326,9 +326,9 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 			{
 				char *pwd;
 				if(!(APParseWPAPassword(completeMsg, len, &pwd)))
-					return AP_FALSE;
+					return false;
 				wlconf->set_key(wlconf, pwd);
-				AP_FREE_OBJECT(pwd);
+				free_object(pwd);
 				break;
 			}
 			case MSGELEMTYPE_ADD_MACFILTER:
@@ -340,15 +340,15 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 				}
 				int num = len / 6;
 				char **maclist;
-				AP_CREATE_ARRAY_ERR(maclist, len, char*, return AP_FALSE;)
+				create_array(maclist, len, char*, return false;)
 				if(!(APParseMACList(completeMsg, len, &maclist)))
-					return AP_FALSE;
+					return false;
 				for(i = 0; i < num; i++) {
 					wlconf->add_macfilterlist(wlconf, maclist[i]);
 					APDebugLog(5, "Add MAC Filter List: %s", maclist[i]);
-					AP_FREE_OBJECT(maclist[i]);
+					free_object(maclist[i]);
 				}
-				AP_FREE_OBJECT(maclist);
+				free_object(maclist);
 				break;
 			}
 			case MSGELEMTYPE_DEL_MACFILTER:
@@ -360,15 +360,15 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 				}
 				int num = len / 6;
 				char **maclist;
-				AP_CREATE_ARRAY_ERR(maclist, len, char*, return AP_FALSE;)
+				create_array(maclist, len, char*, return false;)
 				if(!(APParseMACList(completeMsg, len, &maclist)))
-					return AP_FALSE;
+					return false;
 				for(i = 0; i < num; i++) {
 					wlconf->del_macfilterlist(wlconf, maclist[i]);
 					APDebugLog(5, "Delete MAC Filter List: %s", maclist[i]);
-					AP_FREE_OBJECT(maclist[i]);
+					free_object(maclist[i]);
 				}
-				AP_FREE_OBJECT(maclist);
+				free_object(maclist);
 				break;
 			}
 			case MSGELEMTYPE_CLEAR_MACFILTER:
@@ -386,16 +386,16 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 				}
 				int num = len / 6;
 				char **maclist;
-				AP_CREATE_ARRAY_ERR(maclist, len, char*, return AP_FALSE;)
+				create_array(maclist, len, char*, return false;)
 				if(!(APParseMACList(completeMsg, len, &maclist)))
-					return AP_FALSE;
+					return false;
 				wlconf->clear_macfilterlist(wlconf);
 				for(i = 0; i < num; i++) {
 					wlconf->add_macfilterlist(wlconf, maclist[i]);
 					APDebugLog(5, "Reset & Add MAC Filter List: %s", maclist[i]);
-					AP_FREE_OBJECT(maclist[i]);
+					free_object(maclist[i]);
 				}
-				AP_FREE_OBJECT(maclist);
+				free_object(maclist);
 				break;
 			}
 			default:
@@ -410,24 +410,24 @@ APBool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msg
 	wlconf->change_commit(wlconf);
 	system("wifi restart");
 	APDebugLog(3, "Restart WLAN");
-	return AP_TRUE;
+	return true;
 }
 
-APBool APAssembleConfigurationResponse(APProtocolMessage *messagesPtr, u8* list, int listSize)
+bool APAssembleConfigurationResponse(APProtocolMessage *messagesPtr, u8* list, int listSize)
 {
 	int k = -1;
 	int pos = 0;
 	u16 desiredType = 0;
-	if(messagesPtr == NULL) return AP_FALSE;
+	if(messagesPtr == NULL) return false;
 	
 	APProtocolMessage *msgElems;
 	int msgElemCount = listSize;
-	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return AP_FALSE;);
+	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return false;);
 
 	wlconf->update(wlconf);
 	while(pos < listSize * 2)
 	{
-		AP_COPY_MEMORY(&desiredType, list + pos, 2);
+		copy_memory(&desiredType, list + pos, 2);
 
 		switch(desiredType)
 		{
@@ -435,72 +435,72 @@ APBool APAssembleConfigurationResponse(APProtocolMessage *messagesPtr, u8* list,
 				if(!(APAssembleSSID(&(msgElems[++k])))) {
 					int i;
 					for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
-					AP_FREE_OBJECT(msgElems);
-					return AP_FALSE;
+					free_object(msgElems);
+					return false;
 				}
 				break;
 			case MSGELEMTYPE_CHANNEL:
 				if(!(APAssembleChannel(&(msgElems[++k])))) {
 					int i;
 					for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
-					AP_FREE_OBJECT(msgElems);
-					return AP_FALSE;
+					free_object(msgElems);
+					return false;
 				}
 				break;
 			case MSGELEMTYPE_HARDWARE_MODE:
 				if(!(APAssembleHardwareMode(&(msgElems[++k])))) {
 					int i;
 					for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
-					AP_FREE_OBJECT(msgElems);
-					return AP_FALSE;
+					free_object(msgElems);
+					return false;
 				}
 				break;
 			case MSGELEMTYPE_SUPPRESS_SSID:
 				if(!(APAssembleSuppressSSID(&(msgElems[++k])))) {
 					int i;
 					for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
-					AP_FREE_OBJECT(msgElems);
-					return AP_FALSE;
+					free_object(msgElems);
+					return false;
 				}
 				break;
 			case MSGELEMTYPE_SECURITY_OPTION:
 				if(!(APAssembleSecurityOption(&(msgElems[++k])))) {
 					int i;
 					for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
-					AP_FREE_OBJECT(msgElems);
-					return AP_FALSE;
+					free_object(msgElems);
+					return false;
 				}
 				break;
 			case MSGELEMTYPE_MACFILTER_MODE:
 				if(!(APAssembleMACFilterMode(&(msgElems[++k])))) {
 					int i;
 					for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
-					AP_FREE_OBJECT(msgElems);
-					return AP_FALSE;
+					free_object(msgElems);
+					return false;
 				}
 				break;
 			case MSGELEMTYPE_MACFILTER_LIST:
 				if(!(APAssembleMACFilterList(&(msgElems[++k])))) {
 					int i;
 					for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
-					AP_FREE_OBJECT(msgElems);
-					return AP_FALSE;
+					free_object(msgElems);
+					return false;
 				}
 				break;
 			case MSGELEMTYPE_TX_POWER:
 				if(!(APAssembleTxPower(&(msgElems[++k])))) {
 					int i;
 					for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
-					AP_FREE_OBJECT(msgElems);
-					return AP_FALSE;
+					free_object(msgElems);
+					return false;
 				}
 				break;
 			case MSGELEMTYPE_WPA_PWD:
 				if(!(APAssembleWPAPassword(&(msgElems[++k])))) {
 					int i;
 					for(i = 0; i <= k; i++) { AP_FREE_PROTOCOL_MESSAGE(msgElems[i]);}
-					AP_FREE_OBJECT(msgElems);
-					return AP_FALSE;
+					free_object(msgElems);
+					return false;
 				}
 				break;
 			default:
@@ -511,7 +511,7 @@ APBool APAssembleConfigurationResponse(APProtocolMessage *messagesPtr, u8* list,
 		pos += 2;
 	}
 
-	//AP_FREE_OBJECT(list);
+	//free_object(list);
 	
 	return APAssembleControlMessage(messagesPtr, 
 				 APGetAPID(),
@@ -522,7 +522,7 @@ APBool APAssembleConfigurationResponse(APProtocolMessage *messagesPtr, u8* list,
 	);
 }
 
-APBool APParseConfigurationRequest(APProtocolMessage *completeMsg, u16 msgLen, u8 **listPtr, int *listSize)
+bool APParseConfigurationRequest(APProtocolMessage *completeMsg, u16 msgLen, u8 **listPtr, int *listSize)
 {
 	APLog("Parse Configuration Request");
 
@@ -548,7 +548,7 @@ APBool APParseConfigurationRequest(APProtocolMessage *completeMsg, u16 msgLen, u
 				APDebugLog(5, "Parse Desired Conf List Size: %d", *listSize);
 
 				if(!(APParseDesiredConfList(completeMsg, len, listPtr)))
-					return AP_FALSE;
+					return false;
 
 				elemFlag |= 0x01;
 				break;
@@ -560,7 +560,7 @@ APBool APParseConfigurationRequest(APProtocolMessage *completeMsg, u16 msgLen, u
 	}
 	if(elemFlag != 0x01) { //incomplete message
 		APErrorLog("Incomplete Message Element in Configuration Request");
-		return AP_FALSE;
+		return false;
 	}
 
 	if(*listSize == 0) {
@@ -568,30 +568,30 @@ APBool APParseConfigurationRequest(APProtocolMessage *completeMsg, u16 msgLen, u
 	}
 	APLog("Accept Configuration Request");
 
-	return AP_TRUE;
+	return true;
 }
 
-APBool APReceiveMessageInRunState() 
+bool APReceiveMessageInRunState() 
 {
-	char buf[AP_BUFFER_SIZE];
+	char buf[BUFFER_SIZE];
 	APNetworkAddress addr;
 	int readBytes;
 	u32 recvAddr;
 
 	/* receive the datagram */
 	if(!(APNetworkReceive(buf,
-					 AP_BUFFER_SIZE - 1,
+					 BUFFER_SIZE - 1,
 					 &addr,
 					 &readBytes))) {
 		APErrorLog("Receive Message in run state failed");
-		return AP_FALSE;
+		return false;
 	}
 
 	recvAddr = ntohl(addr.sin_addr.s_addr);
 	/* verify the source of the message */
 	if(recvAddr != gControllerIPAddr) {
 		APErrorLog("Message from the illegal source address");
-		return AP_FALSE;
+		return false;
 	}
 
 	APDebugLog(3, "Receive Message in run state");
@@ -603,17 +603,17 @@ APBool APReceiveMessageInRunState()
 
 	if(!(APParseControlHeader(&completeMsg, &controlVal))) {
 		APErrorLog("Failed to parse header");
-		return AP_FALSE;
+		return false;
 	}
 
 	/* not as expected */
 	if(controlVal.version != CURRENT_VERSION || controlVal.type != TYPE_CONTROL) {
 		APErrorLog("ACAMP version or type is not Expected");
-		return AP_FALSE;
+		return false;
 	}
 	if(controlVal.apid != gAPID) {
 		APErrorLog("The apid in message is different from the one in message header");
-		return AP_FALSE;
+		return false;
 	}
 
 	int is_req = controlVal.msgType % 2; //odd type indicates the request message
@@ -623,25 +623,25 @@ APBool APReceiveMessageInRunState()
 			APDebugLog(3, "Receive a message that has been responsed");
 			if(cacheMsg.type == 0 || controlVal.msgType + 1 != cacheMsg.type) {
 				APErrorLog("The received message does not match the cache message");
-				return AP_FALSE;
+				return false;
 			}
 
 			APDebugLog(3, "Send Cache Message");
 			if(!(APNetworkSend(cacheMsg))) {
 				APErrorLog("Failed to send Cache Message");
-				return AP_FALSE;
+				return false;
 			}
 
 			uloop_timeout_cancel(&tKeepAlive);
 			uloop_timeout_set(&tKeepAlive, gKeepAliveInterval * 1000);
-			return AP_FALSE;
+			return false;
 		}
 		if(controlVal.seqNum != APGetControllerSeqNum()) {
 			if(controlVal.seqNum < APGetControllerSeqNum())
 				APErrorLog("The serial number of the message is expired");
 			else
 				APErrorLog("The serial number of the message is invalid");
-			return AP_FALSE;
+			return false;
 		}
 
 		switch(controlVal.msgType)
@@ -651,24 +651,24 @@ APBool APReceiveMessageInRunState()
 				u8* list = NULL;
 				int listSize; 
 				if(!(APParseConfigurationRequest(&completeMsg, controlVal.msgLen, &list, &listSize))) {
-					return AP_FALSE;
+					return false;
 				}
 
 				APProtocolMessage responseMsg;
 				AP_INIT_PROTOCOL(responseMsg);
 				if(!(APAssembleConfigurationResponse(&responseMsg, list, listSize))) {
 					APErrorLog("Failed to assemble Configuration Response");
-					return AP_FALSE;
+					return false;
 				}
 				APLog("Send Configuration Response");
 				if(!(APNetworkSend(responseMsg))) {
 					APErrorLog("Failed to send Configuration Response");
-					return AP_FALSE;
+					return false;
 				}
-				AP_FREE_OBJECT(list);
+				free_object(list);
 
 				AP_FREE_PROTOCOL_MESSAGE(cacheMsg);
-				AP_INIT_PROTOCOL_MESSAGE(cacheMsg, responseMsg.offset, return AP_FALSE;);
+				AP_INIT_PROTOCOL_MESSAGE(cacheMsg, responseMsg.offset, return false;);
 				APProtocolStoreMessage(&cacheMsg, &responseMsg);
 				cacheMsg.type = MSGTYPE_CONFIGURATION_RESPONSE; //easy to match request
 				AP_FREE_PROTOCOL_MESSAGE(responseMsg);
@@ -681,23 +681,23 @@ APBool APReceiveMessageInRunState()
 			case MSGTYPE_CONFIGURATION_UPDATE_REQUEST:
 			{
 				if(!(APParseConfigurationUpdateRequest(&completeMsg, controlVal.msgLen))) {
-					return AP_FALSE;
+					return false;
 				}
 
 				APProtocolMessage responseMsg;
 				AP_INIT_PROTOCOL(responseMsg);
 				if(!(APAssembleConfigurationUpdateResponse(&responseMsg))) {
 					APErrorLog("Failed to assemble Configuration Update Response");
-					return AP_FALSE;
+					return false;
 				}
 				APLog("Send Configuration Update Response");
 				if(!(APNetworkSend(responseMsg))) {
 					APErrorLog("Failed to send Configuration Update Response");
-					return AP_FALSE;
+					return false;
 				}
 
 				AP_FREE_PROTOCOL_MESSAGE(cacheMsg);
-				AP_INIT_PROTOCOL_MESSAGE(cacheMsg, responseMsg.offset, return AP_FALSE;);
+				AP_INIT_PROTOCOL_MESSAGE(cacheMsg, responseMsg.offset, return false;);
 				APProtocolStoreMessage(&cacheMsg, &responseMsg);
 				cacheMsg.type = MSGTYPE_CONFIGURATION_UPDATE_RESPONSE; //easy to match request
 				AP_FREE_PROTOCOL_MESSAGE(responseMsg);
@@ -710,23 +710,23 @@ APBool APReceiveMessageInRunState()
 			case MSGTYPE_SYSTEM_REQUEST:
 			{
 				if(!(APParseSystemRequest(&completeMsg, controlVal.msgLen))) {
-					return AP_FALSE;
+					return false;
 				}
 
 				APProtocolMessage responseMsg;
 				AP_INIT_PROTOCOL(responseMsg);
 				if(!(APAssembleSystemResponse(&responseMsg))) {
 					APErrorLog("Failed to assemble System Response");
-					return AP_FALSE;
+					return false;
 				}
 				APLog("Send System Response");
 				if(!(APNetworkSend(responseMsg))) {
 					APErrorLog("Failed to send System Response");
-					return AP_FALSE;
+					return false;
 				}
 
 				AP_FREE_PROTOCOL_MESSAGE(cacheMsg);
-				AP_INIT_PROTOCOL_MESSAGE(cacheMsg, responseMsg.offset, return AP_FALSE;);
+				AP_INIT_PROTOCOL_MESSAGE(cacheMsg, responseMsg.offset, return false;);
 				APProtocolStoreMessage(&cacheMsg, &responseMsg);
 				cacheMsg.type = MSGTYPE_SYSTEM_RESPONSE; //easy to match request
 				AP_FREE_PROTOCOL_MESSAGE(responseMsg);
@@ -745,19 +745,19 @@ APBool APReceiveMessageInRunState()
 				AP_INIT_PROTOCOL(responseMsg);
 				if(!(APAssembleUnregisterResponse(&responseMsg))) {
 					APErrorLog("Failed to assemble Unregister Response");
-					return AP_FALSE;
+					return false;
 				}
 				APLog("Send Unregister Response");
 				if(!(APNetworkSend(responseMsg))) {
 					APErrorLog("Failed to send Unregister Response");
-					return AP_FALSE;
+					return false;
 				}
 				AP_FREE_PROTOCOL_MESSAGE(cacheMsg);
 				uloop_timeout_cancel(&tKeepAlive);
 				break;
 			}
 			default:
-				return AP_FALSE;
+				return false;
 		}
 
 
@@ -767,28 +767,28 @@ APBool APReceiveMessageInRunState()
 				APErrorLog("The serial number of the message is expired");
 			else
 				APErrorLog("The serial number of the message is invalid");
-			return AP_FALSE;
+			return false;
 		}
 		if(retransmitMsg.type == 0 || controlVal.msgType != retransmitMsg.type + 1) {
 			APErrorLog("The received message does not match the send message");
-			return AP_FALSE;
+			return false;
 		}
 		switch(controlVal.msgType)
 		{
 			case MSGTYPE_KEEPALIVE_RESPONSE:
 				if(!(APParseKeepAliveResponse())) {
-					return AP_FALSE;
+					return false;
 				}
 				uloop_timeout_cancel(&tRetransmit);
 				AP_FREE_PROTOCOL_MESSAGE(retransmitMsg);
 				APSeqNumIncrement();
 				break;
 			default:
-				return AP_FALSE;
+				return false;
 		}
 	}
 
-	return AP_TRUE;
+	return true;
 }
 
 static void APEvents(struct uloop_fd *event_fd, unsigned int events)

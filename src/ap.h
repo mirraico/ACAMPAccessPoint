@@ -30,7 +30,7 @@ extern u8 gAPMACAddr[6];
 extern u32 gAPDefaultGateway;
 
 extern struct wlconf *wlconf;
-extern APBool wlflag;
+extern bool wlflag;
 
 #define APSeqNumIncrement()         gSeqNum++
 #define APControllerSeqNumIncrement()         gControllerSeqNum++

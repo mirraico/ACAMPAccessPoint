@@ -89,7 +89,7 @@ int main()
 	
 
 	/* start acamp state machine */	
-	AP_REPEAT_FOREVER 
+	while(1) 
 	{
 		switch(nextState) 
 		{

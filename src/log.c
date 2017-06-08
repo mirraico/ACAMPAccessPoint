@@ -42,9 +42,9 @@ __inline__ void _APDebugLog(int level, const char *format, va_list args)
 	
 	timestr[strlen(timestr)-1] = '\0';
 	
-	AP_CREATE_STRING_SIZE_ERR(logStr, (strlen(format)+strlen(timestr)+100), return;);
+	create_string(logStr, (strlen(format)+strlen(timestr)+100), return;);
 	
-	AP_ZERO_MEMORY(label, 10);
+	zero_memory(label, 10);
 	if(level == -1) strcpy(label, "ERROR ");
 	else if(level == 0) strcpy(label, "LOG   ");
 	else sprintf(label, "DEBUG%d", level);
@@ -63,7 +63,7 @@ __inline__ void _APDebugLog(int level, const char *format, va_list args)
 		printf("%s", fileLine);
 	}
 	
-	AP_FREE_OBJECT(logStr);
+	free_object(logStr);
 }
 
 __inline__ void APLog(const char *format, ...)

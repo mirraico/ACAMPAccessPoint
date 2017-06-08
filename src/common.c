@@ -1,6 +1,6 @@
 #include "common.h"
 
-int APTimevalSubtract(struct timeval *res, const struct timeval *x, const struct timeval *y)
+int timeval_subtract(struct timeval *res, const struct timeval *x, const struct timeval *y)
 {
 	int nsec;
 	struct timeval z=*y;
@@ -26,7 +26,7 @@ int APTimevalSubtract(struct timeval *res, const struct timeval *x, const struct
 	return ((x->tv_sec < z.tv_sec) || ((x->tv_sec == z.tv_sec) && (x->tv_usec < z.tv_usec)));
 }
 
-u8 charToHex(char c)
+static u8 char_to_hex(char c)
 {
 	switch(c) 
 	{  
@@ -41,10 +41,10 @@ u8 charToHex(char c)
 	}
 }
 
-void APMACStringToHex(char *str, int* hex) 
+void mac_to_hex(char *str, int* hex) 
 {
 	int i;
 	for(i = 0; i < 6; i++) {
-		hex[i] = (charToHex(str[i*3]) << 4) + charToHex(str[i*3 + 1]);
+		hex[i] = (char_to_hex(str[i*3]) << 4) + char_to_hex(str[i*3 + 1]);
 	}
 }

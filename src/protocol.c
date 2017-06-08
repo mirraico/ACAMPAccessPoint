@@ -7,7 +7,7 @@
  */
 void APProtocolStore8(APProtocolMessage *msgPtr, u8 val)
 {
-	AP_COPY_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), &(val), 1);
+	copy_memory(&((msgPtr->msg)[(msgPtr->offset)]), &(val), 1);
 	(msgPtr->offset) += 1;
 }
 
@@ -19,7 +19,7 @@ void APProtocolStore8(APProtocolMessage *msgPtr, u8 val)
 void APProtocolStore16(APProtocolMessage *msgPtr, u16 val)
 {
 	val = htons(val);
-	AP_COPY_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), &(val), 2);
+	copy_memory(&((msgPtr->msg)[(msgPtr->offset)]), &(val), 2);
 	(msgPtr->offset) += 2;
 }
 
@@ -31,7 +31,7 @@ void APProtocolStore16(APProtocolMessage *msgPtr, u16 val)
 void APProtocolStore32(APProtocolMessage *msgPtr, u32 val)
 {
 	val = htonl(val);
-	AP_COPY_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), &(val), 4);
+	copy_memory(&((msgPtr->msg)[(msgPtr->offset)]), &(val), 4);
 	(msgPtr->offset) += 4;
 }
 
@@ -43,7 +43,7 @@ void APProtocolStore32(APProtocolMessage *msgPtr, u32 val)
 void APProtocolStoreStr(APProtocolMessage *msgPtr, char *str)
 {
 	int len = strlen(str);
-	AP_COPY_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), str, len);
+	copy_memory(&((msgPtr->msg)[(msgPtr->offset)]), str, len);
 	(msgPtr->offset) += len;
 }
 
@@ -54,7 +54,7 @@ void APProtocolStoreStr(APProtocolMessage *msgPtr, char *str)
  */
 void APProtocolStoreMessage(APProtocolMessage *msgPtr, APProtocolMessage *msgToStorePtr)
 {
-	AP_COPY_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), msgToStorePtr->msg, msgToStorePtr->offset);
+	copy_memory(&((msgPtr->msg)[(msgPtr->offset)]), msgToStorePtr->msg, msgToStorePtr->offset);
 	(msgPtr->offset) += msgToStorePtr->offset;
 }
 
@@ -66,7 +66,7 @@ void APProtocolStoreMessage(APProtocolMessage *msgPtr, APProtocolMessage *msgToS
  */
 void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len)
 {
-	AP_COPY_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), bytes, len);
+	copy_memory(&((msgPtr->msg)[(msgPtr->offset)]), bytes, len);
 	(msgPtr->offset) += len;
 }
 
@@ -77,7 +77,7 @@ void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len)
  */
 void APProtocolStoreReserved(APProtocolMessage *msgPtr, int reservedLen)
 {
-	AP_ZERO_MEMORY(&((msgPtr->msg)[(msgPtr->offset)]), reservedLen);
+	zero_memory(&((msgPtr->msg)[(msgPtr->offset)]), reservedLen);
 	(msgPtr->offset) += reservedLen;
 }
 
@@ -87,12 +87,12 @@ void APProtocolStoreReserved(APProtocolMessage *msgPtr, int reservedLen)
  * @param  type   [the type of msg elem]
  * @return        [whether the operation is success or not]
  */
-APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type)
+bool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type)
 {
 	APProtocolMessage completeMsg;
 
-	if(msgPtr == NULL) return AP_FALSE;
-	AP_INIT_PROTOCOL_MESSAGE(completeMsg, ELEMENT_HEADER_LEN+(msgPtr->offset), return AP_FALSE;);
+	if(msgPtr == NULL) return false;
+	AP_INIT_PROTOCOL_MESSAGE(completeMsg, ELEMENT_HEADER_LEN+(msgPtr->offset), return false;);
 
 	APProtocolStore16(&completeMsg, type);
 	APProtocolStore16(&completeMsg, msgPtr->offset);
@@ -104,7 +104,7 @@ APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type)
 	msgPtr->offset = completeMsg.offset;
 	msgPtr->type = type;
 
-	return AP_TRUE;
+	return true;
 }
 
 /**
@@ -117,7 +117,7 @@ APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type)
  * @param  msgElemNum [count of msgElems]
  * @return            [whether the operation is success or not]
  */
-APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
+bool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
 						 u16 msgType, APProtocolMessage *msgElems, int msgElemNum)
 {
 	APProtocolMessage controlHdr, completeMsg;
@@ -126,7 +126,7 @@ APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
 	AP_INIT_PROTOCOL(controlHdr);
 
 	if(msgPtr == NULL || (msgElems == NULL && msgElemNum > 0))
-		return AP_FALSE;
+		return false;
 
 	for(i = 0; i < msgElemNum; i++) msgElemsLen += msgElems[i].offset;
 
@@ -140,10 +140,10 @@ APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
 	if(!(APAssembleControlHeader(&controlHdr, &controlHdrVal))) {
 		AP_FREE_PROTOCOL_MESSAGE(controlHdr);
 		AP_FREE_ARRAY_AND_PROTOCOL_MESSAGE(msgElems, msgElemNum);
-		return AP_FALSE;
+		return false;
 	}
 
-	AP_INIT_PROTOCOL_MESSAGE(completeMsg, controlHdr.offset + msgElemsLen, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(completeMsg, controlHdr.offset + msgElemsLen, return false;);
 	APProtocolStoreMessage(&completeMsg, &controlHdr);
 	AP_FREE_PROTOCOL_MESSAGE(controlHdr);
 
@@ -157,7 +157,7 @@ APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
 	msgPtr->offset = completeMsg.offset;
 	msgPtr->type = msgType;
 
-	return AP_TRUE;
+	return true;
 }
 
 /**
@@ -166,11 +166,11 @@ APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
  * @param  valPtr        [header info]
  * @return               [whether the operation is success or not]
  */
-APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr)
+bool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr)
 {
-	if(controlHdrPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(controlHdrPtr == NULL || valPtr == NULL) return false;
 
-	AP_INIT_PROTOCOL_MESSAGE(*controlHdrPtr, HEADER_LEN, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*controlHdrPtr, HEADER_LEN, return false;);
 
 	APProtocolStore8(controlHdrPtr, valPtr->version);
 	APProtocolStore8(controlHdrPtr, valPtr->type);
@@ -180,7 +180,7 @@ APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *va
 	APProtocolStore16(controlHdrPtr, valPtr->msgLen);
 	APProtocolStoreReserved(controlHdrPtr, 4);
 
-	return AP_TRUE;
+	return true;
 }
 
 /**
@@ -192,7 +192,7 @@ u8 APProtocolRetrieve8(APProtocolMessage *msgPtr)
 {
 	u8 val;
 
-	AP_COPY_MEMORY(&val, &((msgPtr->msg)[(msgPtr->offset)]), 1);
+	copy_memory(&val, &((msgPtr->msg)[(msgPtr->offset)]), 1);
 	(msgPtr->offset) += 1;
 
 	return val;
@@ -207,7 +207,7 @@ u16 APProtocolRetrieve16(APProtocolMessage *msgPtr)
 {
 	u16 val;
 
-	AP_COPY_MEMORY(&val, &((msgPtr->msg)[(msgPtr->offset)]), 2);
+	copy_memory(&val, &((msgPtr->msg)[(msgPtr->offset)]), 2);
 	(msgPtr->offset) += 2;
 
 	return ntohs(val);
@@ -222,7 +222,7 @@ u32 APProtocolRetrieve32(APProtocolMessage *msgPtr)
 {
 	u32 val;
 
-	AP_COPY_MEMORY(&val, &((msgPtr->msg)[(msgPtr->offset)]), 4);
+	copy_memory(&val, &((msgPtr->msg)[(msgPtr->offset)]), 4);
 	(msgPtr->offset) += 4;
 
 	return ntohl(val);
@@ -238,9 +238,9 @@ char* APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len)
 {
 	u8* str;
 
-	AP_CREATE_OBJECT_SIZE_ERR(str, (len+1), return NULL;);
+	create_object(str, (len+1), return NULL;);
 
-	AP_COPY_MEMORY(str, &((msgPtr->msg)[(msgPtr->offset)]), len);
+	copy_memory(str, &((msgPtr->msg)[(msgPtr->offset)]), len);
 	str[len] = '\0';
 	(msgPtr->offset) += len;
 
@@ -257,9 +257,9 @@ u8* APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len)
 {
 	u8* bytes;
 
-	AP_CREATE_OBJECT_SIZE_ERR(bytes, len, return NULL;);
+	create_object(bytes, len, return NULL;);
 
-	AP_COPY_MEMORY(bytes, &((msgPtr->msg)[(msgPtr->offset)]), len);
+	copy_memory(bytes, &((msgPtr->msg)[(msgPtr->offset)]), len);
 	(msgPtr->offset) += len;
 
 	return bytes;
@@ -276,9 +276,9 @@ void APProtocolRetrieveReserved(APProtocolMessage *msgPtr, int reservedLen)
 }
 
 
-APBool APParseControlHeader(APProtocolMessage *msgPtr, APHeaderVal *valPtr) 
+bool APParseControlHeader(APProtocolMessage *msgPtr, APHeaderVal *valPtr) 
 {	
-	if(msgPtr == NULL|| valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL|| valPtr == NULL) return false;
 
 	valPtr->version = APProtocolRetrieve8(msgPtr);
 	valPtr->type = APProtocolRetrieve8(msgPtr);
@@ -288,7 +288,7 @@ APBool APParseControlHeader(APProtocolMessage *msgPtr, APHeaderVal *valPtr)
 	valPtr->msgLen = APProtocolRetrieve16(msgPtr);
 	APProtocolRetrieveReserved(msgPtr, 4);
 	
-	return AP_TRUE;
+	return true;
 }
 
 void APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len)
@@ -307,42 +307,42 @@ void APParseRepeatedMsgElem(APProtocolMessage *msgPtr, int len)
 	msgPtr->offset += len;
 }
 
-APBool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr) 
+bool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieveStr(msgPtr, len);
-	if(valPtr == NULL) return AP_FALSE;
+	if(valPtr == NULL) return false;
 	APDebugLog(5, "Parse Controller Name: %s", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **valPtr) 
+bool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieveStr(msgPtr, len);
-	if(valPtr == NULL) return AP_FALSE;
+	if(valPtr == NULL) return false;
 	APDebugLog(5, "Parse Controller Descriptor: %s", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr) 
+bool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve32(msgPtr);
 	APDebugLog(5, "Parse Controller IP: %u.%u.%u.%u", (u8)(*valPtr >> 24), (u8)(*valPtr >> 16),\
@@ -350,16 +350,16 @@ APBool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr)
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+bool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
 {	
 	int i;
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	for(i = 0; i < 6; i++) {
 		valPtr[i] = APProtocolRetrieve8(msgPtr);
@@ -369,69 +369,69 @@ APBool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 *valPtr)
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseControllerNextSeq(APProtocolMessage *msgPtr, int len, u32 *valPtr) 
+bool APParseControllerNextSeq(APProtocolMessage *msgPtr, int len, u32 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve32(msgPtr);
 	APDebugLog(5, "Parse Controller Next Seq: %d", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APAssembleRegisteredService(APProtocolMessage *msgPtr) 
+bool APAssembleRegisteredService(APProtocolMessage *msgPtr) 
 {
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return false;);
 	APDebugLog(5, "Assemble Registered Service: 0x%02x", gRegisteredService);
 	APProtocolStore8(msgPtr, gRegisteredService);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_REGISTERED_SERVICE);
 }
 
-APBool APAssembleAPName(APProtocolMessage *msgPtr) 
+bool APAssembleAPName(APProtocolMessage *msgPtr) 
 {
 	char* str;
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	str = gAPName;
 	
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return false;);
 	APDebugLog(5, "Assemble AP Name: %s", str);
 	APProtocolStoreStr(msgPtr, str);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_AP_NAME);
 }
 
-APBool APAssembleAPDescriptor(APProtocolMessage *msgPtr) 
+bool APAssembleAPDescriptor(APProtocolMessage *msgPtr) 
 {
 	char* str;
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	str = gAPDescriptor;
 	
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(str), return false;);
 	APDebugLog(5, "Assemble AP Descriptor: %s", str);
 	APProtocolStoreStr(msgPtr, str);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_AP_DESCRIPTOR);
 }
 
-APBool APAssembleAPIPAddr(APProtocolMessage *msgPtr) 
+bool APAssembleAPIPAddr(APProtocolMessage *msgPtr) 
 {
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	u32 ip = gAPIPAddr;
 
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 4, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 4, return false;);
 	APDebugLog(5, "Assemble AP IPAddr: %u.%u.%u.%u", (u8)(ip >> 24), (u8)(ip >> 16),\
 	  (u8)(ip >> 8),  (u8)(ip >> 0));
 	APProtocolStore32(msgPtr, ip);
@@ -439,13 +439,13 @@ APBool APAssembleAPIPAddr(APProtocolMessage *msgPtr)
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_AP_IP_ADDR);
 }
 
-APBool APAssembleAPMACAddr(APProtocolMessage *msgPtr) 
+bool APAssembleAPMACAddr(APProtocolMessage *msgPtr) 
 {
 	int i;
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	u8 *mac = gAPMACAddr;
 
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 6, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 6, return false;);
 	APDebugLog(5, "Assemble AP MACAddr: %02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1],\
 	 mac[2], mac[3], mac[4], mac[5]);
 	for(i = 0; i < 6; i++) {
@@ -455,133 +455,133 @@ APBool APAssembleAPMACAddr(APProtocolMessage *msgPtr)
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_AP_MAC_ADDR);
 }
 
-APBool APAssembleDiscoveryType(APProtocolMessage *msgPtr) 
+bool APAssembleDiscoveryType(APProtocolMessage *msgPtr) 
 {
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return false;);
 	APDebugLog(5, "Assemble Discovery Type: 0x%02x", gDiscoveryType);
 	APProtocolStore8(msgPtr, gDiscoveryType);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_DISCOVERY_TYPE);
 }
 
-APBool APParseResultCode(APProtocolMessage *msgPtr, int len, u16 *valPtr) 
+bool APParseResultCode(APProtocolMessage *msgPtr, int len, u16 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve16(msgPtr);
 	APDebugLog(5, "Parse Result Code: 0x%04x", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseReasonCode(APProtocolMessage *msgPtr, int len, u16 *valPtr) 
+bool APParseReasonCode(APProtocolMessage *msgPtr, int len, u16 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve16(msgPtr);
 	APDebugLog(5, "Parse Reason Code: 0x%04x", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr) 
+bool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve16(msgPtr);
 	APDebugLog(5, "Parse Assigned APID: %u", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseRegisteredService(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+bool APParseRegisteredService(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve8(msgPtr);
 	APDebugLog(5, "Parse Registered Service: 0x%02x", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APAssembleSSID(APProtocolMessage *msgPtr) 
+bool APAssembleSSID(APProtocolMessage *msgPtr) 
 {
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(wlconf->conf->ssid), return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(wlconf->conf->ssid), return false;);
 	APDebugLog(5, "Assemble SSID: %s", wlconf->conf->ssid);
 	APProtocolStoreStr(msgPtr, wlconf->conf->ssid);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SSID);
 }
 
-APBool APAssembleChannel(APProtocolMessage *msgPtr) 
+bool APAssembleChannel(APProtocolMessage *msgPtr) 
 {
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return false;);
 	APDebugLog(5, "Assemble Channel: %u", wlconf->conf->channel);
 	APProtocolStore8(msgPtr, wlconf->conf->channel);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_CHANNEL);
 }
 
-APBool APAssembleHardwareMode(APProtocolMessage *msgPtr) 
+bool APAssembleHardwareMode(APProtocolMessage *msgPtr) 
 {
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	
 	u8 hwMode = 0xFF;
 	if(!strcmp(wlconf->conf->hwmode, ONLY_A)) hwMode = HWMODE_A;
 	else if(!strcmp(wlconf->conf->hwmode, ONLY_B)) hwMode = HWMODE_B;
 	else if(!strcmp(wlconf->conf->hwmode, ONLY_G)) hwMode = HWMODE_G;
 	else if(!strcmp(wlconf->conf->hwmode, ONLY_N)) hwMode = HWMODE_N;
-	if(hwMode == 0xFF) return AP_FALSE;
+	if(hwMode == 0xFF) return false;
 
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return false;);
 	APDebugLog(5, "Assemble Hardware Mode: %u", hwMode);
 	APProtocolStore8(msgPtr, hwMode);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_HARDWARE_MODE);
 }
 
-APBool APAssembleSuppressSSID(APProtocolMessage *msgPtr) 
+bool APAssembleSuppressSSID(APProtocolMessage *msgPtr) 
 {
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	
 	u8 suppress = wlconf->conf->hidden ? 1 : 0;
 
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return false;);
 	APDebugLog(5, "Assemble Suppress SSID: %u", suppress);
 	APProtocolStore8(msgPtr, suppress);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SUPPRESS_SSID);
 }
 
-APBool APAssembleSecurityOption(APProtocolMessage *msgPtr) 
+bool APAssembleSecurityOption(APProtocolMessage *msgPtr) 
 {
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	
 	u8 security = 0xFF;
 	if(wlconf->conf->encryption == NULL || strlen(wlconf->conf->encryption) == 0) security = SECURITY_OPEN;
@@ -589,36 +589,36 @@ APBool APAssembleSecurityOption(APProtocolMessage *msgPtr)
 	else if(!strcmp(wlconf->conf->encryption, WPA_WPA2_MIXED)) security = SECURITY_WPA_WPA2_MIXED;
 	else if(!strcmp(wlconf->conf->encryption, WPA_PSK)) security = SECURITY_WPA;
 	else if(!strcmp(wlconf->conf->encryption, WPA2_PSK)) security = SECURITY_WPA2;
-	if(security == 0xFF) return AP_FALSE;
+	if(security == 0xFF) return false;
 
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return false;);
 	APDebugLog(5, "Assemble Security Option: %u", security);
 	APProtocolStore8(msgPtr, security);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_SECURITY_OPTION);
 }
 
-APBool APAssembleMACFilterMode(APProtocolMessage *msgPtr)
+bool APAssembleMACFilterMode(APProtocolMessage *msgPtr)
 {
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	
 	u8 mode = 0xFF;
 	if(wlconf->conf->macfilter == NULL || strlen(wlconf->conf->macfilter) == 0) mode = FILTER_NONE;
 	else if(!strcmp(wlconf->conf->macfilter, MAC_FILTER_NONE)) mode = FILTER_NONE;
 	else if(!strcmp(wlconf->conf->macfilter, MAC_FILTER_ALLOW)) mode = FILTER_ACCEPT_ONLY;
 	else if(!strcmp(wlconf->conf->macfilter, MAC_FILTER_DENY)) mode = FILTER_DENY;
-	if(mode == 0xFF) return AP_FALSE;
+	if(mode == 0xFF) return false;
 
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return false;);
 	APDebugLog(5, "Assemble MAC Filter Mode: %u", mode);
 	APProtocolStore8(msgPtr, mode);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_MACFILTER_MODE);
 }
 
-APBool APAssembleMACFilterList(APProtocolMessage *msgPtr)
+bool APAssembleMACFilterList(APProtocolMessage *msgPtr)
 {
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	
 	int list_num = wlconf->conf->macfilter_list->listsize;
 	if(list_num == 0) {
@@ -627,14 +627,14 @@ APBool APAssembleMACFilterList(APProtocolMessage *msgPtr)
 	} 
 
 	APDebugLog(5, "Assemble MAC Filter List Size: %d", list_num);
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, list_num * 6, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, list_num * 6, return false;);
 
 	struct maclist_node *node;
 	mlist_foreach_element(wlconf->conf->macfilter_list, node)
 	{
 		int i;
 		int mac[6];
-		APMACStringToHex(node->macaddr, mac);
+		mac_to_hex(node->macaddr, mac);
 		for(i = 0; i < 6; i++) {
 			APProtocolStore8(msgPtr, mac[i]);
 		}
@@ -644,175 +644,175 @@ APBool APAssembleMACFilterList(APProtocolMessage *msgPtr)
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_MACFILTER_LIST);
 }
 
-APBool APAssembleTxPower(APProtocolMessage *msgPtr) 
+bool APAssembleTxPower(APProtocolMessage *msgPtr) 
 {
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, 1, return false;);
 	APDebugLog(5, "Assemble Tx Power: %u", wlconf->conf->txpower);
 	APProtocolStore8(msgPtr, wlconf->conf->txpower);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_TX_POWER);
 }
 
-APBool APAssembleWPAPassword(APProtocolMessage *msgPtr) 
+bool APAssembleWPAPassword(APProtocolMessage *msgPtr) 
 {
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	
-	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(wlconf->conf->key), return AP_FALSE;);
+	AP_INIT_PROTOCOL_MESSAGE(*msgPtr, strlen(wlconf->conf->key), return false;);
 	APDebugLog(5, "Assemble WPA Password: %s", wlconf->conf->key);
 	APProtocolStoreStr(msgPtr, wlconf->conf->key);
 
 	return APAssembleMsgElem(msgPtr, MSGELEMTYPE_WPA_PWD);
 }
 
-APBool APParseDesiredConfList(APProtocolMessage *msgPtr, int len, u8 **valPtr)
+bool APParseDesiredConfList(APProtocolMessage *msgPtr, int len, u8 **valPtr)
 {
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieveRawBytes(msgPtr, len);
 
 	// while(pos < len) {
 	// 	u16 type = APProtocolRetrieve16(msgPtr);
 	// 	APDebugLog(5, "Parse Desired Conf List: 0x%04x", type);
-	// 	AP_COPY_MEMORY(valPtr + pos, &type, 2);
+	// 	copy_memory(valPtr + pos, &type, 2);
 	// 	pos += 2;
 	// }
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
 }
 
-APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr) 
+bool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieveStr(msgPtr, len);
-	if(valPtr == NULL) return AP_FALSE;
+	if(valPtr == NULL) return false;
 	APDebugLog(5, "Parse SSID: %s", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+bool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve8(msgPtr);
 	APDebugLog(5, "Parse Channel: %u", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+bool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve8(msgPtr);
 	APDebugLog(5, "Parse Hardware Mode: %u", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+bool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve8(msgPtr);
 	APDebugLog(5, "Parse Suppress SSID: %u", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+bool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve8(msgPtr);
 	APDebugLog(5, "Parse Security Option: %u", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseMACFilterMode(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+bool APParseMACFilterMode(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve8(msgPtr);
 	APDebugLog(5, "Parse MAC Filter Mode: %u", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseTxPower(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
+bool APParseTxPower(APProtocolMessage *msgPtr, int len, u8 *valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve8(msgPtr);
 	APDebugLog(5, "Parse Tx Power: %u", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseWPAPassword(APProtocolMessage *msgPtr, int len, char **valPtr) 
+bool APParseWPAPassword(APProtocolMessage *msgPtr, int len, char **valPtr) 
 {	
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieveStr(msgPtr, len);
-	if(valPtr == NULL) return AP_FALSE;
+	if(valPtr == NULL) return false;
 	APDebugLog(5, "Parse WPA Password: %s", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseMACList(APProtocolMessage *msgPtr, int len, char ***valPtr)
+bool APParseMACList(APProtocolMessage *msgPtr, int len, char ***valPtr)
 {
 	int oldOffset = msgPtr->offset;
 	u8 mac[6];
 	int pos = 0, cnt = 0;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 
 	while(pos < len) 
 	{
@@ -820,7 +820,7 @@ APBool APParseMACList(APProtocolMessage *msgPtr, int len, char ***valPtr)
 		if(pos % 6 == 5) 
 		{
 			char *str;
-			AP_CREATE_STRING_SIZE_ERR(str, 18, return AP_FALSE;);
+			create_string(str, 18, return false;);
 			sprintf(str, "%02x:%02x:%02x:%02x:%02x:%02x\0", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 			(*valPtr)[cnt++] = str;
 			APDebugLog(5, "Parse MAC List: %02x:%02x:%02x:%02x:%02x:%02x\0", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
@@ -829,22 +829,22 @@ APBool APParseMACList(APProtocolMessage *msgPtr, int len, char ***valPtr)
 	}
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APParseSystemCommand(APProtocolMessage *msgPtr, int len, u8 *valPtr)
+bool APParseSystemCommand(APProtocolMessage *msgPtr, int len, u8 *valPtr)
 {
 	int oldOffset = msgPtr->offset;
-	if(msgPtr == NULL || valPtr == NULL) return AP_FALSE;
+	if(msgPtr == NULL || valPtr == NULL) return false;
 	
 	*valPtr = APProtocolRetrieve8(msgPtr);
 	APDebugLog(5, "Parse System Command: %u", *valPtr);
 
 	if((msgPtr->offset - oldOffset) != len) {
 		APErrorLog("Message Element Malformed");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }

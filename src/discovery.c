@@ -21,32 +21,32 @@ int foundControllerCount;
 controllerVal controllers[MAX_WAIT_CONTROLLER];
 
 
-APBool APEvaluateController()
+bool APEvaluateController()
 {
 	int i;
 	/* now the strategy is choose the first */
-	AP_CREATE_OBJECT_SIZE_ERR(gControllerName, (strlen(controllers[0].name) + 1), return AP_FALSE;);
-	AP_COPY_MEMORY(gControllerName, controllers[0].name, strlen(controllers[0].name));
+	create_object(gControllerName, (strlen(controllers[0].name) + 1), return false;);
+	copy_memory(gControllerName, controllers[0].name, strlen(controllers[0].name));
 	gControllerName[strlen(controllers[0].name)] = '\0';
 
-	AP_CREATE_OBJECT_SIZE_ERR(gControllerDescriptor, (strlen(controllers[0].descriptor) + 1), return AP_FALSE;);
-	AP_COPY_MEMORY(gControllerDescriptor, controllers[0].descriptor, strlen(controllers[0].descriptor));
+	create_object(gControllerDescriptor, (strlen(controllers[0].descriptor) + 1), return false;);
+	copy_memory(gControllerDescriptor, controllers[0].descriptor, strlen(controllers[0].descriptor));
 	gControllerDescriptor[strlen(controllers[0].descriptor)] = '\0';
 
 	gControllerIPAddr = controllers[0].IPAddr; 
 	for(i = 0; i < 6; i++) {
 		gControllerMACAddr[i] = controllers[0].MACAddr[i];
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APAssembleDiscoveryRequest(APProtocolMessage *messagesPtr)
+bool APAssembleDiscoveryRequest(APProtocolMessage *messagesPtr)
 {
-	if(messagesPtr == NULL) return AP_FALSE;
+	if(messagesPtr == NULL) return false;
 	
 	APProtocolMessage *msgElems;
 	int msgElemCount = 0;
-	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return AP_FALSE;);
+	AP_CREATE_PROTOCOL_ARRAY(msgElems, msgElemCount, return false;);
 	
 	return APAssembleControlMessage(messagesPtr, 
 				 APGetAPID(),
@@ -57,7 +57,7 @@ APBool APAssembleDiscoveryRequest(APProtocolMessage *messagesPtr)
 	);
 }
 
-APBool APParseDiscoveryResponse(char *msg, 
+bool APParseDiscoveryResponse(char *msg, 
 					   int len,
 					   int currentSeqNum,
 					   controllerVal *controllerPtr) 
@@ -68,7 +68,7 @@ APBool APParseDiscoveryResponse(char *msg,
 	u16 elemFlag = 0;
 	
 	if(msg == NULL || controllerPtr == NULL) 
-		return AP_FALSE;
+		return false;
 	
 	APLog("Parse Discovery Response");
 	
@@ -77,21 +77,21 @@ APBool APParseDiscoveryResponse(char *msg,
 	
 	if(!(APParseControlHeader(&completeMsg, &controlVal))) {
 		APErrorLog("Failed to parse header");
-		return AP_FALSE;
+		return false;
 	}
 	
 	/* not as expected */
 	if(controlVal.version != CURRENT_VERSION || controlVal.type != TYPE_CONTROL) {
 		APErrorLog("ACAMP version or type is not Expected");
-		return AP_FALSE;
+		return false;
 	}
 	if(controlVal.seqNum != currentSeqNum) {
 		APErrorLog("Sequence Number of Response doesn't match Request");
-		return AP_FALSE;
+		return false;
 	}
 	if(controlVal.msgType != MSGTYPE_DISCOVERY_RESPONSE) {
 		APErrorLog("Message is not Discovery Response as Expected");
-		return AP_FALSE;
+		return false;
 	}
 
 	/* parse message elements */
@@ -112,7 +112,7 @@ APBool APParseDiscoveryResponse(char *msg,
 					break;
 				}
 				if(!(APParseControllerName(&completeMsg, len, &(controllerPtr->name))))
-					return AP_FALSE;
+					return false;
 				elemFlag |= 0x01;
 				break;
 			case MSGELEMTYPE_CONTROLLER_DESCRIPTOR:
@@ -122,7 +122,7 @@ APBool APParseDiscoveryResponse(char *msg,
 					break;
 				}
 				if(!(APParseControllerDescriptor(&completeMsg, len, &(controllerPtr->descriptor))))
-					return AP_FALSE;
+					return false;
 				elemFlag |= 0x02;
 				break;
 			case MSGELEMTYPE_CONTROLLER_IP_ADDR:
@@ -132,7 +132,7 @@ APBool APParseDiscoveryResponse(char *msg,
 					break;
 				}
 				if(!(APParseControllerIPAddr(&completeMsg, len, &(controllerPtr->IPAddr))))
-					return AP_FALSE;
+					return false;
 				elemFlag |= 0x04;
 				break;
 			case MSGELEMTYPE_CONTROLLER_MAC_ADDR:
@@ -142,7 +142,7 @@ APBool APParseDiscoveryResponse(char *msg,
 					break;
 				}
 				if(!(APParseControllerMACAddr(&completeMsg, len, controllerPtr->MACAddr)))
-					return AP_FALSE;
+					return false;
 				elemFlag |= 0x08;
 				break;
 			
@@ -156,14 +156,14 @@ APBool APParseDiscoveryResponse(char *msg,
 
 	if(elemFlag != 0x0F) {
 		APErrorLog("Incomplete Message Element in Discovery Response");
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
-APBool APReceiveDiscoveryResponse() {
+bool APReceiveDiscoveryResponse() {
 	int i;
-	char buf[AP_BUFFER_SIZE];
+	char buf[BUFFER_SIZE];
 	APNetworkAddress addr;
 	controllerVal *controllerPtr = &controllers[foundControllerCount];
 	int readBytes;
@@ -178,11 +178,11 @@ APBool APReceiveDiscoveryResponse() {
 
 	/* receive the datagram */
 	if(!(APNetworkReceiveFromBroad(buf,
-					 AP_BUFFER_SIZE - 1,
+					 BUFFER_SIZE - 1,
 					 &addr,
 					 &readBytes))) {
 		APErrorLog("Receive Discovery Response failed");
-		return AP_FALSE;
+		return false;
 	}
 
 	recvAddr = ntohl(addr.sin_addr.s_addr);
@@ -191,22 +191,22 @@ APBool APReceiveDiscoveryResponse() {
 	
 	/* check if it is a valid Discovery Response */
 	if(!(APParseDiscoveryResponse(buf, readBytes, APGetSeqNum(), controllerPtr))) {
-		return AP_FALSE;
+		return false;
 	}
 
 	/* the address declared by controller is fake */
 	if(ntohl(addr.sin_addr.s_addr) != controllerPtr->IPAddr) {
 		APErrorLog("The source address and the address carried in the packet do not match");
-		return AP_FALSE;
+		return false;
 	}
 	
 	APLog("Accept valid Discovery Response from %u.%u.%u.%u", (u8)((controllerPtr->IPAddr) >> 24), (u8)((controllerPtr->IPAddr) >> 16),\
 	  (u8)((controllerPtr->IPAddr) >> 8),  (u8)((controllerPtr->IPAddr) >> 0));
 	
-	return AP_TRUE;
+	return true;
 }
 
-APBool APReadDiscoveryResponse() 
+bool APReadDiscoveryResponse() 
 {
 
 	struct timeval timeout, new_timeout, before, after, delta;
@@ -216,9 +216,9 @@ APBool APReadDiscoveryResponse()
 
 	gettimeofday(&before, NULL); // set current time
 	
-	AP_REPEAT_FOREVER 
+	while(1) 
 	{
-		APBool success = false;
+		bool success = false;
 
 		if(APNetworkTimedPollRead(gSocketBroad, &new_timeout)) 
 		{
@@ -232,8 +232,8 @@ APBool APReadDiscoveryResponse()
 		}
 		/* compute time and go on */
 		gettimeofday(&after, NULL);
-		APTimevalSubtract(&delta, &after, &before);
-		if(APTimevalSubtract(&new_timeout, &timeout, &delta) == 1) { 
+		timeval_subtract(&delta, &after, &before);
+		if(timeval_subtract(&new_timeout, &timeout, &delta) == 1) { 
 			/* time is over */
 			goto ap_time_over;
 		}
@@ -244,11 +244,11 @@ APBool APReadDiscoveryResponse()
 
 	if(foundControllerCount == 0) {
 		APLog("There is no response or valid Controller");
-		return AP_FALSE;
+		return false;
 	} 
 	
 	APLog("There is(are) %d controller(s) available", foundControllerCount);
-	return AP_TRUE;
+	return true;
 }
 
 APStateTransition APEnterDiscovery() 
@@ -264,7 +264,7 @@ APStateTransition APEnterDiscovery()
 		return AP_ENTER_DOWN;
 	}
 
-	AP_REPEAT_FOREVER
+	while(1)
 	{
 		foundControllerCount = 0;
 

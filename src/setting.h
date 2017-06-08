@@ -10,7 +10,7 @@
 
 extern FILE* gSettingsFile;
 
-APBool APParseSettingsFile();
+bool APParseSettingsFile();
 void APDefaultSettings();
 
 

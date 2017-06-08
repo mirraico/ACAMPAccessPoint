@@ -17,18 +17,18 @@ typedef struct sockaddr_in APNetworkAddress;
 extern APSocket gSocket;
 extern APSocket gSocketBroad;
 
-APBool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGateway);
-APBool APNetworkInitControllerAddr(u32 controllerAddr);
-APBool APNetworkInitBroadcast();
+bool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGateway);
+bool APNetworkInitControllerAddr(u32 controllerAddr);
+bool APNetworkInitBroadcast();
 void APNetworkCloseSocket(APSocket s);
 
-APBool APNetworkSend(
+bool APNetworkSend(
 					APProtocolMessage sendMsg);
-APBool APNetworkSendToBroad(
+bool APNetworkSendToBroad(
 					APProtocolMessage sendMsg);
-APBool APNetworkReceive(u8* buffer,
+bool APNetworkReceive(u8* buffer,
 					 int bufferLen, APNetworkAddress* addr, int* readLenPtr);
-APBool APNetworkReceiveFromBroad(u8* buffer,
+bool APNetworkReceiveFromBroad(u8* buffer,
 					 int bufferLen, APNetworkAddress* addr, int* readLenPtr);
 
 #endif

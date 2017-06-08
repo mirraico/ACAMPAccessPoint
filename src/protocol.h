@@ -190,8 +190,8 @@ typedef enum {
  * @param  size  [required size]
  */
 #define		AP_INIT_PROTOCOL_MESSAGE(mess, size, err) {\
-							AP_CREATE_OBJECT_SIZE_ERR(((mess).msg), (size), err);\
-							AP_ZERO_MEMORY(((mess).msg), (size));\
+							create_object(((mess).msg), (size), err);\
+							zero_memory(((mess).msg), (size));\
 							(mess).offset = 0;\
 							(mess).type = 0; }
 
@@ -201,7 +201,7 @@ typedef enum {
  * @param  mess  [value that need to be freed]
  */
 #define		AP_FREE_PROTOCOL_MESSAGE(mess) {\
- 							AP_FREE_OBJECT(((mess).msg));\
+ 							free_object(((mess).msg));\
 							(mess).msg = NULL;\
 							(mess).offset = 0;\
 							(mess).type = 0; }
@@ -212,7 +212,7 @@ typedef enum {
  * @param  ar_size  [required size for array]
  */
 #define 	AP_CREATE_PROTOCOL_ARRAY(ar_name, ar_size, err) {\
-							AP_CREATE_ARRAY_ERR(ar_name, ar_size, APProtocolMessage, err)\
+							create_array(ar_name, ar_size, APProtocolMessage, err)\
 							int i;\
 							for(i=0;i<(ar_size); i++) {\
 								(ar_name)[i].msg = NULL;\
@@ -229,7 +229,7 @@ typedef enum {
 							for(i=0;i<(ar_size); i++) {\
 								AP_FREE_PROTOCOL_MESSAGE((ar_name)[i]);\
 							}\
-							AP_FREE_OBJECT(ar_name); }
+							free_object(ar_name); }
 
 
 void APProtocolStore8(APProtocolMessage *msgPtr, u8 val);
@@ -240,10 +240,10 @@ void APProtocolStoreMessage(APProtocolMessage *msgPtr, APProtocolMessage *msgToS
 void APProtocolStoreRawBytes(APProtocolMessage *msgPtr, u8 *bytes, int len);
 void APProtocolStoreReserved(APProtocolMessage *msgPtr, int reservedLen);
 
-APBool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type);
-APBool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
+bool APAssembleMsgElem(APProtocolMessage *msgPtr, u16 type);
+bool APAssembleControlMessage(APProtocolMessage *msgPtr, u16 apid, u32 seqNum,
 						 u16 msgType, APProtocolMessage *msgElems, int msgElemNum);
-APBool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr);
+bool APAssembleControlHeader(APProtocolMessage *controlHdrPtr, APHeaderVal *valPtr);
 
 u8 APProtocolRetrieve8(APProtocolMessage *msgPtr);
 u16 APProtocolRetrieve16(APProtocolMessage *msgPtr);
@@ -252,50 +252,50 @@ char *APProtocolRetrieveStr(APProtocolMessage *msgPtr, int len);
 u8 *APProtocolRetrieveRawBytes(APProtocolMessage *msgPtr, int len);
 void APProtocolRetrieveReserved(APProtocolMessage *msgPtr, int reservedLen);
 
-APBool APParseControlHeader(APProtocolMessage *msgPtr, APHeaderVal *valPtr);
+bool APParseControlHeader(APProtocolMessage *msgPtr, APHeaderVal *valPtr);
 void APParseFormatMsgElem(APProtocolMessage *msgPtr, u16 *type, u16 *len);
 void APParseUnrecognizedMsgElem(APProtocolMessage *msgPtr, int len);
 void APParseRepeatedMsgElem(APProtocolMessage *msgPtr, int len);
 
 
-APBool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr);
-APBool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **valPtr);
-APBool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr);
-APBool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-APBool APParseControllerNextSeq(APProtocolMessage *msgPtr, int len, u32 *valPtr);
+bool APParseControllerName(APProtocolMessage *msgPtr, int len, char **valPtr);
+bool APParseControllerDescriptor(APProtocolMessage *msgPtr, int len, char **valPtr);
+bool APParseControllerIPAddr(APProtocolMessage *msgPtr, int len, u32 *valPtr);
+bool APParseControllerMACAddr(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+bool APParseControllerNextSeq(APProtocolMessage *msgPtr, int len, u32 *valPtr);
 
-APBool APAssembleRegisteredService(APProtocolMessage *msgPtr);
-APBool APAssembleAPName(APProtocolMessage *msgPtr);
-APBool APAssembleAPDescriptor(APProtocolMessage *msgPtr);
-APBool APAssembleAPIPAddr(APProtocolMessage *msgPtr);
-APBool APAssembleAPMACAddr(APProtocolMessage *msgPtr);
-APBool APAssembleDiscoveryType(APProtocolMessage *msgPtr);
+bool APAssembleRegisteredService(APProtocolMessage *msgPtr);
+bool APAssembleAPName(APProtocolMessage *msgPtr);
+bool APAssembleAPDescriptor(APProtocolMessage *msgPtr);
+bool APAssembleAPIPAddr(APProtocolMessage *msgPtr);
+bool APAssembleAPMACAddr(APProtocolMessage *msgPtr);
+bool APAssembleDiscoveryType(APProtocolMessage *msgPtr);
 
-APBool APParseResultCode(APProtocolMessage *msgPtr, int len, u16 *valPtr);
-APBool APParseReasonCode(APProtocolMessage *msgPtr, int len, u16 *valPtr);
-APBool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr);
-APBool APParseRegisteredService(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+bool APParseResultCode(APProtocolMessage *msgPtr, int len, u16 *valPtr);
+bool APParseReasonCode(APProtocolMessage *msgPtr, int len, u16 *valPtr);
+bool APParseAssignedAPID(APProtocolMessage *msgPtr, int len, u16 *valPtr);
+bool APParseRegisteredService(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 
-APBool APAssembleSSID(APProtocolMessage *msgPtr);
-APBool APAssembleChannel(APProtocolMessage *msgPtr);
-APBool APAssembleHardwareMode(APProtocolMessage *msgPtr);
-APBool APAssembleSuppressSSID(APProtocolMessage *msgPtr);
-APBool APAssembleSecurityOption(APProtocolMessage *msgPtr);
-APBool APAssembleMACFilterMode(APProtocolMessage *msgPtr);
-APBool APAssembleMACFilterList(APProtocolMessage *msgPtr);
-APBool APAssembleTxPower(APProtocolMessage *msgPtr);
-APBool APAssembleWPAPassword(APProtocolMessage *msgPtr);
+bool APAssembleSSID(APProtocolMessage *msgPtr);
+bool APAssembleChannel(APProtocolMessage *msgPtr);
+bool APAssembleHardwareMode(APProtocolMessage *msgPtr);
+bool APAssembleSuppressSSID(APProtocolMessage *msgPtr);
+bool APAssembleSecurityOption(APProtocolMessage *msgPtr);
+bool APAssembleMACFilterMode(APProtocolMessage *msgPtr);
+bool APAssembleMACFilterList(APProtocolMessage *msgPtr);
+bool APAssembleTxPower(APProtocolMessage *msgPtr);
+bool APAssembleWPAPassword(APProtocolMessage *msgPtr);
 
-APBool APParseDesiredConfList(APProtocolMessage *msgPtr, int len, u8 **valPtr);
-APBool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr);
-APBool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-APBool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-APBool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-APBool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-APBool APParseMACFilterMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-APBool APParseTxPower(APProtocolMessage *msgPtr, int len, u8 *valPtr);
-APBool APParseWPAPassword(APProtocolMessage *msgPtr, int len, char **valPtr);
-APBool APParseMACList(APProtocolMessage *msgPtr, int len, char ***valPtr);
-APBool APParseSystemCommand(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+bool APParseDesiredConfList(APProtocolMessage *msgPtr, int len, u8 **valPtr);
+bool APParseSSID(APProtocolMessage *msgPtr, int len, char **valPtr);
+bool APParseChannel(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+bool APParseHardwareMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+bool APParseSuppressSSID(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+bool APParseSecurityOption(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+bool APParseMACFilterMode(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+bool APParseTxPower(APProtocolMessage *msgPtr, int len, u8 *valPtr);
+bool APParseWPAPassword(APProtocolMessage *msgPtr, int len, char **valPtr);
+bool APParseMACList(APProtocolMessage *msgPtr, int len, char ***valPtr);
+bool APParseSystemCommand(APProtocolMessage *msgPtr, int len, u8 *valPtr);
 
 #endif

@@ -52,7 +52,7 @@ void APNetworkParseRoutes(struct nlmsghdr *nlHdr, u32* localIP, u32* localDefaul
 		char ifName[IF_NAMESIZE];
 	} rtInfo;
 	struct route_info* prtInfo = &rtInfo;
-	AP_ZERO_MEMORY(prtInfo, sizeof(struct route_info));
+	zero_memory(prtInfo, sizeof(struct route_info));
 
 	struct rtmsg *rtMsg = (struct rtmsg *) NLMSG_DATA(nlHdr);
 	if ((rtMsg->rtm_family != AF_INET) || (rtMsg->rtm_table != RT_TABLE_MAIN)) return;
@@ -93,15 +93,15 @@ void APNetworkParseRoutes(struct nlmsghdr *nlHdr, u32* localIP, u32* localDefaul
  * init broadcast socket
  * @return [whether the operation is success or not]
  */
-APBool APNetworkInitBroadcast()
+bool APNetworkInitBroadcast()
 {
 	if(gSocketBroad >= 0) APNetworkCloseSocket(gSocketBroad);
 	gSocketBroad = socket(AF_INET, SOCK_DGRAM, 0);
-	if(gSocketBroad < 0) return AP_FALSE;
+	if(gSocketBroad < 0) return false;
 	const int opt = 1;
 	int nb = setsockopt(gSocketBroad, SOL_SOCKET, SO_BROADCAST, (char *)&opt, sizeof(opt));
-	if(nb < 0) return AP_FALSE;
-	return AP_TRUE;
+	if(nb < 0) return false;
+	return true;
 }
 
 
@@ -112,13 +112,13 @@ APBool APNetworkInitBroadcast()
  * @param  localDefaultGateway [output local default gateway]
  * @return                     [whether the operation is success or not]
  */
-APBool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGateway)
+bool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGateway)
 {
 	char msgBuf[8192];
 	int sock, len, msgSeq = 0;
 
-	if((sock = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE)) < 0) return AP_FALSE;
-	AP_ZERO_MEMORY(msgBuf, 8192);
+	if((sock = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE)) < 0) return false;
+	zero_memory(msgBuf, 8192);
 
 	struct nlmsghdr *nlMsg = (struct nlmsghdr *) msgBuf;
 	nlMsg->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
@@ -127,8 +127,8 @@ APBool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGatew
 	nlMsg->nlmsg_seq = msgSeq++;
 	nlMsg->nlmsg_pid = getpid();
 
-	if (send(sock, nlMsg, nlMsg->nlmsg_len, 0) < 0)  return AP_FALSE;
-	if ((len = APNetworkReadNlSock(sock, msgBuf, msgSeq, getpid())) < 0) return AP_FALSE;
+	if (send(sock, nlMsg, nlMsg->nlmsg_len, 0) < 0)  return false;
+	if ((len = APNetworkReadNlSock(sock, msgBuf, msgSeq, getpid())) < 0) return false;
 	
 	for (; NLMSG_OK(nlMsg, len); nlMsg = NLMSG_NEXT(nlMsg, len)) 
 		APNetworkParseRoutes(nlMsg, localIP, localDefaultGateway);
@@ -142,8 +142,8 @@ APBool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGatew
 	if(!ioctl(sock, SIOCGIFHWADDR, &ifr)) {
 		memcpy(localMAC, ifr.ifr_hwaddr.sa_data, 6);
 	}
-	else return AP_FALSE;
-	return AP_TRUE;
+	else return false;
+	return true;
 }
 
 /**
@@ -151,18 +151,18 @@ APBool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGatew
  * @param  controllerAddr [controller's ip address]
  * @return                [whether the operation is success or not]
  */
-APBool APNetworkInitControllerAddr(u32 controllerAddr)
+bool APNetworkInitControllerAddr(u32 controllerAddr)
 {
 	if(gSocket >= 0) APNetworkCloseSocket(gSocket);
 	gSocket = socket(AF_INET, SOCK_DGRAM, 0);
-	if(gSocket < 0) return AP_FALSE;
+	if(gSocket < 0) return false;
 
-	AP_ZERO_MEMORY(&gControllerSockaddr, sizeof(gControllerSockaddr));
+	zero_memory(&gControllerSockaddr, sizeof(gControllerSockaddr));
 	gControllerSockaddr.sin_family = AF_INET;
 	gControllerSockaddr.sin_addr.s_addr = htonl(controllerAddr);
 	gControllerSockaddr.sin_port = htons(PROTOCOL_PORT);
 	
-	return AP_TRUE;
+	return true;
 }
 
 /**
@@ -181,14 +181,14 @@ void APNetworkCloseSocket(APSocket s)
  * @param  sendMsg [msg]
  * @return         [whether the operation is success or not]
  */
-APBool APNetworkSend(APProtocolMessage sendMsg) 
+bool APNetworkSend(APProtocolMessage sendMsg) 
 {
 	if(sendMsg.msg == NULL) 
-		return AP_FALSE;
+		return false;
 	if(sendto(gSocket, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&gControllerSockaddr, sizeof(gControllerSockaddr)) < 0) {
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
 /**
@@ -196,19 +196,19 @@ APBool APNetworkSend(APProtocolMessage sendMsg)
  * @param  sendMsg [msg]
  * @return         [whether the operation is success or not]
  */
-APBool APNetworkSendToBroad(APProtocolMessage sendMsg) 
+bool APNetworkSendToBroad(APProtocolMessage sendMsg) 
 {
 	if(sendMsg.msg == NULL) 
-		return AP_FALSE;
+		return false;
 	APNetworkAddress broadAddr;
-	AP_ZERO_MEMORY(&broadAddr, sizeof(broadAddr));
+	zero_memory(&broadAddr, sizeof(broadAddr));
 	broadAddr.sin_family = AF_INET;
 	broadAddr.sin_addr.s_addr = inet_addr("255.255.255.255");
 	broadAddr.sin_port = htons(PROTOCOL_PORT);
 	if(sendto(gSocketBroad, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&broadAddr, sizeof(gControllerSockaddr)) < 0) {
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
 /**
@@ -219,16 +219,16 @@ APBool APNetworkSendToBroad(APProtocolMessage sendMsg)
  * @param  readLenPtr [output size of received msg]
  * @return            [whether the operation is success or not]
  */
-APBool APNetworkReceive(u8* buffer,
+bool APNetworkReceive(u8* buffer,
 					 int bufferLen, APNetworkAddress* addr, int* readLenPtr) 
 {
 	if(buffer == NULL || readLenPtr == NULL)
-		return AP_FALSE;
+		return false;
 	unsigned int  addrLen = sizeof(APNetworkAddress);
 	if((*readLenPtr = recvfrom(gSocket, (char*)buffer, bufferLen, 0, (struct sockaddr*)addr, &addrLen)) < 0) {
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
 /**
@@ -239,16 +239,16 @@ APBool APNetworkReceive(u8* buffer,
  * @param  readLenPtr [output size of received msg]
  * @return            [whether the operation is success or not]
  */
-APBool APNetworkReceiveFromBroad(u8* buffer,
+bool APNetworkReceiveFromBroad(u8* buffer,
 					 int bufferLen, APNetworkAddress* addr, int* readLenPtr) 
 {
 	if(buffer == NULL || readLenPtr == NULL)
-		return AP_FALSE;
+		return false;
 	unsigned int addrLen = sizeof(APNetworkAddress);
 	if((*readLenPtr = recvfrom(gSocketBroad, (char*)buffer, bufferLen, 0, (struct sockaddr*)addr, &addrLen)) < 0) {
-		return AP_FALSE;
+		return false;
 	}
-	return AP_TRUE;
+	return true;
 }
 
 /**
@@ -257,19 +257,19 @@ APBool APNetworkReceiveFromBroad(u8* buffer,
  * @param  timeout  [timeout]
  * @return            [whether the operation is success or not]
  */
-APBool APNetworkTimedPollRead(APSocket sock, struct timeval *timeout) {
+bool APNetworkTimedPollRead(APSocket sock, struct timeval *timeout) {
 	int r;
 	
 	fd_set fset;
 	
-	if(timeout == NULL) return AP_FALSE;
+	if(timeout == NULL) return false;
 	
 	FD_ZERO(&fset);
 	FD_SET(sock, &fset);
 
 	if((r = select(sock+1, &fset, NULL, NULL, timeout)) == 0) 
 	{
-		return AP_FALSE;
+		return false;
 	} 
 	else if (r < 0) 
 	{
@@ -277,10 +277,10 @@ APBool APNetworkTimedPollRead(APSocket sock, struct timeval *timeout) {
 		if(errno == EINTR)
 		{
 			APErrorLog("Select Interrupted by signal");
-			return AP_FALSE;
+			return false;
 		}
-		return AP_FALSE;
+		return false;
 	}
 
-	return AP_TRUE;
+	return true;
 }

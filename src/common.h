@@ -25,29 +25,20 @@
 #include <libubox/uloop.h>
 #include "wlconf.h"
 
-typedef enum  {
-	AP_FALSE = 0,
-	AP_TRUE = 1
-} APBool;
+#define	BUFFER_SIZE					    65536
 
-#define	AP_BUFFER_SIZE					65536
-#define	AP_ZERO_MEMORY					bzero
-#define	AP_COPY_MEMORY(dst, src, len)	bcopy(src, dst, len)
-#define	AP_REPEAT_FOREVER				while(1)
+#define	zero_memory					    bzero
+#define	copy_memory(dst, src, len)	    bcopy(src, dst, len)
+#define	create_string(str_name, str_size, on_err)	{str_name = ((char*)malloc(str_size)); if(!(str_name)) {on_err}}
+#define	create_object(obj_name, obj_size, on_err)	{obj_name = ((u8*)malloc(obj_size)); if(!(obj_name)) {on_err}}
+#define	create_array(ar_name, ar_size, ar_type, on_err)	{ar_name = (ar_type*) (malloc(sizeof(ar_type) * (ar_size))); if(!(ar_name)) {on_err}}
+#define	free_object(obj_name)					{if(obj_name){free((obj_name)); (obj_name) = NULL;}}
 
-#define	AP_CREATE_STRING_SIZE_ERR(str_name, str_size, on_err)	{str_name = ((char*)malloc(str_size)); if(!(str_name)) {on_err}}
-#define	AP_CREATE_OBJECT_SIZE_ERR(obj_name, obj_size, on_err)	{obj_name = ((u8*)malloc(obj_size)); if(!(obj_name)) {on_err}}
-#define	AP_CREATE_OBJECT_ERR(obj_name, obj_type, on_err)	{obj_name = (obj_type*) (malloc(sizeof(obj_type))); if(!(obj_name)) {on_err}}
-#define	AP_CREATE_ARRAY_ERR(ar_name, ar_size, ar_type, on_err)	{ar_name = (ar_type*) (malloc(sizeof(ar_type) * (ar_size))); if(!(ar_name)) {on_err}}
-
-#define	AP_FREE_OBJECT(obj_name)					{if(obj_name){free((obj_name)); (obj_name) = NULL;}}
-#define	AP_FREE_OBJECTS_ARRAY(ar_name, ar_size)		{int _i = 0; for(_i = ((ar_size)-1); _i >= 0; _i--) {if(((ar_name)[_i]) != NULL){ free((ar_name)[_i]);}} free(ar_name); (ar_name) = NULL; }
-
-#define	AP_RANDOM_INT(min, max) { (min) + (rand() % ((max)-(min))); }
+#define	random_int(min, max) { (min) + (rand() % ((max)-(min))); }
 
 
-int APTimevalSubtract(struct timeval *res, const struct timeval *x, const struct timeval *y);
-void APMACStringToHex(char *str, int* hex);
+int timeval_subtract(struct timeval *res, const struct timeval *x, const struct timeval *y);
+void mac_to_hex(char *str, int* hex);
 
 typedef u_int64_t u64;
 typedef u_int32_t u32;

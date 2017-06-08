@@ -13,9 +13,9 @@ char * APGetLine(FILE *configFile) {
 	char *command = NULL;
 	char *ret = NULL;
 
-	AP_CREATE_STRING_SIZE_ERR(buff, AP_BUFFER_SIZE, return NULL;);
+	create_string(buff, BUFFER_SIZE, return NULL;);
 	
-	while ( ((ret = fgets(buff, AP_BUFFER_SIZE, configFile)) != NULL) &&\
+	while ( ((ret = fgets(buff, BUFFER_SIZE, configFile)) != NULL) &&\
 		(buff[0] == '\n' || buff[0] == '\r' || buff[0] == '#') );
 	
 	if(buff != NULL && ret != NULL) {
@@ -23,11 +23,11 @@ char * APGetLine(FILE *configFile) {
 		int len = strlen(buff);
 		buff[len-1] = '\0';
 		
-		AP_CREATE_STRING_SIZE_ERR(command, len, return NULL;);
+		create_string(command, len, return NULL;);
 		strcpy(command, buff);
 	}
 	
-	AP_FREE_OBJECT(buff);
+	free_object(buff);
 	
 	return command;
 }
@@ -97,13 +97,13 @@ int APExtractIntVaule(char *str)
 /**
  * parse ap name, descriptor, and all configuration from files
  */
-APBool APParseSettingsFile()
+bool APParseSettingsFile()
 {
 	char *line = NULL;
 
 	gSettingsFile = fopen (AP_SETTINGS_FILE, "rb");
 	if (gSettingsFile == NULL) {
-		return AP_FALSE;
+		return false;
 	}
 	while((line = (char*)APGetLine(gSettingsFile)) != NULL) 
 	{
@@ -111,7 +111,7 @@ APBool APParseSettingsFile()
 
 		if((pos=strchr (line, '='))==NULL) 
 		{
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;
 		}
 		pos[0] = '\0';
@@ -122,25 +122,25 @@ APBool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			AP_CREATE_STRING_SIZE_ERR(gAPLogFileName, len + 1, return AP_FALSE;);
-			AP_ZERO_MEMORY(gAPLogFileName, len + 1);
-			AP_COPY_MEMORY(gAPLogFileName, value, len);
+			create_string(gAPLogFileName, len + 1, return false;);
+			zero_memory(gAPLogFileName, len + 1);
+			copy_memory(gAPLogFileName, value, len);
 
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "AP_LOG_LEVEL"))
 		{
 			gAPLogLevel = APExtractIntVaule(pos+1);
 			
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "AP_STDOUT_LOG_LEVEL"))
 		{
 			gAPStdoutLevel = APExtractIntVaule(pos+1);
 			
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "AP_NAME"))
@@ -148,12 +148,12 @@ APBool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			AP_CREATE_STRING_SIZE_ERR(gAPName, len + 1, return AP_FALSE;);
-			AP_ZERO_MEMORY(gAPName, len + 1);
-			AP_COPY_MEMORY(gAPName, value, len);
+			create_string(gAPName, len + 1, return false;);
+			zero_memory(gAPName, len + 1);
+			copy_memory(gAPName, value, len);
 			
 			APDebugLog(5, "CONF AP Name: %s", gAPName);
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "AP_DESCRIPTOR"))
@@ -161,12 +161,12 @@ APBool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			AP_CREATE_STRING_SIZE_ERR(gAPDescriptor, len + 1, return AP_FALSE;);
-			AP_ZERO_MEMORY(gAPDescriptor, len + 1);
-			AP_COPY_MEMORY(gAPDescriptor, value, len);
+			create_string(gAPDescriptor, len + 1, return false;);
+			zero_memory(gAPDescriptor, len + 1);
+			copy_memory(gAPDescriptor, value, len);
 
 			APDebugLog(5, "CONF AP Descriptor: %s", gAPDescriptor);
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;
 		}
 		if (!strcmp(APExtractTag(line), "ETH_INTERFACE"))
@@ -174,12 +174,12 @@ APBool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			AP_CREATE_STRING_SIZE_ERR(gIfEthName, len + 1, return AP_FALSE;);
-			AP_ZERO_MEMORY(gIfEthName, len + 1);
-			AP_COPY_MEMORY(gIfEthName, value, len);
+			create_string(gIfEthName, len + 1, return false;);
+			zero_memory(gIfEthName, len + 1);
+			copy_memory(gIfEthName, value, len);
 
 			APDebugLog(5, "CONF Eth Interface Name: %s", gIfEthName);
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;
 		}
 		if (!strcmp(APExtractTag(line), "DISCOVERY_TYPE"))
@@ -187,7 +187,7 @@ APBool APParseSettingsFile()
 			gDiscoveryType = APExtractIntVaule(pos+1);
 
 			APDebugLog(5, "CONF Discovery Type: %u", gDiscoveryType);
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "STATIC_CONTROLLER_ADDRESS"))
@@ -196,15 +196,15 @@ APBool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			AP_CREATE_STRING_SIZE_ERR(ip, len + 1, return AP_FALSE;);
-			AP_ZERO_MEMORY(ip, len + 1);
-			AP_COPY_MEMORY(ip, value, len);
+			create_string(ip, len + 1, return false;);
+			zero_memory(ip, len + 1);
+			copy_memory(ip, value, len);
 			gStaticControllerIPAddr = ntohl(inet_addr(ip));
-			AP_FREE_OBJECT(ip);
+			free_object(ip);
 
 			APDebugLog(5, "CONF Static Controller IP Addr: %u.%u.%u.%u", (u8)(gStaticControllerIPAddr >> 24), (u8)(gStaticControllerIPAddr >> 16),\
 	  			(u8)(gStaticControllerIPAddr >> 8),  (u8)(gStaticControllerIPAddr >> 0));
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;
 		}
 		if (!strcmp(APExtractTag(line), "REGISTERED_SERVICE"))
@@ -212,17 +212,17 @@ APBool APParseSettingsFile()
 			gRegisteredService = APExtractIntVaule(pos+1);
 			
 			APDebugLog(5, "CONF Registered Service: %u", gRegisteredService);
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "WLAN"))
 		{
 			int flag = APExtractIntVaule(pos+1);
 			
-			if(!flag) wlflag = AP_FALSE;
+			if(!flag) wlflag = false;
 			
 			APDebugLog(5, "CONF MAC Filter: Reset");
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "SSID"))
@@ -231,14 +231,14 @@ APBool APParseSettingsFile()
 			int len = strlen(value);
 			
 			char *ssid;
-			AP_CREATE_STRING_SIZE_ERR(ssid, len + 1, return AP_FALSE;);
-			AP_ZERO_MEMORY(ssid, len + 1);
-			AP_COPY_MEMORY(ssid, value, len);
+			create_string(ssid, len + 1, return false;);
+			zero_memory(ssid, len + 1);
+			copy_memory(ssid, value, len);
 			wlconf->set_ssid(wlconf, ssid);
 
 			APDebugLog(5, "CONF SSID: %s", ssid);
-			AP_FREE_OBJECT(ssid);
-			AP_FREE_OBJECT(line);
+			free_object(ssid);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "SUPPRESS_SSID"))
@@ -252,7 +252,7 @@ APBool APParseSettingsFile()
 			}
 			
 			APDebugLog(5, "CONF Suppress SSID: %u", suppressSSID);
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "HW_MODE"))
@@ -275,7 +275,7 @@ APBool APParseSettingsFile()
 			}
 
 			APDebugLog(5, "CONF Hardware Mode: %u", hwMode);
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "CHANNEL"))
@@ -285,7 +285,7 @@ APBool APParseSettingsFile()
 			wlconf->set_channel(wlconf, channel);
 			
 			APDebugLog(5, "CONF Channel: %d", channel);
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "TX_POWER"))
@@ -295,7 +295,7 @@ APBool APParseSettingsFile()
 			wlconf->set_txpower(wlconf, tx_power);
 			
 			APDebugLog(5, "CONF Tx Power: %d", tx_power);
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "SECURITY_OPTION"))
@@ -319,7 +319,7 @@ APBool APParseSettingsFile()
 			}
 
 			APDebugLog(5, "CONF Security Option: %u", securityOption);
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "WPA_PASSPHRASE"))
@@ -328,14 +328,14 @@ APBool APParseSettingsFile()
 			int len = strlen(value);
 			
 			char *password;
-			AP_CREATE_STRING_SIZE_ERR(password, len + 1, return AP_FALSE;);
-			AP_ZERO_MEMORY(password, len + 1);
-			AP_COPY_MEMORY(password, value, len);
+			create_string(password, len + 1, return false;);
+			zero_memory(password, len + 1);
+			copy_memory(password, value, len);
 			wlconf->set_key(wlconf, password);
 
 			APDebugLog(5, "CONF WPA Password: %s", password);
-			AP_FREE_OBJECT(password);
-			AP_FREE_OBJECT(line);
+			free_object(password);
+			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "RESET_MAC_FILTER"))
@@ -345,14 +345,14 @@ APBool APParseSettingsFile()
 			if(reset) wlconf->set_macfilter(wlconf, MAC_FILTER_NONE);
 			
 			APDebugLog(5, "CONF MAC Filter: Reset");
-			AP_FREE_OBJECT(line);
+			free_object(line);
 			continue;	
 		}
 		
-		AP_FREE_OBJECT(line);
+		free_object(line);
 		continue;	
 	}
-	return AP_TRUE;
+	return true;
 }
 
 void APDefaultSettings()
@@ -369,7 +369,7 @@ void APDefaultSettings()
 	/* init in APNetworkInitIfname() */
 	gIfEthName = "br-lan";
 	//gIfWlanName = NULL;
-	wlflag = AP_TRUE;
+	wlflag = true;
 
 	/* IP, MAC and default gateway addr will be automatically obtained soon by APNetworkInitLocalAddr() */
 	gAPIPAddr = 0;

@@ -26,7 +26,7 @@ char* gAPDescriptor;
 
 /* all wireless conf */
 struct wlconf *wlconf;
-APBool wlflag;
+bool wlflag;
 
 __inline__ u32 APGetSeqNum() { return gSeqNum; }
 __inline__ u32 APGetControllerSeqNum() { return gControllerSeqNum; }
