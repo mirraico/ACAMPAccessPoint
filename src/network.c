@@ -120,18 +120,18 @@ bool init_local_addr(u32* local_ip, u8* localMAC, u32* local_de_gw)
 	if((sock = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE)) < 0) return false;
 	zero_memory(msgBuf, 8192);
 
-	struct nlmsghdr *nlMsg = (struct nlmsghdr *) msgBuf;
-	nlMsg->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
-	nlMsg->nlmsg_type = RTM_GETROUTE;
-	nlMsg->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST;
-	nlMsg->nlmsg_seq = msgSeq++;
-	nlMsg->nlmsg_pid = getpid();
+	struct nlmsghdr *nlmsg = (struct nlmsghdr *) msgBuf;
+	nlmsg->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
+	nlmsg->nlmsg_type = RTM_GETROUTE;
+	nlmsg->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST;
+	nlmsg->nlmsg_seq = msgSeq++;
+	nlmsg->nlmsg_pid = getpid();
 
-	if (send(sock, nlMsg, nlMsg->nlmsg_len, 0) < 0)  return false;
+	if (send(sock, nlmsg, nlmsg->nlmsg_len, 0) < 0)  return false;
 	if ((len = read_nl_sock(sock, msgBuf, msgSeq, getpid())) < 0) return false;
 	
-	for (; NLMSG_OK(nlMsg, len); nlMsg = NLMSG_NEXT(nlMsg, len)) 
-		parse_routes(nlMsg, local_ip, local_de_gw);
+	for (; NLMSG_OK(nlmsg, len); nlmsg = NLMSG_NEXT(nlmsg, len)) 
+		parse_routes(nlmsg, local_ip, local_de_gw);
 	close(sock);
 	
 	/* mac addr */
@@ -178,14 +178,14 @@ void close_socket(int s)
 
 /**
  * send a singlecast msg to controller
- * @param  sendMsg [msg]
+ * @param  send_msg [msg]
  * @return         [whether the operation is success or not]
  */
-bool send_udp(protocol_msg sendMsg) 
+bool send_udp(protocol_msg send_msg) 
 {
-	if(sendMsg.msg == NULL) 
+	if(send_msg.msg == NULL) 
 		return false;
-	if(sendto(ap_socket, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&controller_sockaddr, sizeof(controller_sockaddr)) < 0) {
+	if(sendto(ap_socket, send_msg.msg, send_msg.offset, 0, (struct sockaddr*)&controller_sockaddr, sizeof(controller_sockaddr)) < 0) {
 		return false;
 	}
 	return true;
@@ -193,19 +193,19 @@ bool send_udp(protocol_msg sendMsg)
 
 /**
  * send a broadcast msg to controller
- * @param  sendMsg [msg]
+ * @param  send_msg [msg]
  * @return         [whether the operation is success or not]
  */
-bool send_udp_br(protocol_msg sendMsg) 
+bool send_udp_br(protocol_msg send_msg) 
 {
-	if(sendMsg.msg == NULL) 
+	if(send_msg.msg == NULL) 
 		return false;
 	struct sockaddr_in broadAddr;
 	zero_memory(&broadAddr, sizeof(broadAddr));
 	broadAddr.sin_family = AF_INET;
 	broadAddr.sin_addr.s_addr = inet_addr("255.255.255.255");
 	broadAddr.sin_port = htons(PROTOCOL_PORT);
-	if(sendto(ap_socket_br, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&broadAddr, sizeof(controller_sockaddr)) < 0) {
+	if(sendto(ap_socket_br, send_msg.msg, send_msg.offset, 0, (struct sockaddr*)&broadAddr, sizeof(controller_sockaddr)) < 0) {
 		return false;
 	}
 	return true;

@@ -88,11 +88,11 @@ typedef struct {
 #define MSGELEMTYPE_DISCOVERY_TYPE 0x0004
 #define MSGELEMTYPE_REGISTERED_SERVICE 0x0005
 #define MSGELEMTYPE_CONTROLLER_NAME 0x0006
-#define MSGELEMTYPE_controller_descCRIPTOR 0x0007
+#define MSGELEMTYPE_CONTROLLER_DESCRIPTOR 0x0007
 #define MSGELEMTYPE_CONTROLLER_IP_ADDR 0x0008
 #define MSGELEMTYPE_CONTROLLER_MAC_ADDR 0x0009
 #define MSGELEMTYPE_AP_NAME 0x000a
-#define MSGELEMTYPE_ap_descCRIPTOR 0x000b
+#define MSGELEMTYPE_AP_DESCRIPTOR 0x000b
 #define MSGELEMTYPE_AP_IP_ADDR 0x000c
 #define MSGELEMTYPE_AP_MAC_ADDR 0x000d
 //#define MSGELEMTYPE_RETURNED_MSGELEM 0x000e
@@ -171,7 +171,7 @@ typedef enum {
 	ENTER_DISCOVERY,
 	ENTER_REGISTER,
 	ENTER_RUN
-} state;
+} ap_state;
 
 /**
  * initialize protocol_msg structure, without any msg
@@ -242,7 +242,7 @@ void store_reserved(protocol_msg *msg_p, int reservedLen);
 
 bool assemble_msgelem(protocol_msg *msg_p, u16 type);
 bool assemble_msg(protocol_msg *msg_p, u16 apid, u32 seq_num,
-						 u16 msg_type, protocol_msg *msgElems, int msgElemNum);
+						 u16 msg_type, protocol_msg *msgelems, int msgElemNum);
 bool assemble_header(protocol_msg *controlHdrPtr, header_val *valPtr);
 
 u8 retrieve_8(protocol_msg *msg_p);

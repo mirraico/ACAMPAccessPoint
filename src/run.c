@@ -6,160 +6,160 @@
 
 #define MAX_EVENT_NUMBER 1024
 
-struct uloop_fd fdSocket;
-struct uloop_timeout tKeepAlive;
-struct uloop_timeout tRetransmit;
-protocol_msg retransmitMsg;
-int retransmitInterval;
-int retransmitCount;
-protocol_msg cacheMsg;
+struct uloop_fd fd_socket;
+struct uloop_timeout timer_keepalive;
+struct uloop_timeout timer_retransmit;
+protocol_msg retransmit_msg;
+int retransmit_interval;
+int retransmit_cnt;
+protocol_msg cache_msg;
 
-static void APRretransmitHandler(struct uloop_timeout *t)
+static void retransmit_handler(struct uloop_timeout *t)
 {
-	retransmitCount++;
-	if(retransmitCount >= 5) {
-		log_i("There is no valid Response for %d times", retransmitCount);
+	retransmit_cnt++;
+	if(retransmit_cnt >= 5) {
+		log_i("There is no valid Response for %d times", retransmit_cnt);
 		log_i("The connection to controller has been interrupted");
 		uloop_end();
 		return;
 	}
 
-	log_i("There is no valid Response, times = %d, retransmit request", retransmitCount);
-	retransmitInterval *= 2;
-	if(retransmitInterval > keepalive_interval / 2) {
-		retransmitInterval = keepalive_interval / 2;
+	log_i("There is no valid Response, times = %d, retransmit request", retransmit_cnt);
+	retransmit_interval *= 2;
+	if(retransmit_interval > keepalive_interval / 2) {
+		retransmit_interval = keepalive_interval / 2;
 	}
-	uloop_timeout_set(&tRetransmit, retransmitInterval * 1000);
-	log_d(5, "Adjust the retransmit interval to %d sec and retransmit", retransmitInterval);
-	if(!(send_udp(retransmitMsg))) {
+	uloop_timeout_set(&timer_retransmit, retransmit_interval * 1000);
+	log_d(5, "Adjust the retransmit interval to %d sec and retransmit", retransmit_interval);
+	if(!(send_udp(retransmit_msg))) {
 		log_e("Failed to retransmit Request");
 		uloop_end();
 		return;
 	}
 }
 
-bool APAssembleKeepAliveRequest(protocol_msg *messagesPtr)
+bool assemble_keepalive_req(protocol_msg *msg_p)
 {
 	int k = -1;
-	if(messagesPtr == NULL) return false;
+	if(msg_p == NULL) return false;
 	
-	protocol_msg *msgElems;
-	int msgElemCount = 0;
-	create_protocol_arr(msgElems, msgElemCount, return false;);
+	protocol_msg *msgelems;
+	int msgelem_cnt = 0;
+	create_protocol_arr(msgelems, msgelem_cnt, return false;);
 	
-	return assemble_msg(messagesPtr, 
+	return assemble_msg(msg_p, 
 				 ap_apid,
 				 ap_seqnum,
 				 MSGTYPE_KEEPALIVE_REQUEST,
-				 msgElems,
-				 msgElemCount
+				 msgelems,
+				 msgelem_cnt
 	);
 }
 
-static void APKeepAliveHandler(struct uloop_timeout *t) 
+static void keepalive_handler(struct uloop_timeout *t) 
 {
-	protocol_msg sendMsg;
-	init_protocol_msg(sendMsg);
-	if(!(APAssembleKeepAliveRequest(&sendMsg))) {
+	protocol_msg send_msg;
+	init_protocol_msg(send_msg);
+	if(!(assemble_keepalive_req(&send_msg))) {
 		log_e("Failed to assemble Keep Alive Request");
 		uloop_end();
 		return;
 	}
 	log_i("Send Keep Alive Request");
-	if(!(send_udp(sendMsg))) {
+	if(!(send_udp(send_msg))) {
 		log_e("Failed to send Keep Alive Request");
 		uloop_end();
 		return;
 	}
 
-	init_protocol_msg_size(retransmitMsg, sendMsg.offset, log_e("Failed to init Retransmit Message"); uloop_end(); return;);
-	store_msg(&retransmitMsg, &sendMsg);
-	retransmitMsg.type = MSGTYPE_KEEPALIVE_REQUEST; //easy to match response
-	free_protocol_msg(sendMsg);
+	init_protocol_msg_size(retransmit_msg, send_msg.offset, log_e("Failed to init Retransmit Message"); uloop_end(); return;);
+	store_msg(&retransmit_msg, &send_msg);
+	retransmit_msg.type = MSGTYPE_KEEPALIVE_REQUEST; //easy to match response
+	free_protocol_msg(send_msg);
 	
-	retransmitInterval = 3;
-	retransmitCount = 0;
-	uloop_timeout_set(&tRetransmit, retransmitInterval * 1000);
+	retransmit_interval = 3;
+	retransmit_cnt = 0;
+	uloop_timeout_set(&timer_retransmit, retransmit_interval * 1000);
 }
 
-bool APParseKeepAliveResponse()
+bool parse_keepalive_resp()
 {
-	uloop_timeout_cancel(&tKeepAlive);
-	uloop_timeout_set(&tKeepAlive, keepalive_interval * 1000);
+	uloop_timeout_cancel(&timer_keepalive);
+	uloop_timeout_set(&timer_keepalive, keepalive_interval * 1000);
 	log_i("Accept Keep Alive Response");
 	return true;
 }
 
-bool APAssembleUnregisterResponse(protocol_msg *messagesPtr)
+bool assemble_unregister_resp(protocol_msg *msg_p)
 {
-	if(messagesPtr == NULL) return false;
+	if(msg_p == NULL) return false;
 	
-	protocol_msg *msgElems;
-	int msgElemCount = 0;
-	create_protocol_arr(msgElems, msgElemCount, return false;);
+	protocol_msg *msgelems;
+	int msgelem_cnt = 0;
+	create_protocol_arr(msgelems, msgelem_cnt, return false;);
 	
-	return assemble_msg(messagesPtr, 
+	return assemble_msg(msg_p, 
 				 ap_apid,
 				 controller_seqnum,
 				 MSGTYPE_UNREGISTER_RESPONSE,
-				 msgElems,
-				 msgElemCount
+				 msgelems,
+				 msgelem_cnt
 	);
 }
 
-bool APAssembleSystemResponse(protocol_msg *messagesPtr)
+bool assemble_system_resp(protocol_msg *msg_p)
 {
-	if(messagesPtr == NULL) return false;
+	if(msg_p == NULL) return false;
 	
-	protocol_msg *msgElems;
-	int msgElemCount = 0;
-	create_protocol_arr(msgElems, msgElemCount, return false;);
+	protocol_msg *msgelems;
+	int msgelem_cnt = 0;
+	create_protocol_arr(msgelems, msgelem_cnt, return false;);
 	
-	return assemble_msg(messagesPtr, 
+	return assemble_msg(msg_p, 
 				 ap_apid,
 				 controller_seqnum,
 				 MSGTYPE_SYSTEM_RESPONSE,
-				 msgElems,
-				 msgElemCount
+				 msgelems,
+				 msgelem_cnt
 	);
 }
 
-bool APParseSystemRequest(protocol_msg *completeMsg, u16 msg_len)
+bool parse_system_req(protocol_msg *complete_msg, u16 msg_len)
 {
 	log_i("Parse System Request");
 
 	u8 command;
-	u16 elemFlag = 0;
+	u16 elem_flag = 0;
 
 	/* parse message elements */
-	while(completeMsg->offset < msg_len) 
+	while(complete_msg->offset < msg_len) 
 	{
 		u16 type = 0;
 		u16 len = 0;
 
-		parse_msgelem(completeMsg, &type, &len);
+		parse_msgelem(complete_msg, &type, &len);
 		// log_d(3, "Parsing Message Element: %u, len: %u", type, len);
 		switch(type) 
 		{
 			case MSGELEMTYPE_SYSTEM_COMMAND:
-				if(elemFlag & 0x01) {
-					parse_repeated_msgelem(completeMsg, len);
+				if(elem_flag & 0x01) {
+					parse_repeated_msgelem(complete_msg, len);
 					log_e("Repeated Message Element");
 					break;
 				}
 
-				if(!(parse_sys_cmd(completeMsg, len, &command)))
+				if(!(parse_sys_cmd(complete_msg, len, &command)))
 					return false;
 
-				elemFlag |= 0x01;
+				elem_flag |= 0x01;
 				break;
 			default:
-				parse_unrecognized_msgelem(completeMsg, len);
+				parse_unrecognized_msgelem(complete_msg, len);
 				log_e("Unrecognized Message Element");
 				break;
 		}
 	}
-	if(elemFlag != 0x01) { //incomplete message
+	if(elem_flag != 0x01) { //incomplete message
 		log_e("Incomplete Message Element in System Request");
 		return false;
 	}
@@ -188,41 +188,41 @@ bool APParseSystemRequest(protocol_msg *completeMsg, u16 msg_len)
 	return true;
 }
 
-bool APAssembleConfigurationUpdateResponse(protocol_msg *messagesPtr)
+bool assemble_conf_update_resp(protocol_msg *msg_p)
 {
-	if(messagesPtr == NULL) return false;
+	if(msg_p == NULL) return false;
 	
-	protocol_msg *msgElems;
-	int msgElemCount = 0;
-	create_protocol_arr(msgElems, msgElemCount, return false;);
+	protocol_msg *msgelems;
+	int msgelem_cnt = 0;
+	create_protocol_arr(msgelems, msgelem_cnt, return false;);
 	
-	return assemble_msg(messagesPtr, 
+	return assemble_msg(msg_p, 
 				 ap_apid,
 				 controller_seqnum,
 				 MSGTYPE_CONFIGURATION_UPDATE_RESPONSE,
-				 msgElems,
-				 msgElemCount
+				 msgelems,
+				 msgelem_cnt
 	);
 }
 
-bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
+bool parse_conf_update_req(protocol_msg *complete_msg, u16 msg_len)
 {
 	log_i("Parse Configuration Update Request");
 
 	/* parse message elements */
-	while(completeMsg->offset < msg_len) 
+	while(complete_msg->offset < msg_len) 
 	{
 		u16 type = 0;
 		u16 len = 0;
 
-		parse_msgelem(completeMsg, &type, &len);
+		parse_msgelem(complete_msg, &type, &len);
 		// log_d(3, "Parsing Message Element: %u, len: %u", type, len);
 		switch(type) 
 		{
 			case MSGELEMTYPE_SSID:
 			{
 				char *ssid;
-				if(!(parse_ssid(completeMsg, len, &ssid)))
+				if(!(parse_ssid(complete_msg, len, &ssid)))
 					return false;
 				wlconf->set_ssid(wlconf, ssid);
 				free_object(ssid);
@@ -231,7 +231,7 @@ bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
 			case MSGELEMTYPE_CHANNEL:
 			{
 				u8 channel;
-				if(!(parse_channel(completeMsg, len, &channel)))
+				if(!(parse_channel(complete_msg, len, &channel)))
 					return false;
 				wlconf->set_channel(wlconf, channel);
 				break;
@@ -239,7 +239,7 @@ bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
 			case MSGELEMTYPE_HARDWARE_MODE:
 			{
 				u8 hw_mode;
-				if(!(parse_hwmode(completeMsg, len, &hw_mode)))
+				if(!(parse_hwmode(complete_msg, len, &hw_mode)))
 					return false;
 				switch(hw_mode)
 				{
@@ -263,7 +263,7 @@ bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
 			case MSGELEMTYPE_SUPPRESS_SSID:
 			{
 				u8 suppress;
-				if(!(parse_hide_ssid(completeMsg, len, &suppress)))
+				if(!(parse_hide_ssid(complete_msg, len, &suppress)))
 					return false;
 				if(suppress == SUPPRESS_SSID_DISABLED) wlconf->set_ssid_hidden(wlconf, false);
 				else wlconf->set_ssid_hidden(wlconf, true);
@@ -272,7 +272,7 @@ bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
 			case MSGELEMTYPE_SECURITY_OPTION:
 			{
 				u8 security;
-				if(!(parse_sec_opt(completeMsg, len, &security)))
+				if(!(parse_sec_opt(complete_msg, len, &security)))
 					return false;
 				switch(security)
 				{
@@ -296,7 +296,7 @@ bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
 			case MSGELEMTYPE_MACFILTER_MODE:
 			{
 				u8 mode;
-				if(!(parse_macfilter_mode(completeMsg, len, &mode)))
+				if(!(parse_macfilter_mode(complete_msg, len, &mode)))
 					return false;
 				switch(mode)
 				{
@@ -317,7 +317,7 @@ bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
 			case MSGELEMTYPE_TX_POWER:
 			{
 				u8 tx_power;
-				if(!(parse_tx_power(completeMsg, len, &tx_power)))
+				if(!(parse_tx_power(complete_msg, len, &tx_power)))
 					return false;
 				wlconf->set_txpower(wlconf, tx_power);
 				break;
@@ -325,7 +325,7 @@ bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
 			case MSGELEMTYPE_WPA_PWD:
 			{
 				char *pwd;
-				if(!(parse_wpa_pwd(completeMsg, len, &pwd)))
+				if(!(parse_wpa_pwd(complete_msg, len, &pwd)))
 					return false;
 				wlconf->set_key(wlconf, pwd);
 				free_object(pwd);
@@ -341,7 +341,7 @@ bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
 				int num = len / 6;
 				char **maclist;
 				create_array(maclist, len, char*, return false;)
-				if(!(parse_mac_list(completeMsg, len, &maclist)))
+				if(!(parse_mac_list(complete_msg, len, &maclist)))
 					return false;
 				for(i = 0; i < num; i++) {
 					wlconf->add_macfilterlist(wlconf, maclist[i]);
@@ -361,7 +361,7 @@ bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
 				int num = len / 6;
 				char **maclist;
 				create_array(maclist, len, char*, return false;)
-				if(!(parse_mac_list(completeMsg, len, &maclist)))
+				if(!(parse_mac_list(complete_msg, len, &maclist)))
 					return false;
 				for(i = 0; i < num; i++) {
 					wlconf->del_macfilterlist(wlconf, maclist[i]);
@@ -387,7 +387,7 @@ bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
 				int num = len / 6;
 				char **maclist;
 				create_array(maclist, len, char*, return false;)
-				if(!(parse_mac_list(completeMsg, len, &maclist)))
+				if(!(parse_mac_list(complete_msg, len, &maclist)))
 					return false;
 				wlconf->clear_macfilterlist(wlconf);
 				for(i = 0; i < num; i++) {
@@ -399,7 +399,7 @@ bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
 				break;
 			}
 			default:
-				parse_unrecognized_msgelem(completeMsg, len);
+				parse_unrecognized_msgelem(complete_msg, len);
 				log_e("Unrecognized Message Element");
 				break;
 		}
@@ -413,16 +413,16 @@ bool APParseConfigurationUpdateRequest(protocol_msg *completeMsg, u16 msg_len)
 	return true;
 }
 
-bool APAssembleConfigurationResponse(protocol_msg *messagesPtr, u8* list, int listSize)
+bool assemble_conf_resp(protocol_msg *msg_p, u8* list, int listSize)
 {
 	int k = -1;
 	int pos = 0;
 	u16 desiredType = 0;
-	if(messagesPtr == NULL) return false;
+	if(msg_p == NULL) return false;
 	
-	protocol_msg *msgElems;
-	int msgElemCount = listSize;
-	create_protocol_arr(msgElems, msgElemCount, return false;);
+	protocol_msg *msgelems;
+	int msgelem_cnt = listSize;
+	create_protocol_arr(msgelems, msgelem_cnt, return false;);
 
 	wlconf->update(wlconf);
 	while(pos < listSize * 2)
@@ -432,74 +432,74 @@ bool APAssembleConfigurationResponse(protocol_msg *messagesPtr, u8* list, int li
 		switch(desiredType)
 		{
 			case MSGELEMTYPE_SSID:
-				if(!(assemble_ssid(&(msgElems[++k])))) {
+				if(!(assemble_ssid(&(msgelems[++k])))) {
 					int i;
-					for(i = 0; i <= k; i++) { free_protocol_msg(msgElems[i]);}
-					free_object(msgElems);
+					for(i = 0; i <= k; i++) { free_protocol_msg(msgelems[i]);}
+					free_object(msgelems);
 					return false;
 				}
 				break;
 			case MSGELEMTYPE_CHANNEL:
-				if(!(assemble_channel(&(msgElems[++k])))) {
+				if(!(assemble_channel(&(msgelems[++k])))) {
 					int i;
-					for(i = 0; i <= k; i++) { free_protocol_msg(msgElems[i]);}
-					free_object(msgElems);
+					for(i = 0; i <= k; i++) { free_protocol_msg(msgelems[i]);}
+					free_object(msgelems);
 					return false;
 				}
 				break;
 			case MSGELEMTYPE_HARDWARE_MODE:
-				if(!(assemble_hwmode(&(msgElems[++k])))) {
+				if(!(assemble_hwmode(&(msgelems[++k])))) {
 					int i;
-					for(i = 0; i <= k; i++) { free_protocol_msg(msgElems[i]);}
-					free_object(msgElems);
+					for(i = 0; i <= k; i++) { free_protocol_msg(msgelems[i]);}
+					free_object(msgelems);
 					return false;
 				}
 				break;
 			case MSGELEMTYPE_SUPPRESS_SSID:
-				if(!(assemble_hide_ssid(&(msgElems[++k])))) {
+				if(!(assemble_hide_ssid(&(msgelems[++k])))) {
 					int i;
-					for(i = 0; i <= k; i++) { free_protocol_msg(msgElems[i]);}
-					free_object(msgElems);
+					for(i = 0; i <= k; i++) { free_protocol_msg(msgelems[i]);}
+					free_object(msgelems);
 					return false;
 				}
 				break;
 			case MSGELEMTYPE_SECURITY_OPTION:
-				if(!(assemble_sec_opt(&(msgElems[++k])))) {
+				if(!(assemble_sec_opt(&(msgelems[++k])))) {
 					int i;
-					for(i = 0; i <= k; i++) { free_protocol_msg(msgElems[i]);}
-					free_object(msgElems);
+					for(i = 0; i <= k; i++) { free_protocol_msg(msgelems[i]);}
+					free_object(msgelems);
 					return false;
 				}
 				break;
 			case MSGELEMTYPE_MACFILTER_MODE:
-				if(!(assemble_macfilter_mode(&(msgElems[++k])))) {
+				if(!(assemble_macfilter_mode(&(msgelems[++k])))) {
 					int i;
-					for(i = 0; i <= k; i++) { free_protocol_msg(msgElems[i]);}
-					free_object(msgElems);
+					for(i = 0; i <= k; i++) { free_protocol_msg(msgelems[i]);}
+					free_object(msgelems);
 					return false;
 				}
 				break;
 			case MSGELEMTYPE_MACFILTER_LIST:
-				if(!(assemble_macfilter_list(&(msgElems[++k])))) {
+				if(!(assemble_macfilter_list(&(msgelems[++k])))) {
 					int i;
-					for(i = 0; i <= k; i++) { free_protocol_msg(msgElems[i]);}
-					free_object(msgElems);
+					for(i = 0; i <= k; i++) { free_protocol_msg(msgelems[i]);}
+					free_object(msgelems);
 					return false;
 				}
 				break;
 			case MSGELEMTYPE_TX_POWER:
-				if(!(assemble_tx_power(&(msgElems[++k])))) {
+				if(!(assemble_tx_power(&(msgelems[++k])))) {
 					int i;
-					for(i = 0; i <= k; i++) { free_protocol_msg(msgElems[i]);}
-					free_object(msgElems);
+					for(i = 0; i <= k; i++) { free_protocol_msg(msgelems[i]);}
+					free_object(msgelems);
 					return false;
 				}
 				break;
 			case MSGELEMTYPE_WPA_PWD:
-				if(!(assemble_wpa_pwd(&(msgElems[++k])))) {
+				if(!(assemble_wpa_pwd(&(msgelems[++k])))) {
 					int i;
-					for(i = 0; i <= k; i++) { free_protocol_msg(msgElems[i]);}
-					free_object(msgElems);
+					for(i = 0; i <= k; i++) { free_protocol_msg(msgelems[i]);}
+					free_object(msgelems);
 					return false;
 				}
 				break;
@@ -513,52 +513,52 @@ bool APAssembleConfigurationResponse(protocol_msg *messagesPtr, u8* list, int li
 
 	//free_object(list);
 	
-	return assemble_msg(messagesPtr, 
+	return assemble_msg(msg_p, 
 				 ap_apid,
 				 controller_seqnum,
 				 MSGTYPE_CONFIGURATION_RESPONSE,
-				 msgElems,
-				 msgElemCount
+				 msgelems,
+				 msgelem_cnt
 	);
 }
 
-bool APParseConfigurationRequest(protocol_msg *completeMsg, u16 msg_len, u8 **listPtr, int *listSize)
+bool parse_conf_req(protocol_msg *complete_msg, u16 msg_len, u8 **listPtr, int *listSize)
 {
 	log_i("Parse Configuration Request");
 
-	u16 elemFlag = 0;
+	u16 elem_flag = 0;
 
 	/* parse message elements */
-	while(completeMsg->offset < msg_len) 
+	while(complete_msg->offset < msg_len) 
 	{
 		u16 type = 0;
 		u16 len = 0;
 
-		parse_msgelem(completeMsg, &type, &len);
+		parse_msgelem(complete_msg, &type, &len);
 		// log_d(3, "Parsing Message Element: %u, len: %u", type, len);
 		switch(type) 
 		{
 			case MSGELEMTYPE_DESIRED_CONF_LIST:
-				if(elemFlag & 0x01) {
-					parse_repeated_msgelem(completeMsg, len);
+				if(elem_flag & 0x01) {
+					parse_repeated_msgelem(complete_msg, len);
 					log_e("Repeated Message Element");
 					break;
 				}
 				*listSize = len / 2; //each type takes 2 bytes
 				log_d(5, "Parse Desired Conf List Size: %d", *listSize);
 
-				if(!(parse_desired_conf_list(completeMsg, len, listPtr)))
+				if(!(parse_desired_conf_list(complete_msg, len, listPtr)))
 					return false;
 
-				elemFlag |= 0x01;
+				elem_flag |= 0x01;
 				break;
 			default:
-				parse_unrecognized_msgelem(completeMsg, len);
+				parse_unrecognized_msgelem(complete_msg, len);
 				log_e("Unrecognized Message Element");
 				break;
 		}
 	}
-	if(elemFlag != 0x01) { //incomplete message
+	if(elem_flag != 0x01) { //incomplete message
 		log_e("Incomplete Message Element in Configuration Request");
 		return false;
 	}
@@ -571,92 +571,92 @@ bool APParseConfigurationRequest(protocol_msg *completeMsg, u16 msg_len, u8 **li
 	return true;
 }
 
-bool APReceiveMessageInRunState() 
+bool msg_handle_in_run() 
 {
 	char buf[BUFFER_SIZE];
 	struct sockaddr_in addr;
-	int readBytes;
-	u32 recvAddr;
+	int read_bytes;
+	u32 recv_addr;
 
 	/* receive the datagram */
 	if(!(recv_udp(buf,
 					 BUFFER_SIZE - 1,
 					 &addr,
-					 &readBytes))) {
+					 &read_bytes))) {
 		log_e("Receive Message in run state failed");
 		return false;
 	}
 
-	recvAddr = ntohl(addr.sin_addr.s_addr);
+	recv_addr = ntohl(addr.sin_addr.s_addr);
 	/* verify the source of the message */
-	if(recvAddr != controller_ip) {
+	if(recv_addr != controller_ip) {
 		log_e("Message from the illegal source address");
 		return false;
 	}
 
 	log_d(3, "Receive Message in run state");
 
-	header_val controlVal;
-	protocol_msg completeMsg;
-	completeMsg.msg = buf;
-	completeMsg.offset = 0;
+	header_val control_val;
+	protocol_msg complete_msg;
+	complete_msg.msg = buf;
+	complete_msg.offset = 0;
 
-	if(!(parse_header(&completeMsg, &controlVal))) {
+	if(!(parse_header(&complete_msg, &control_val))) {
 		log_e("Failed to parse header");
 		return false;
 	}
 
 	/* not as expected */
-	if(controlVal.version != CURRENT_VERSION || controlVal.type != TYPE_CONTROL) {
+	if(control_val.version != CURRENT_VERSION || control_val.type != TYPE_CONTROL) {
 		log_e("ACAMP version or type is not Expected");
 		return false;
 	}
-	if(controlVal.apid != ap_apid) {
+	if(control_val.apid != ap_apid) {
 		log_e("The apid in message is different from the one in message header");
 		return false;
 	}
 
-	int is_req = controlVal.msg_type % 2; //odd type indicates the request message
+	int is_req = control_val.msg_type % 2; //odd type indicates the request message
 
 	if(is_req) {
-		if(controlVal.seq_num == controller_seqnum - 1) {
+		if(control_val.seq_num == controller_seqnum - 1) {
 			log_d(3, "Receive a message that has been responsed");
-			if(cacheMsg.type == 0 || controlVal.msg_type + 1 != cacheMsg.type) {
+			if(cache_msg.type == 0 || control_val.msg_type + 1 != cache_msg.type) {
 				log_e("The received message does not match the cache message");
 				return false;
 			}
 
 			log_d(3, "Send Cache Message");
-			if(!(send_udp(cacheMsg))) {
+			if(!(send_udp(cache_msg))) {
 				log_e("Failed to send Cache Message");
 				return false;
 			}
 
-			uloop_timeout_cancel(&tKeepAlive);
-			uloop_timeout_set(&tKeepAlive, keepalive_interval * 1000);
+			uloop_timeout_cancel(&timer_keepalive);
+			uloop_timeout_set(&timer_keepalive, keepalive_interval * 1000);
 			return false;
 		}
-		if(controlVal.seq_num != controller_seqnum) {
-			if(controlVal.seq_num < controller_seqnum)
+		if(control_val.seq_num != controller_seqnum) {
+			if(control_val.seq_num < controller_seqnum)
 				log_e("The serial number of the message is expired");
 			else
 				log_e("The serial number of the message is invalid");
 			return false;
 		}
 
-		switch(controlVal.msg_type)
+		switch(control_val.msg_type)
 		{
 			case MSGTYPE_CONFIGURATION_REQUEST:
 			{
 				u8* list = NULL;
 				int listSize; 
-				if(!(APParseConfigurationRequest(&completeMsg, controlVal.msg_len, &list, &listSize))) {
+				if(!(parse_conf_req(&complete_msg, control_val.msg_len, &list, &listSize))) {
 					return false;
 				}
 
 				protocol_msg responseMsg;
 				init_protocol_msg(responseMsg);
-				if(!(APAssembleConfigurationResponse(&responseMsg, list, listSize))) {
+				if(!(assemble_conf_resp(&responseMsg, list, listSize))) {
 					log_e("Failed to assemble Configuration Response");
 					return false;
 				}
@@ -667,26 +667,26 @@ bool APReceiveMessageInRunState()
 				}
 				free_object(list);
 
-				free_protocol_msg(cacheMsg);
-				init_protocol_msg_size(cacheMsg, responseMsg.offset, return false;);
-				store_msg(&cacheMsg, &responseMsg);
-				cacheMsg.type = MSGTYPE_CONFIGURATION_RESPONSE; //easy to match request
+				free_protocol_msg(cache_msg);
+				init_protocol_msg_size(cache_msg, responseMsg.offset, return false;);
+				store_msg(&cache_msg, &responseMsg);
+				cache_msg.type = MSGTYPE_CONFIGURATION_RESPONSE; //easy to match request
 				free_protocol_msg(responseMsg);
 
 				controller_seqnum_inc();
-				uloop_timeout_cancel(&tKeepAlive);
-				uloop_timeout_set(&tKeepAlive, keepalive_interval * 1000);
+				uloop_timeout_cancel(&timer_keepalive);
+				uloop_timeout_set(&timer_keepalive, keepalive_interval * 1000);
 				break;
 			}
 			case MSGTYPE_CONFIGURATION_UPDATE_REQUEST:
 			{
-				if(!(APParseConfigurationUpdateRequest(&completeMsg, controlVal.msg_len))) {
+				if(!(parse_conf_update_req(&complete_msg, control_val.msg_len))) {
 					return false;
 				}
 
 				protocol_msg responseMsg;
 				init_protocol_msg(responseMsg);
-				if(!(APAssembleConfigurationUpdateResponse(&responseMsg))) {
+				if(!(assemble_conf_update_resp(&responseMsg))) {
 					log_e("Failed to assemble Configuration Update Response");
 					return false;
 				}
@@ -696,26 +696,26 @@ bool APReceiveMessageInRunState()
 					return false;
 				}
 
-				free_protocol_msg(cacheMsg);
-				init_protocol_msg_size(cacheMsg, responseMsg.offset, return false;);
-				store_msg(&cacheMsg, &responseMsg);
-				cacheMsg.type = MSGTYPE_CONFIGURATION_UPDATE_RESPONSE; //easy to match request
+				free_protocol_msg(cache_msg);
+				init_protocol_msg_size(cache_msg, responseMsg.offset, return false;);
+				store_msg(&cache_msg, &responseMsg);
+				cache_msg.type = MSGTYPE_CONFIGURATION_UPDATE_RESPONSE; //easy to match request
 				free_protocol_msg(responseMsg);
 
 				controller_seqnum_inc();
-				uloop_timeout_cancel(&tKeepAlive);
-				uloop_timeout_set(&tKeepAlive, keepalive_interval * 1000);
+				uloop_timeout_cancel(&timer_keepalive);
+				uloop_timeout_set(&timer_keepalive, keepalive_interval * 1000);
 				break;
 			}
 			case MSGTYPE_SYSTEM_REQUEST:
 			{
-				if(!(APParseSystemRequest(&completeMsg, controlVal.msg_len))) {
+				if(!(parse_system_req(&complete_msg, control_val.msg_len))) {
 					return false;
 				}
 
 				protocol_msg responseMsg;
 				init_protocol_msg(responseMsg);
-				if(!(APAssembleSystemResponse(&responseMsg))) {
+				if(!(assemble_system_resp(&responseMsg))) {
 					log_e("Failed to assemble System Response");
 					return false;
 				}
@@ -725,15 +725,15 @@ bool APReceiveMessageInRunState()
 					return false;
 				}
 
-				free_protocol_msg(cacheMsg);
-				init_protocol_msg_size(cacheMsg, responseMsg.offset, return false;);
-				store_msg(&cacheMsg, &responseMsg);
-				cacheMsg.type = MSGTYPE_SYSTEM_RESPONSE; //easy to match request
+				free_protocol_msg(cache_msg);
+				init_protocol_msg_size(cache_msg, responseMsg.offset, return false;);
+				store_msg(&cache_msg, &responseMsg);
+				cache_msg.type = MSGTYPE_SYSTEM_RESPONSE; //easy to match request
 				free_protocol_msg(responseMsg);
 
 				controller_seqnum_inc();
-				uloop_timeout_cancel(&tKeepAlive);
-				uloop_timeout_set(&tKeepAlive, keepalive_interval * 1000);
+				uloop_timeout_cancel(&timer_keepalive);
+				uloop_timeout_set(&timer_keepalive, keepalive_interval * 1000);
 				break;
 			}
 			case MSGTYPE_UNREGISTER_REQUEST:
@@ -743,7 +743,7 @@ bool APReceiveMessageInRunState()
 
 				protocol_msg responseMsg;
 				init_protocol_msg(responseMsg);
-				if(!(APAssembleUnregisterResponse(&responseMsg))) {
+				if(!(assemble_unregister_resp(&responseMsg))) {
 					log_e("Failed to assemble Unregister Response");
 					return false;
 				}
@@ -752,8 +752,8 @@ bool APReceiveMessageInRunState()
 					log_e("Failed to send Unregister Response");
 					return false;
 				}
-				free_protocol_msg(cacheMsg);
-				uloop_timeout_cancel(&tKeepAlive);
+				free_protocol_msg(cache_msg);
+				uloop_timeout_cancel(&timer_keepalive);
 				break;
 			}
 			default:
@@ -762,25 +762,25 @@ bool APReceiveMessageInRunState()
 
 
 	} else {
-		if(controlVal.seq_num != ap_seqnum) {
-			if(controlVal.seq_num < ap_seqnum)
+		if(control_val.seq_num != ap_seqnum) {
+			if(control_val.seq_num < ap_seqnum)
 				log_e("The serial number of the message is expired");
 			else
 				log_e("The serial number of the message is invalid");
 			return false;
 		}
-		if(retransmitMsg.type == 0 || controlVal.msg_type != retransmitMsg.type + 1) {
+		if(retransmit_msg.type == 0 || control_val.msg_type != retransmit_msg.type + 1) {
 			log_e("The received message does not match the send message");
 			return false;
 		}
-		switch(controlVal.msg_type)
+		switch(control_val.msg_type)
 		{
 			case MSGTYPE_KEEPALIVE_RESPONSE:
-				if(!(APParseKeepAliveResponse())) {
+				if(!(parse_keepalive_resp())) {
 					return false;
 				}
-				uloop_timeout_cancel(&tRetransmit);
-				free_protocol_msg(retransmitMsg);
+				uloop_timeout_cancel(&timer_retransmit);
+				free_protocol_msg(retransmit_msg);
 				ap_seqnum_inc();
 				break;
 			default:
@@ -791,33 +791,33 @@ bool APReceiveMessageInRunState()
 	return true;
 }
 
-static void APEvents(struct uloop_fd *event_fd, unsigned int events)
+static void ap_cb(struct uloop_fd *event_fd, unsigned int events)
 {
 	int sockfd = event_fd->fd;
 	if(sockfd != ap_socket) {
 		log_e("Received an event from unknown source");
 	}
-	(APReceiveMessageInRunState());
+	msg_handle_in_run();
 }
 
-state APEnterRun() 
+ap_state enter_run() 
 {
 	log_i("");	
 	log_i("######### Run State #########");
 
-	free_protocol_msg(cacheMsg);
-	free_protocol_msg(retransmitMsg);
+	free_protocol_msg(cache_msg);
+	free_protocol_msg(retransmit_msg);
 
 
 	uloop_init();
 
-	tRetransmit.cb = APRretransmitHandler;
-	tKeepAlive.cb = APKeepAliveHandler;
-	uloop_timeout_set(&tKeepAlive, 100); //send a keep alive req soon
+	timer_retransmit.cb = retransmit_handler;
+	timer_keepalive.cb = keepalive_handler;
+	uloop_timeout_set(&timer_keepalive, 100); //send a keep alive req soon
 
-	fdSocket.fd = ap_socket;
-	fdSocket.cb = APEvents;
-	uloop_fd_add(&fdSocket, ULOOP_READ);
+	fd_socket.fd = ap_socket;
+	fd_socket.cb = ap_cb;
+	uloop_fd_add(&fd_socket, ULOOP_READ);
 
 	uloop_run();
 

@@ -27,7 +27,7 @@
 
 struct maclist_node
 {
-	char macaddr[20];
+	char mac_addr[20];
 	struct maclist_node *next;
 };
 
@@ -36,8 +36,8 @@ struct maclist
 	int listsize;
 	struct maclist_node *head;
 	struct maclist_node *tail;
-	int (*add_member)(struct maclist *, char *macaddr);
-	int (*del_member)(struct maclist *, char *macaddr);
+	int (*add_member)(struct maclist *, char *mac_addr);
+	int (*del_member)(struct maclist *, char *mac_addr);
 	void (*free_maclist)(struct maclist *);
 };
 
@@ -69,8 +69,8 @@ struct wlconf
 	int (*set_encryption)(struct wlconf *, char *encryption);
 	int (*set_key)(struct wlconf *, char *key);
 	int (*set_macfilter)(struct wlconf *, char *macfilter);
-	int (*add_macfilterlist)(struct wlconf *, char *macaddr);
-	int (*del_macfilterlist)(struct wlconf *, char *macaddr);
+	int (*add_macfilterlist)(struct wlconf *, char *mac_addr);
+	int (*del_macfilterlist)(struct wlconf *, char *mac_addr);
 	int (*clear_macfilterlist)(struct wlconf *);
 	int (*change_commit)(struct wlconf *);
 	int (*update)(struct wlconf *);

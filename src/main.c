@@ -94,13 +94,13 @@ int main()
 		switch(next_state) 
 		{
 			case ENTER_DISCOVERY:
-				next_state = APEnterDiscovery();
+				next_state = enter_discovery();
 				break;
 			case ENTER_REGISTER:
-				next_state = APEnterRegister();
+				next_state = enter_register();
 				break;
 			case ENTER_RUN:
-				next_state = APEnterRun();
+				next_state = enter_run();
 				break;
 			case ENTER_DOWN:
 				destroy();

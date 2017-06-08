@@ -20,9 +20,9 @@ bool init_broadcast();
 void close_socket(int s);
 
 bool send_udp(
-					protocol_msg sendMsg);
+					protocol_msg send_msg);
 bool send_udp_br(
-					protocol_msg sendMsg);
+					protocol_msg send_msg);
 bool recv_udp(u8* buffer,
 					 int bufferLen, struct sockaddr_in* addr, int* readLenPtr);
 bool recv_udp_br(u8* buffer,

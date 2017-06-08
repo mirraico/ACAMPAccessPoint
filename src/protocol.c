@@ -89,19 +89,19 @@ void store_reserved(protocol_msg *msg_p, int reserved_len)
  */
 bool assemble_msgelem(protocol_msg *msg_p, u16 type)
 {
-	protocol_msg completeMsg;
+	protocol_msg complete_msg;
 
 	if(msg_p == NULL) return false;
-	init_protocol_msg_size(completeMsg, ELEMENT_HEADER_LEN+(msg_p->offset), return false;);
+	init_protocol_msg_size(complete_msg, ELEMENT_HEADER_LEN+(msg_p->offset), return false;);
 
-	store_16(&completeMsg, type);
-	store_16(&completeMsg, msg_p->offset);
-	store_msg(&completeMsg, msg_p);
+	store_16(&complete_msg, type);
+	store_16(&complete_msg, msg_p->offset);
+	store_msg(&complete_msg, msg_p);
 
 	free_protocol_msg(*msg_p);
 
-	msg_p->msg = completeMsg.msg;
-	msg_p->offset = completeMsg.offset;
+	msg_p->msg = complete_msg.msg;
+	msg_p->offset = complete_msg.offset;
 	msg_p->type = type;
 
 	return true;
@@ -113,22 +113,22 @@ bool assemble_msgelem(protocol_msg *msg_p, u16 type)
  * @param  apid       [apid that will be used in message header]
  * @param  seq_num     [seq num that will be used in message header]
  * @param  msg_type    [the type of msg]
- * @param  msgElems   [a array of msgElems, which will be used in msg]
- * @param  msgElemNum [count of msgElems]
+ * @param  msgelems   [a array of msgelems, which will be used in msg]
+ * @param  msgElemNum [count of msgelems]
  * @return            [whether the operation is success or not]
  */
 bool assemble_msg(protocol_msg *msg_p, u16 apid, u32 seq_num,
-						 u16 msg_type, protocol_msg *msgElems, int msgElemNum)
+						 u16 msg_type, protocol_msg *msgelems, int msgElemNum)
 {
-	protocol_msg controlHdr, completeMsg;
+	protocol_msg controlHdr, complete_msg;
 	int msgElemsLen = 0, i;
 	header_val controlHdrVal;
 	init_protocol_msg(controlHdr);
 
-	if(msg_p == NULL || (msgElems == NULL && msgElemNum > 0))
+	if(msg_p == NULL || (msgelems == NULL && msgElemNum > 0))
 		return false;
 
-	for(i = 0; i < msgElemNum; i++) msgElemsLen += msgElems[i].offset;
+	for(i = 0; i < msgElemNum; i++) msgElemsLen += msgelems[i].offset;
 
 	controlHdrVal.version = CURRENT_VERSION;
 	controlHdrVal.type = TYPE_CONTROL;
@@ -139,22 +139,22 @@ bool assemble_msg(protocol_msg *msg_p, u16 apid, u32 seq_num,
 
 	if(!(assemble_header(&controlHdr, &controlHdrVal))) {
 		free_protocol_msg(controlHdr);
-		free_arr_and_protocol_msg(msgElems, msgElemNum);
+		free_arr_and_protocol_msg(msgelems, msgElemNum);
 		return false;
 	}
 
-	init_protocol_msg_size(completeMsg, controlHdr.offset + msgElemsLen, return false;);
-	store_msg(&completeMsg, &controlHdr);
+	init_protocol_msg_size(complete_msg, controlHdr.offset + msgElemsLen, return false;);
+	store_msg(&complete_msg, &controlHdr);
 	free_protocol_msg(controlHdr);
 
 	for(i = 0; i < msgElemNum; i++) {
-		store_msg(&completeMsg, &(msgElems[i]));
+		store_msg(&complete_msg, &(msgelems[i]));
 	}
-	free_arr_and_protocol_msg(msgElems, msgElemNum);
+	free_arr_and_protocol_msg(msgelems, msgElemNum);
 
 	free_protocol_msg(*msg_p);
-	msg_p->msg = completeMsg.msg;
-	msg_p->offset = completeMsg.offset;
+	msg_p->msg = complete_msg.msg;
+	msg_p->offset = complete_msg.offset;
 	msg_p->type = msg_type;
 
 	return true;
@@ -423,7 +423,7 @@ bool assemble_ap_desc(protocol_msg *msg_p)
 	log_d(5, "Assemble AP Descriptor: %s", str);
 	store_str(msg_p, str);
 
-	return assemble_msgelem(msg_p, MSGELEMTYPE_ap_descCRIPTOR);
+	return assemble_msgelem(msg_p, MSGELEMTYPE_AP_DESCRIPTOR);
 }
 
 bool assemble_ap_ip(protocol_msg *msg_p) 
@@ -432,7 +432,7 @@ bool assemble_ap_ip(protocol_msg *msg_p)
 	u32 ip = ap_ip;
 
 	init_protocol_msg_size(*msg_p, 4, return false;);
-	log_d(5, "Assemble AP IPAddr: %u.%u.%u.%u", (u8)(ip >> 24), (u8)(ip >> 16),\
+	log_d(5, "Assemble AP ip_addr: %u.%u.%u.%u", (u8)(ip >> 24), (u8)(ip >> 16),\
 	  (u8)(ip >> 8),  (u8)(ip >> 0));
 	store_32(msg_p, ip);
 
@@ -446,7 +446,7 @@ bool assemble_ap_mac(protocol_msg *msg_p)
 	u8 *mac = ap_mac;
 
 	init_protocol_msg_size(*msg_p, 6, return false;);
-	log_d(5, "Assemble AP MACAddr: %02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1],\
+	log_d(5, "Assemble AP mac_addr: %02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1],\
 	 mac[2], mac[3], mac[4], mac[5]);
 	for(i = 0; i < 6; i++) {
 		store_8(msg_p, mac[i]);
@@ -634,11 +634,11 @@ bool assemble_macfilter_list(protocol_msg *msg_p)
 	{
 		int i;
 		int mac[6];
-		mac_to_hex(node->macaddr, mac);
+		mac_to_hex(node->mac_addr, mac);
 		for(i = 0; i < 6; i++) {
 			store_8(msg_p, mac[i]);
 		}
-		log_d(5, "Assemble MAC Filter List: %s", node->macaddr);
+		log_d(5, "Assemble MAC Filter List: %s", node->mac_addr);
 	}
 
 	return assemble_msgelem(msg_p, MSGELEMTYPE_MACFILTER_LIST);

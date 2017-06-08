@@ -3,16 +3,16 @@
 #include <stdlib.h>
 #include "wlconf.h"
 
-static int add_member(struct maclist *list, char *macaddr)
+static int add_member(struct maclist *list, char *mac_addr)
 {
 	struct maclist_node *ptr = list->head;
 	while(ptr != NULL)
 	{
-		if(!strcmp(ptr->macaddr, macaddr)) return 0;
+		if(!strcmp(ptr->mac_addr, mac_addr)) return 0;
 		ptr = ptr->next;
 	}
 	struct maclist_node *node = malloc(sizeof(struct maclist_node));
-	strcpy(node->macaddr, macaddr);
+	strcpy(node->mac_addr, mac_addr);
 	node->next = NULL;
 	if (list->head == NULL)
 	{
@@ -27,14 +27,14 @@ static int add_member(struct maclist *list, char *macaddr)
 	list->listsize++;
 }
 
-static int del_member(struct maclist *list, char *macaddr)
+static int del_member(struct maclist *list, char *mac_addr)
 {
 	if (list->listsize == 0)
 	{
 		return -1;
 	}
 	struct maclist_node *node = list->head;
-	if (!(strcmp(node->macaddr, macaddr)))
+	if (!(strcmp(node->mac_addr, mac_addr)))
 	{
 		list->head = node->next;
 		free(node);
@@ -43,7 +43,7 @@ static int del_member(struct maclist *list, char *macaddr)
 	}
 	while (node->next != NULL)
 	{
-		if (!(strcmp(node->next->macaddr, macaddr)))
+		if (!(strcmp(node->next->mac_addr, mac_addr)))
 		{
 			struct maclist_node *s_node = node->next;
 			if (s_node->next == NULL)
@@ -61,7 +61,7 @@ static int del_member(struct maclist *list, char *macaddr)
 		}
 		node = node->next;
 	}
-	printf ("macaddr not found:%s\n", macaddr);
+	printf ("mac_addr not found:%s\n", mac_addr);
 	return -1;
 }
 
@@ -100,13 +100,13 @@ static void free_maclist(struct maclist *list)
  * Return:  0	- success
  * 		   -1	- failed
  */
-static add_macfilterlist(struct wlconf *wlconf, char *macaddr)
+static add_macfilterlist(struct wlconf *wlconf, char *mac_addr)
 {
 	char str[100];
 	struct uci_ptr ptr;
 	int rv;
 	strcpy(str, "wireless.@wifi-iface[0].maclist=");
-	strcat(str, macaddr);
+	strcat(str, mac_addr);
 	if (uci_lookup_ptr(wlconf->ctx, &ptr, str, true) != UCI_OK)
 	{
 		printf("ADD_LIST_ERROR:error in uci_lookup_ptr\n");
@@ -119,7 +119,7 @@ static add_macfilterlist(struct wlconf *wlconf, char *macaddr)
 		return -1;
 	}
 	uci_save(wlconf->ctx, ptr.p);
-	wlconf->conf->macfilter_list->add_member(wlconf->conf->macfilter_list, macaddr);
+	wlconf->conf->macfilter_list->add_member(wlconf->conf->macfilter_list, mac_addr);
 	return 0;
 	// uci_commit(wlconf->ctx, &ptr.p, true);
 }
@@ -129,13 +129,13 @@ static add_macfilterlist(struct wlconf *wlconf, char *macaddr)
  * Return:  0	- success
  * 		   -1	- failed
  */
-static del_macfilterlist(struct wlconf *wlconf, char *macaddr)
+static del_macfilterlist(struct wlconf *wlconf, char *mac_addr)
 {
 	char str[100];
 	struct uci_ptr ptr;
 	int rv;
 	strcpy(str, "wireless.@wifi-iface[0].maclist=");
-	strcat(str, macaddr);
+	strcat(str, mac_addr);
 	if (wlconf->conf->macfilter_list->listsize == 0)
 	{
 		printf("DELETE_LIST_ERROR:list empty\n");
@@ -152,7 +152,7 @@ static del_macfilterlist(struct wlconf *wlconf, char *macaddr)
 		return -1;
 	}
 	uci_save(wlconf->ctx, ptr.p);
-	wlconf->conf->macfilter_list->del_member(wlconf->conf->macfilter_list, macaddr);
+	wlconf->conf->macfilter_list->del_member(wlconf->conf->macfilter_list, mac_addr);
 	// uci_commit(wlconf->ctx, &ptr.p, true);
 }
 
@@ -374,7 +374,7 @@ static int set_macfilter(struct wlconf *wlconf, char *mode)
 	{
 		mlist_foreach_element(wlconf->conf->macfilter_list, node)
 		{
-			del_macfilterlist(wlconf, node->macaddr);
+			del_macfilterlist(wlconf, node->mac_addr);
 		}
 		strcpy(wlconf->conf->macfilter, mode);
 		rv = uci_delete(wlconf->ctx, &ptr);
@@ -423,7 +423,7 @@ static int clear_macfilterlist(struct wlconf *wlconf)
 	struct maclist_node *node;
 	mlist_foreach_element(wlconf->conf->macfilter_list, node)
 	{
-		del_macfilterlist(wlconf, node->macaddr);
+		del_macfilterlist(wlconf, node->mac_addr);
 	}
 }
 
@@ -497,10 +497,10 @@ static void init_conf(struct wlconf *wlconf)
 			}
 			else if (!(strcmp(ele_name, "maclist")))
 			{
-				struct uci_element *macaddr;
-				uci_foreach_element(&(o->v.list), macaddr)
+				struct uci_element *mac_addr;
+				uci_foreach_element(&(o->v.list), mac_addr)
 				{
-					wlconf->conf->macfilter_list->add_member(wlconf->conf->macfilter_list, macaddr->name);
+					wlconf->conf->macfilter_list->add_member(wlconf->conf->macfilter_list, mac_addr->name);
 				}
 			}
 			else if (!(strcmp(ele_name, "hwmode")))

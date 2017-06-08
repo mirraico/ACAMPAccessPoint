@@ -109,7 +109,7 @@ bool parse_settings_file()
 	{
 		char *pos = NULL;
 
-		if((pos=strchr (line, '='))==NULL) 
+		if((pos = strchr (line, '=')) == NULL) 
 		{
 			free_object(line);
 			continue;
