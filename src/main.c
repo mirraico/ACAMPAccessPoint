@@ -24,11 +24,6 @@ int main()
 	APInitProtocol();
 	APDefaultSettings();
 
-	if(!APInitErrorHandling()) {
-		APErrorLog("Can't init error handling structure");
-		exit(1);
-	};
-
 	APLog("Start reading the setting file");
 	if(!APParseSettingsFile()) {
 		APErrorLog("Can't read setting file");

@@ -184,9 +184,9 @@ void APNetworkCloseSocket(APSocket s)
 APBool APNetworkSend(APProtocolMessage sendMsg) 
 {
 	if(sendMsg.msg == NULL) 
-		return APErrorRaise(AP_ERROR_WRONG_ARG, "APNetworkSend()");
+		return AP_FALSE;
 	if(sendto(gSocket, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&gControllerSockaddr, sizeof(gControllerSockaddr)) < 0) {
-		return APErrorRaise(AP_ERROR_SENDING, "APNetworkSend()");
+		return AP_FALSE;
 	}
 	return AP_TRUE;
 }
@@ -199,14 +199,14 @@ APBool APNetworkSend(APProtocolMessage sendMsg)
 APBool APNetworkSendToBroad(APProtocolMessage sendMsg) 
 {
 	if(sendMsg.msg == NULL) 
-		return APErrorRaise(AP_ERROR_WRONG_ARG, "APNetworkSendToBroad()");
+		return AP_FALSE;
 	APNetworkAddress broadAddr;
 	AP_ZERO_MEMORY(&broadAddr, sizeof(broadAddr));
 	broadAddr.sin_family = AF_INET;
 	broadAddr.sin_addr.s_addr = inet_addr("255.255.255.255");
 	broadAddr.sin_port = htons(PROTOCOL_PORT);
 	if(sendto(gSocketBroad, sendMsg.msg, sendMsg.offset, 0, (struct sockaddr*)&broadAddr, sizeof(gControllerSockaddr)) < 0) {
-		return APErrorRaise(AP_ERROR_SENDING, "APNetworkSendToBroad()");
+		return AP_FALSE;
 	}
 	return AP_TRUE;
 }
@@ -223,10 +223,10 @@ APBool APNetworkReceive(u8* buffer,
 					 int bufferLen, APNetworkAddress* addr, int* readLenPtr) 
 {
 	if(buffer == NULL || readLenPtr == NULL)
-		return APErrorRaise(AP_ERROR_WRONG_ARG, "APNetworkReceive()");
+		return AP_FALSE;
 	unsigned int  addrLen = sizeof(APNetworkAddress);
 	if((*readLenPtr = recvfrom(gSocket, (char*)buffer, bufferLen, 0, (struct sockaddr*)addr, &addrLen)) < 0) {
-		return APErrorRaise(AP_ERROR_RECEIVING, "APNetworkReceive()");
+		return AP_FALSE;
 	}
 	return AP_TRUE;
 }
@@ -243,10 +243,10 @@ APBool APNetworkReceiveFromBroad(u8* buffer,
 					 int bufferLen, APNetworkAddress* addr, int* readLenPtr) 
 {
 	if(buffer == NULL || readLenPtr == NULL)
-		return APErrorRaise(AP_ERROR_WRONG_ARG, "APNetworkReceiveFromBroad()");
+		return AP_FALSE;
 	unsigned int addrLen = sizeof(APNetworkAddress);
 	if((*readLenPtr = recvfrom(gSocketBroad, (char*)buffer, bufferLen, 0, (struct sockaddr*)addr, &addrLen)) < 0) {
-		return APErrorRaise(AP_ERROR_RECEIVING, "APNetworkReceiveFromBroad()");
+		return AP_FALSE;
 	}
 	return AP_TRUE;
 }
@@ -262,14 +262,14 @@ APBool APNetworkTimedPollRead(APSocket sock, struct timeval *timeout) {
 	
 	fd_set fset;
 	
-	if(timeout == NULL) return APErrorRaise(AP_ERROR_WRONG_ARG, "APNetworkTimedPollRead()");
+	if(timeout == NULL) return AP_FALSE;
 	
 	FD_ZERO(&fset);
 	FD_SET(sock, &fset);
 
 	if((r = select(sock+1, &fset, NULL, NULL, timeout)) == 0) 
 	{
-		return APErrorRaise(AP_ERROR_TIME_EXPIRED, NULL);
+		return AP_FALSE;
 	} 
 	else if (r < 0) 
 	{
@@ -277,9 +277,9 @@ APBool APNetworkTimedPollRead(APSocket sock, struct timeval *timeout) {
 		if(errno == EINTR)
 		{
 			APErrorLog("Select Interrupted by signal");
-			return APErrorRaise(AP_ERROR_INTERRUPTED, NULL);
+			return AP_FALSE;
 		}
-		return APErrorRaise(AP_ERROR_GENERAL, "APNetworkTimedPollRead()");
+		return AP_FALSE;
 	}
 
 	return AP_TRUE;
