@@ -122,23 +122,23 @@ bool APParseSettingsFile()
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			create_string(gAPLogFileName, len + 1, return false;);
-			zero_memory(gAPLogFileName, len + 1);
-			copy_memory(gAPLogFileName, value, len);
+			create_string(log_filename, len + 1, return false;);
+			zero_memory(log_filename, len + 1);
+			copy_memory(log_filename, value, len);
 
 			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "AP_LOG_LEVEL"))
 		{
-			gAPLogLevel = APExtractIntVaule(pos+1);
+			log_level = APExtractIntVaule(pos+1);
 			
 			free_object(line);
 			continue;	
 		}
 		if (!strcmp(APExtractTag(line), "AP_STDOUT_LOG_LEVEL"))
 		{
-			gAPStdoutLevel = APExtractIntVaule(pos+1);
+			log_stdlev = APExtractIntVaule(pos+1);
 			
 			free_object(line);
 			continue;	
@@ -152,20 +152,20 @@ bool APParseSettingsFile()
 			zero_memory(ap_name, len + 1);
 			copy_memory(ap_name, value, len);
 			
-			APDebugLog(5, "CONF AP Name: %s", ap_name);
+			log_d(5, "CONF AP Name: %s", ap_name);
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "AP_DESCRIPTOR"))
+		if (!strcmp(APExtractTag(line), "ap_descCRIPTOR"))
 		{
 			char* value = APExtractStringVaule(pos+1);
 			int len = strlen(value);
 			
-			create_string(ap_des, len + 1, return false;);
-			zero_memory(ap_des, len + 1);
-			copy_memory(ap_des, value, len);
+			create_string(ap_desc, len + 1, return false;);
+			zero_memory(ap_desc, len + 1);
+			copy_memory(ap_desc, value, len);
 
-			APDebugLog(5, "CONF AP Descriptor: %s", ap_des);
+			log_d(5, "CONF AP Descriptor: %s", ap_desc);
 			free_object(line);
 			continue;
 		}
@@ -178,7 +178,7 @@ bool APParseSettingsFile()
 			zero_memory(ap_ethname, len + 1);
 			copy_memory(ap_ethname, value, len);
 
-			APDebugLog(5, "CONF Eth Interface Name: %s", ap_ethname);
+			log_d(5, "CONF Eth Interface Name: %s", ap_ethname);
 			free_object(line);
 			continue;
 		}
@@ -186,7 +186,7 @@ bool APParseSettingsFile()
 		{
 			ap_discovery_type = APExtractIntVaule(pos+1);
 
-			APDebugLog(5, "CONF Discovery Type: %u", ap_discovery_type);
+			log_d(5, "CONF Discovery Type: %u", ap_discovery_type);
 			free_object(line);
 			continue;	
 		}
@@ -202,7 +202,7 @@ bool APParseSettingsFile()
 			static_controller_ip = ntohl(inet_addr(ip));
 			free_object(ip);
 
-			APDebugLog(5, "CONF Static Controller IP Addr: %u.%u.%u.%u", (u8)(static_controller_ip >> 24), (u8)(static_controller_ip >> 16),\
+			log_d(5, "CONF Static Controller IP Addr: %u.%u.%u.%u", (u8)(static_controller_ip >> 24), (u8)(static_controller_ip >> 16),\
 	  			(u8)(static_controller_ip >> 8),  (u8)(static_controller_ip >> 0));
 			free_object(line);
 			continue;
@@ -211,7 +211,7 @@ bool APParseSettingsFile()
 		{
 			ap_register_service = APExtractIntVaule(pos+1);
 			
-			APDebugLog(5, "CONF Registered Service: %u", ap_register_service);
+			log_d(5, "CONF Registered Service: %u", ap_register_service);
 			free_object(line);
 			continue;	
 		}
@@ -221,7 +221,7 @@ bool APParseSettingsFile()
 			
 			if(!flag) wlflag = false;
 			
-			APDebugLog(5, "CONF MAC Filter: Reset");
+			log_d(5, "CONF MAC Filter: Reset");
 			free_object(line);
 			continue;	
 		}
@@ -236,7 +236,7 @@ bool APParseSettingsFile()
 			copy_memory(ssid, value, len);
 			wlconf->set_ssid(wlconf, ssid);
 
-			APDebugLog(5, "CONF SSID: %s", ssid);
+			log_d(5, "CONF SSID: %s", ssid);
 			free_object(ssid);
 			free_object(line);
 			continue;	
@@ -251,7 +251,7 @@ bool APParseSettingsFile()
 				wlconf->set_ssid_hidden(wlconf, false);
 			}
 			
-			APDebugLog(5, "CONF Suppress SSID: %u", suppressSSID);
+			log_d(5, "CONF Suppress SSID: %u", suppressSSID);
 			free_object(line);
 			continue;	
 		}
@@ -274,7 +274,7 @@ bool APParseSettingsFile()
 					break;
 			}
 
-			APDebugLog(5, "CONF Hardware Mode: %u", hwMode);
+			log_d(5, "CONF Hardware Mode: %u", hwMode);
 			free_object(line);
 			continue;	
 		}
@@ -284,7 +284,7 @@ bool APParseSettingsFile()
 			
 			wlconf->set_channel(wlconf, channel);
 			
-			APDebugLog(5, "CONF Channel: %d", channel);
+			log_d(5, "CONF Channel: %d", channel);
 			free_object(line);
 			continue;	
 		}
@@ -294,7 +294,7 @@ bool APParseSettingsFile()
 			
 			wlconf->set_txpower(wlconf, tx_power);
 			
-			APDebugLog(5, "CONF Tx Power: %d", tx_power);
+			log_d(5, "CONF Tx Power: %d", tx_power);
 			free_object(line);
 			continue;	
 		}
@@ -318,7 +318,7 @@ bool APParseSettingsFile()
 					break;
 			}
 
-			APDebugLog(5, "CONF Security Option: %u", securityOption);
+			log_d(5, "CONF Security Option: %u", securityOption);
 			free_object(line);
 			continue;	
 		}
@@ -333,7 +333,7 @@ bool APParseSettingsFile()
 			copy_memory(password, value, len);
 			wlconf->set_key(wlconf, password);
 
-			APDebugLog(5, "CONF WPA Password: %s", password);
+			log_d(5, "CONF WPA Password: %s", password);
 			free_object(password);
 			free_object(line);
 			continue;	
@@ -344,7 +344,7 @@ bool APParseSettingsFile()
 			
 			if(reset) wlconf->set_macfilter(wlconf, MAC_FILTER_NONE);
 			
-			APDebugLog(5, "CONF MAC Filter: Reset");
+			log_d(5, "CONF MAC Filter: Reset");
 			free_object(line);
 			continue;	
 		}
@@ -359,12 +359,12 @@ void APDefaultSettings()
 {
 	int i;
 
-	gAPLogFileName = NULL; //no file log
-	gAPLogLevel = 0;
-	gAPStdoutLevel = 0;
+	log_filename = NULL; //no file log
+	log_level = 0;
+	log_stdlev = 0;
 
 	ap_name = "unnamed AP";
-	ap_des = "no descriptor";
+	ap_desc = "no descriptor";
 
 	/* init in APNetworkInitIfname() */
 	ap_ethname = "br-lan";
@@ -383,7 +383,7 @@ void APDefaultSettings()
 	ap_register_service = REGISTERED_SERVICE_CONF_STA; //configuration and station service
 
 	controller_name = NULL;
-	controller_des = NULL;
+	controller_desc = NULL;
 	controller_ip = 0; 
 	for(i = 0; i < 6; i++) {
 		controller_mac[i] = 0;

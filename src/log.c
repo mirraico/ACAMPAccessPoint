@@ -1,40 +1,40 @@
 #include "log.h"
 
-char *gAPLogFileName;
-int gAPLogLevel;
-int gAPStdoutLevel;
+char *log_filename;
+int log_level;
+int log_stdlev;
 
-FILE *gAPLogFile = NULL;
+static FILE *log_file = NULL;
 
-void APInitLogFile()
+void init_log()
 {
-	if(gAPLogFileName == NULL) 
+	if(log_filename == NULL) 
 	{
-		gAPLogFile = NULL;
-		APLog("The Log File is disabled");
+		log_file = NULL;
+		log("The Log File is disabled");
 		return;
 	}
-	if((gAPLogFile = fopen(gAPLogFileName, "w")) == NULL) 
+	if((log_file = fopen(log_filename, "w")) == NULL) 
 	{
-		APErrorLog("Can't open log file: %s", strerror(errno));
+		log_e("Can't open log file: %s", strerror(errno));
 		exit(1);
 	}
 }
 
-void APCloseLogFile()
+void destroy_log()
 {
-	fclose(gAPLogFile);
-	gAPLogFile = NULL;
+	fclose(log_file);
+	log_file = NULL;
 }
 
-__inline__ void _APDebugLog(int level, const char *format, va_list args) 
+__inline__ void _log_d(int level, const char *format, va_list args) 
 {
 	char *logStr = NULL;
 	time_t curtime;
 	char *timestr = NULL;
 	char label[10];
 	
-	if(gAPLogLevel < level && gAPStdoutLevel < level) return;
+	if(log_level < level && log_stdlev < level) return;
 	if(format == NULL) return;
 	
 	time(&curtime);
@@ -53,12 +53,12 @@ __inline__ void _APDebugLog(int level, const char *format, va_list args)
 	char fileLine[256];
 	vsnprintf(fileLine, 255, logStr, args);
 
-	if(gAPLogLevel >= level && gAPLogFile != NULL) 
+	if(log_level >= level && log_file != NULL) 
 	{
-		fwrite(fileLine, strlen(fileLine), 1, gAPLogFile);
-		fflush(gAPLogFile);
+		fwrite(fileLine, strlen(fileLine), 1, log_file);
+		fflush(log_file);
 	}
-	if(gAPStdoutLevel >= level)
+	if(log_stdlev >= level)
 	{
 		printf("%s", fileLine);
 	}
@@ -66,28 +66,28 @@ __inline__ void _APDebugLog(int level, const char *format, va_list args)
 	free_object(logStr);
 }
 
-__inline__ void APLog(const char *format, ...)
+__inline__ void log(const char *format, ...)
 {
 	va_list args;
 	
 	va_start(args, format);
-	_APDebugLog(0, format, args);
+	_log_d(0, format, args);
 	va_end(args);
 }
 
-__inline__ void APErrorLog(const char *format, ...)
+__inline__ void log_e(const char *format, ...)
 {
 	va_list args;
 	
 	va_start(args, format);
-	_APDebugLog(-1, format, args);
+	_log_d(-1, format, args);
 	va_end(args);
 }
 
-__inline__ void APDebugLog(int level, const char *format, ...) 
+__inline__ void log_d(int level, const char *format, ...) 
 {
 	va_list args;
 	va_start(args, format);
-	_APDebugLog(level, format, args);
+	_log_d(level, format, args);
 	va_end(args);
 }

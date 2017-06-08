@@ -18,21 +18,21 @@ static void APRretransmitHandler(struct uloop_timeout *t)
 {
 	retransmitCount++;
 	if(retransmitCount >= 5) {
-		APLog("There is no valid Response for %d times", retransmitCount);
-		APLog("The connection to controller has been interrupted");
+		log("There is no valid Response for %d times", retransmitCount);
+		log("The connection to controller has been interrupted");
 		uloop_end();
 		return;
 	}
 
-	APLog("There is no valid Response, times = %d, retransmit request", retransmitCount);
+	log("There is no valid Response, times = %d, retransmit request", retransmitCount);
 	retransmitInterval *= 2;
 	if(retransmitInterval > keepalive_interval / 2) {
 		retransmitInterval = keepalive_interval / 2;
 	}
 	uloop_timeout_set(&tRetransmit, retransmitInterval * 1000);
-	APDebugLog(5, "Adjust the retransmit interval to %d sec and retransmit", retransmitInterval);
+	log_d(5, "Adjust the retransmit interval to %d sec and retransmit", retransmitInterval);
 	if(!(APNetworkSend(retransmitMsg))) {
-		APErrorLog("Failed to retransmit Request");
+		log_e("Failed to retransmit Request");
 		uloop_end();
 		return;
 	}
@@ -61,18 +61,18 @@ static void APKeepAliveHandler(struct uloop_timeout *t)
 	APProtocolMessage sendMsg;
 	AP_INIT_PROTOCOL(sendMsg);
 	if(!(APAssembleKeepAliveRequest(&sendMsg))) {
-		APErrorLog("Failed to assemble Keep Alive Request");
+		log_e("Failed to assemble Keep Alive Request");
 		uloop_end();
 		return;
 	}
-	APLog("Send Keep Alive Request");
+	log("Send Keep Alive Request");
 	if(!(APNetworkSend(sendMsg))) {
-		APErrorLog("Failed to send Keep Alive Request");
+		log_e("Failed to send Keep Alive Request");
 		uloop_end();
 		return;
 	}
 
-	AP_INIT_PROTOCOL_MESSAGE(retransmitMsg, sendMsg.offset, APErrorLog("Failed to init Retransmit Message"); uloop_end(); return;);
+	AP_INIT_PROTOCOL_MESSAGE(retransmitMsg, sendMsg.offset, log_e("Failed to init Retransmit Message"); uloop_end(); return;);
 	APProtocolStoreMessage(&retransmitMsg, &sendMsg);
 	retransmitMsg.type = MSGTYPE_KEEPALIVE_REQUEST; //easy to match response
 	AP_FREE_PROTOCOL_MESSAGE(sendMsg);
@@ -86,7 +86,7 @@ bool APParseKeepAliveResponse()
 {
 	uloop_timeout_cancel(&tKeepAlive);
 	uloop_timeout_set(&tKeepAlive, keepalive_interval * 1000);
-	APLog("Accept Keep Alive Response");
+	log("Accept Keep Alive Response");
 	return true;
 }
 
@@ -126,7 +126,7 @@ bool APAssembleSystemResponse(APProtocolMessage *messagesPtr)
 
 bool APParseSystemRequest(APProtocolMessage *completeMsg, u16 msgLen)
 {
-	APLog("Parse System Request");
+	log("Parse System Request");
 
 	u8 command;
 	u16 elemFlag = 0;
@@ -138,13 +138,13 @@ bool APParseSystemRequest(APProtocolMessage *completeMsg, u16 msgLen)
 		u16 len = 0;
 
 		APParseFormatMsgElem(completeMsg, &type, &len);
-		// APDebugLog(3, "Parsing Message Element: %u, len: %u", type, len);
+		// log_d(3, "Parsing Message Element: %u, len: %u", type, len);
 		switch(type) 
 		{
 			case MSGELEMTYPE_SYSTEM_COMMAND:
 				if(elemFlag & 0x01) {
 					APParseRepeatedMsgElem(completeMsg, len);
-					APErrorLog("Repeated Message Element");
+					log_e("Repeated Message Element");
 					break;
 				}
 
@@ -155,34 +155,34 @@ bool APParseSystemRequest(APProtocolMessage *completeMsg, u16 msgLen)
 				break;
 			default:
 				APParseUnrecognizedMsgElem(completeMsg, len);
-				APErrorLog("Unrecognized Message Element");
+				log_e("Unrecognized Message Element");
 				break;
 		}
 	}
 	if(elemFlag != 0x01) { //incomplete message
-		APErrorLog("Incomplete Message Element in System Request");
+		log_e("Incomplete Message Element in System Request");
 		return false;
 	}
 
-	APLog("Accept System Request");
+	log("Accept System Request");
 
 	switch(command)
 	{
 		case SYSTEM_WLAN_DOWN:
 			system("wifi down");
-			APDebugLog(3, "WLAN Down");
+			log_d(3, "WLAN Down");
 			break;
 		case SYSTEM_WLAN_UP:
 			system("wifi up");
-			APDebugLog(3, "WLAN Up");
+			log_d(3, "WLAN Up");
 			break;
 		case SYSTEM_WLAN_RESTART:
 			system("wifi restart");
-			APDebugLog(3, "Restart WLAN");
+			log_d(3, "Restart WLAN");
 			break;
 		case SYSTEM_NETWORK_RESTART:
 			system("/etc/init.d/network restart");
-			APDebugLog(3, "Restart network");
+			log_d(3, "Restart network");
 			break;
 	}
 	return true;
@@ -207,7 +207,7 @@ bool APAssembleConfigurationUpdateResponse(APProtocolMessage *messagesPtr)
 
 bool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msgLen)
 {
-	APLog("Parse Configuration Update Request");
+	log("Parse Configuration Update Request");
 
 	/* parse message elements */
 	while(completeMsg->offset < msgLen) 
@@ -216,7 +216,7 @@ bool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msgLe
 		u16 len = 0;
 
 		APParseFormatMsgElem(completeMsg, &type, &len);
-		// APDebugLog(3, "Parsing Message Element: %u, len: %u", type, len);
+		// log_d(3, "Parsing Message Element: %u, len: %u", type, len);
 		switch(type) 
 		{
 			case MSGELEMTYPE_SSID:
@@ -335,7 +335,7 @@ bool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msgLe
 			{
 				int i;
 				if(len % 6) {
-					APErrorLog("Message Element Malformed in MAC Addr");
+					log_e("Message Element Malformed in MAC Addr");
 					break;
 				}
 				int num = len / 6;
@@ -345,7 +345,7 @@ bool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msgLe
 					return false;
 				for(i = 0; i < num; i++) {
 					wlconf->add_macfilterlist(wlconf, maclist[i]);
-					APDebugLog(5, "Add MAC Filter List: %s", maclist[i]);
+					log_d(5, "Add MAC Filter List: %s", maclist[i]);
 					free_object(maclist[i]);
 				}
 				free_object(maclist);
@@ -355,7 +355,7 @@ bool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msgLe
 			{
 				int i;
 				if(len % 6) {
-					APErrorLog("Message Element Malformed in MAC Addr");
+					log_e("Message Element Malformed in MAC Addr");
 					break;
 				}
 				int num = len / 6;
@@ -365,7 +365,7 @@ bool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msgLe
 					return false;
 				for(i = 0; i < num; i++) {
 					wlconf->del_macfilterlist(wlconf, maclist[i]);
-					APDebugLog(5, "Delete MAC Filter List: %s", maclist[i]);
+					log_d(5, "Delete MAC Filter List: %s", maclist[i]);
 					free_object(maclist[i]);
 				}
 				free_object(maclist);
@@ -374,14 +374,14 @@ bool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msgLe
 			case MSGELEMTYPE_CLEAR_MACFILTER:
 			{
 				wlconf->clear_macfilterlist(wlconf);
-				APDebugLog(5, "Clear MAC Filter List");
+				log_d(5, "Clear MAC Filter List");
 				break;
 			}
 			case MSGELEMTYPE_RESET_MACFILTER:
 			{
 				int i;
 				if(len % 6) {
-					APErrorLog("Message Element Malformed in MAC Addr");
+					log_e("Message Element Malformed in MAC Addr");
 					break;
 				}
 				int num = len / 6;
@@ -392,7 +392,7 @@ bool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msgLe
 				wlconf->clear_macfilterlist(wlconf);
 				for(i = 0; i < num; i++) {
 					wlconf->add_macfilterlist(wlconf, maclist[i]);
-					APDebugLog(5, "Reset & Add MAC Filter List: %s", maclist[i]);
+					log_d(5, "Reset & Add MAC Filter List: %s", maclist[i]);
 					free_object(maclist[i]);
 				}
 				free_object(maclist);
@@ -400,16 +400,16 @@ bool APParseConfigurationUpdateRequest(APProtocolMessage *completeMsg, u16 msgLe
 			}
 			default:
 				APParseUnrecognizedMsgElem(completeMsg, len);
-				APErrorLog("Unrecognized Message Element");
+				log_e("Unrecognized Message Element");
 				break;
 		}
 	}
 
-	APLog("Accept Configuration Update Request");
+	log("Accept Configuration Update Request");
 
 	wlconf->change_commit(wlconf);
 	system("wifi restart");
-	APDebugLog(3, "Restart WLAN");
+	log_d(3, "Restart WLAN");
 	return true;
 }
 
@@ -504,7 +504,7 @@ bool APAssembleConfigurationResponse(APProtocolMessage *messagesPtr, u8* list, i
 				}
 				break;
 			default:
-				APErrorLog("Unknown desired configuration type");
+				log_e("Unknown desired configuration type");
 				break;
 		}
 
@@ -524,7 +524,7 @@ bool APAssembleConfigurationResponse(APProtocolMessage *messagesPtr, u8* list, i
 
 bool APParseConfigurationRequest(APProtocolMessage *completeMsg, u16 msgLen, u8 **listPtr, int *listSize)
 {
-	APLog("Parse Configuration Request");
+	log("Parse Configuration Request");
 
 	u16 elemFlag = 0;
 
@@ -535,17 +535,17 @@ bool APParseConfigurationRequest(APProtocolMessage *completeMsg, u16 msgLen, u8 
 		u16 len = 0;
 
 		APParseFormatMsgElem(completeMsg, &type, &len);
-		// APDebugLog(3, "Parsing Message Element: %u, len: %u", type, len);
+		// log_d(3, "Parsing Message Element: %u, len: %u", type, len);
 		switch(type) 
 		{
 			case MSGELEMTYPE_DESIRED_CONF_LIST:
 				if(elemFlag & 0x01) {
 					APParseRepeatedMsgElem(completeMsg, len);
-					APErrorLog("Repeated Message Element");
+					log_e("Repeated Message Element");
 					break;
 				}
 				*listSize = len / 2; //each type takes 2 bytes
-				APDebugLog(5, "Parse Desired Conf List Size: %d", *listSize);
+				log_d(5, "Parse Desired Conf List Size: %d", *listSize);
 
 				if(!(APParseDesiredConfList(completeMsg, len, listPtr)))
 					return false;
@@ -554,19 +554,19 @@ bool APParseConfigurationRequest(APProtocolMessage *completeMsg, u16 msgLen, u8 
 				break;
 			default:
 				APParseUnrecognizedMsgElem(completeMsg, len);
-				APErrorLog("Unrecognized Message Element");
+				log_e("Unrecognized Message Element");
 				break;
 		}
 	}
 	if(elemFlag != 0x01) { //incomplete message
-		APErrorLog("Incomplete Message Element in Configuration Request");
+		log_e("Incomplete Message Element in Configuration Request");
 		return false;
 	}
 
 	if(*listSize == 0) {
-		APErrorLog("There is no requested configuration");
+		log_e("There is no requested configuration");
 	}
-	APLog("Accept Configuration Request");
+	log("Accept Configuration Request");
 
 	return true;
 }
@@ -583,18 +583,18 @@ bool APReceiveMessageInRunState()
 					 BUFFER_SIZE - 1,
 					 &addr,
 					 &readBytes))) {
-		APErrorLog("Receive Message in run state failed");
+		log_e("Receive Message in run state failed");
 		return false;
 	}
 
 	recvAddr = ntohl(addr.sin_addr.s_addr);
 	/* verify the source of the message */
 	if(recvAddr != controller_ip) {
-		APErrorLog("Message from the illegal source address");
+		log_e("Message from the illegal source address");
 		return false;
 	}
 
-	APDebugLog(3, "Receive Message in run state");
+	log_d(3, "Receive Message in run state");
 
 	APHeaderVal controlVal;
 	APProtocolMessage completeMsg;
@@ -602,17 +602,17 @@ bool APReceiveMessageInRunState()
 	completeMsg.offset = 0;
 
 	if(!(APParseControlHeader(&completeMsg, &controlVal))) {
-		APErrorLog("Failed to parse header");
+		log_e("Failed to parse header");
 		return false;
 	}
 
 	/* not as expected */
 	if(controlVal.version != CURRENT_VERSION || controlVal.type != TYPE_CONTROL) {
-		APErrorLog("ACAMP version or type is not Expected");
+		log_e("ACAMP version or type is not Expected");
 		return false;
 	}
 	if(controlVal.apid != ap_apid) {
-		APErrorLog("The apid in message is different from the one in message header");
+		log_e("The apid in message is different from the one in message header");
 		return false;
 	}
 
@@ -620,15 +620,15 @@ bool APReceiveMessageInRunState()
 
 	if(is_req) {
 		if(controlVal.seqNum == controller_seqnum - 1) {
-			APDebugLog(3, "Receive a message that has been responsed");
+			log_d(3, "Receive a message that has been responsed");
 			if(cacheMsg.type == 0 || controlVal.msgType + 1 != cacheMsg.type) {
-				APErrorLog("The received message does not match the cache message");
+				log_e("The received message does not match the cache message");
 				return false;
 			}
 
-			APDebugLog(3, "Send Cache Message");
+			log_d(3, "Send Cache Message");
 			if(!(APNetworkSend(cacheMsg))) {
-				APErrorLog("Failed to send Cache Message");
+				log_e("Failed to send Cache Message");
 				return false;
 			}
 
@@ -638,9 +638,9 @@ bool APReceiveMessageInRunState()
 		}
 		if(controlVal.seqNum != controller_seqnum) {
 			if(controlVal.seqNum < controller_seqnum)
-				APErrorLog("The serial number of the message is expired");
+				log_e("The serial number of the message is expired");
 			else
-				APErrorLog("The serial number of the message is invalid");
+				log_e("The serial number of the message is invalid");
 			return false;
 		}
 
@@ -657,12 +657,12 @@ bool APReceiveMessageInRunState()
 				APProtocolMessage responseMsg;
 				AP_INIT_PROTOCOL(responseMsg);
 				if(!(APAssembleConfigurationResponse(&responseMsg, list, listSize))) {
-					APErrorLog("Failed to assemble Configuration Response");
+					log_e("Failed to assemble Configuration Response");
 					return false;
 				}
-				APLog("Send Configuration Response");
+				log("Send Configuration Response");
 				if(!(APNetworkSend(responseMsg))) {
-					APErrorLog("Failed to send Configuration Response");
+					log_e("Failed to send Configuration Response");
 					return false;
 				}
 				free_object(list);
@@ -687,12 +687,12 @@ bool APReceiveMessageInRunState()
 				APProtocolMessage responseMsg;
 				AP_INIT_PROTOCOL(responseMsg);
 				if(!(APAssembleConfigurationUpdateResponse(&responseMsg))) {
-					APErrorLog("Failed to assemble Configuration Update Response");
+					log_e("Failed to assemble Configuration Update Response");
 					return false;
 				}
-				APLog("Send Configuration Update Response");
+				log("Send Configuration Update Response");
 				if(!(APNetworkSend(responseMsg))) {
-					APErrorLog("Failed to send Configuration Update Response");
+					log_e("Failed to send Configuration Update Response");
 					return false;
 				}
 
@@ -716,12 +716,12 @@ bool APReceiveMessageInRunState()
 				APProtocolMessage responseMsg;
 				AP_INIT_PROTOCOL(responseMsg);
 				if(!(APAssembleSystemResponse(&responseMsg))) {
-					APErrorLog("Failed to assemble System Response");
+					log_e("Failed to assemble System Response");
 					return false;
 				}
-				APLog("Send System Response");
+				log("Send System Response");
 				if(!(APNetworkSend(responseMsg))) {
-					APErrorLog("Failed to send System Response");
+					log_e("Failed to send System Response");
 					return false;
 				}
 
@@ -738,18 +738,18 @@ bool APReceiveMessageInRunState()
 			}
 			case MSGTYPE_UNREGISTER_REQUEST:
 			{
-				APLog("Accept Unregister Request");
+				log("Accept Unregister Request");
 				uloop_end(); //goto AP_DOWN
 
 				APProtocolMessage responseMsg;
 				AP_INIT_PROTOCOL(responseMsg);
 				if(!(APAssembleUnregisterResponse(&responseMsg))) {
-					APErrorLog("Failed to assemble Unregister Response");
+					log_e("Failed to assemble Unregister Response");
 					return false;
 				}
-				APLog("Send Unregister Response");
+				log("Send Unregister Response");
 				if(!(APNetworkSend(responseMsg))) {
-					APErrorLog("Failed to send Unregister Response");
+					log_e("Failed to send Unregister Response");
 					return false;
 				}
 				AP_FREE_PROTOCOL_MESSAGE(cacheMsg);
@@ -764,13 +764,13 @@ bool APReceiveMessageInRunState()
 	} else {
 		if(controlVal.seqNum != ap_seqnum) {
 			if(controlVal.seqNum < ap_seqnum)
-				APErrorLog("The serial number of the message is expired");
+				log_e("The serial number of the message is expired");
 			else
-				APErrorLog("The serial number of the message is invalid");
+				log_e("The serial number of the message is invalid");
 			return false;
 		}
 		if(retransmitMsg.type == 0 || controlVal.msgType != retransmitMsg.type + 1) {
-			APErrorLog("The received message does not match the send message");
+			log_e("The received message does not match the send message");
 			return false;
 		}
 		switch(controlVal.msgType)
@@ -795,15 +795,15 @@ static void APEvents(struct uloop_fd *event_fd, unsigned int events)
 {
 	int sockfd = event_fd->fd;
 	if(sockfd != gSocket) {
-		APErrorLog("Received an event from unknown source");
+		log_e("Received an event from unknown source");
 	}
 	(APReceiveMessageInRunState());
 }
 
 APStateTransition APEnterRun() 
 {
-	APLog("");	
-	APLog("######### Run State #########");
+	log("");	
+	log("######### Run State #########");
 
 	AP_FREE_PROTOCOL_MESSAGE(cacheMsg);
 	AP_FREE_PROTOCOL_MESSAGE(retransmitMsg);

@@ -3,14 +3,14 @@
 
 #include "common.h"
 
-extern char *gAPLogFileName;
-extern int gAPLogLevel;
-extern int gAPStdoutLevel;
+extern char *log_filename;
+extern int log_level;
+extern int log_stdlev;
 
-void APInitLogFile();
-void APCloseLogFile();
-extern void APLog(const char *format, ...);
-extern void APErrorLog(const char *format, ...);
-extern void APDebugLog(int level, const char *format, ...);
+void init_log();
+void destroy_log();
+extern void log(const char *format, ...);
+extern void log_e(const char *format, ...);
+extern void log_d(int level, const char *format, ...);
 
 #endif // LOG_H

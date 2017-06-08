@@ -23,9 +23,9 @@ extern u8 ap_mac[6];
 extern u32 ap_default_gw; //unused
 
 extern char* controller_name;
-extern char* controller_des;
+extern char* controller_desc;
 extern char* ap_name;
-extern char* ap_des;
+extern char* ap_desc;
 
 /* all wireless conf */
 extern struct wlconf *wlconf;

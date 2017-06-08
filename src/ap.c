@@ -20,9 +20,9 @@ u8 ap_mac[6];
 u32 ap_default_gw; //unused
 
 char* controller_name;
-char* controller_des;
+char* controller_desc;
 char* ap_name;
-char* ap_des;
+char* ap_desc;
 
 /* all wireless conf */
 struct wlconf *wlconf;

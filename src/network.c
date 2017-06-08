@@ -273,10 +273,10 @@ bool APNetworkTimedPollRead(APSocket sock, struct timeval *timeout) {
 	} 
 	else if (r < 0) 
 	{
-		APErrorLog("Select Error");
+		log_e("Select Error");
 		if(errno == EINTR)
 		{
-			APErrorLog("Select Interrupted by signal");
+			log_e("Select Interrupted by signal");
 			return false;
 		}
 		return false;
