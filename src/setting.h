@@ -6,12 +6,10 @@
 #include "protocol.h"
 #include "log.h"
 
-#define AP_SETTINGS_FILE 	"setting.conf"
+#define SETTINGS_FILE 	"setting.conf"
 
-extern FILE* gSettingsFile;
-
-bool APParseSettingsFile();
-void APDefaultSettings();
+bool parse_settings_file();
+void init_default_settings();
 
 
 #endif // SETTING_H

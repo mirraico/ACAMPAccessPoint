@@ -5,7 +5,7 @@
 #include "log.h"
 #include "network.h"
 
-void APDestroy()
+void destroy()
 {
 	log_d(3, "Start destroying AP");
 	close_socket(ap_socket);
@@ -17,15 +17,15 @@ void APDestroy()
 
 int main()
 {
-	state nextState = ENTER_DISCOVERY;
+	ap_state next_state = ENTER_DISCOVERY;
 
 	wlconf = wlconf_alloc();
 
 	init_protocol();
-	APDefaultSettings();
+	init_default_settings();
 
 	log_i("Start reading the setting file");
-	if(!APParseSettingsFile()) {
+	if(!parse_settings_file()) {
 		log_e("Can't read setting file");
 		exit(1);
 	}
@@ -64,7 +64,7 @@ int main()
 			case DISCOVERY_TPYE_STATIC:
 				if(static_controller_ip != 0) {
 					controller_ip = static_controller_ip;
-					nextState = ENTER_REGISTER;
+					next_state = ENTER_REGISTER;
 					log_i("Use static controller addr to register: %u.%u.%u.%u", (u8)(controller_ip >> 24),\
 		 				(u8)(controller_ip >> 16),  (u8)(controller_ip >> 8),  (u8)(controller_ip >> 0));
 				} else {
@@ -75,7 +75,7 @@ int main()
 			case DISCOVERY_TPYE_DEFAULT_GATE:
 				if(ap_default_gw != 0) {
 				 	controller_ip = ap_default_gw;
-					nextState = ENTER_REGISTER;
+					next_state = ENTER_REGISTER;
 					log_i("Use default gateway addr to register: %u.%u.%u.%u", (u8)(controller_ip >> 24),\
 		 				(u8)(controller_ip >> 16),  (u8)(controller_ip >> 8),  (u8)(controller_ip >> 0));
 			 	} else {
@@ -91,19 +91,19 @@ int main()
 	/* start acamp state machine */	
 	while(1) 
 	{
-		switch(nextState) 
+		switch(next_state) 
 		{
 			case ENTER_DISCOVERY:
-				nextState = APEnterDiscovery();
+				next_state = APEnterDiscovery();
 				break;
 			case ENTER_REGISTER:
-				nextState = APEnterRegister();
+				next_state = APEnterRegister();
 				break;
 			case ENTER_RUN:
-				nextState = APEnterRun();
+				next_state = APEnterRun();
 				break;
 			case ENTER_DOWN:
-				APDestroy();
+				destroy();
 				return 0;
 				break;
 		}

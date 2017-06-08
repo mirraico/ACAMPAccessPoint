@@ -1,13 +1,13 @@
 #include "setting.h"
 
-FILE* gSettingsFile = NULL;
+static FILE* settings_file = NULL;
 
 /**
  * get one "useful" (not a comment, not blank) line from the config file
  * @param	configFile [config file]
  * @return	[a "useful" line]
  */
-char * APGetLine(FILE *configFile) {
+char * get_line(FILE *configFile) {
 
 	char *buff = NULL;
 	char *command = NULL;
@@ -37,7 +37,7 @@ char * APGetLine(FILE *configFile) {
  * @param	tag [a specified tag]
  * @return	[a "useful" tag]
  */
-char* APExtractTag(char *tag)
+char* extract_tag(char *tag)
 {
 	int i = strlen(tag) - 1;
 	while(tag[i] == ' ' || tag[i] == '\t' || tag[i] == '\n' || tag[i] == '\r')
@@ -57,7 +57,7 @@ char* APExtractTag(char *tag)
  * @param	str [a specified string]
  * @return	[a "useful" string vaule]
  */
-char* APExtractStringVaule(char *str)
+char* extract_str(char *str)
 {
 	int i = strlen(str) - 1;
 	while(str[i] == ' ' || str[i] == '\t' || str[i] == '\n' || str[i] == '\r')
@@ -79,7 +79,7 @@ char* APExtractStringVaule(char *str)
  * @param	str [a specified string]
  * @return	[a "useful" int vaule]
  */
-int APExtractIntVaule(char *str)
+int extract_int(char *str)
 {
 	int i = strlen(str) - 1;
 	while(str[i] == ' ' || str[i] == '\t' || str[i] == '\n' || str[i] == '\r')
@@ -97,15 +97,15 @@ int APExtractIntVaule(char *str)
 /**
  * parse ap name, descriptor, and all configuration from files
  */
-bool APParseSettingsFile()
+bool parse_settings_file()
 {
 	char *line = NULL;
 
-	gSettingsFile = fopen (AP_SETTINGS_FILE, "rb");
-	if (gSettingsFile == NULL) {
+	settings_file = fopen (SETTINGS_FILE, "rb");
+	if (settings_file == NULL) {
 		return false;
 	}
-	while((line = (char*)APGetLine(gSettingsFile)) != NULL) 
+	while((line = (char*)get_line(settings_file)) != NULL) 
 	{
 		char *pos = NULL;
 
@@ -117,9 +117,9 @@ bool APParseSettingsFile()
 		pos[0] = '\0';
 
 
-		if (!strcmp(APExtractTag(line), "AP_LOG_PATH"))
+		if (!strcmp(extract_tag(line), "AP_LOG_PATH"))
 		{
-			char* value = APExtractStringVaule(pos+1);
+			char* value = extract_str(pos+1);
 			int len = strlen(value);
 			
 			create_string(log_filename, len + 1, return false;);
@@ -129,23 +129,23 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "AP_LOG_LEVEL"))
+		if (!strcmp(extract_tag(line), "AP_LOG_LEVEL"))
 		{
-			log_level = APExtractIntVaule(pos+1);
+			log_level = extract_int(pos+1);
 			
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "AP_STDOUT_LOG_LEVEL"))
+		if (!strcmp(extract_tag(line), "AP_STDOUT_LOG_LEVEL"))
 		{
-			log_stdlev = APExtractIntVaule(pos+1);
+			log_stdlev = extract_int(pos+1);
 			
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "AP_NAME"))
+		if (!strcmp(extract_tag(line), "AP_NAME"))
 		{
-			char* value = APExtractStringVaule(pos+1);
+			char* value = extract_str(pos+1);
 			int len = strlen(value);
 			
 			create_string(ap_name, len + 1, return false;);
@@ -156,9 +156,9 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "ap_descCRIPTOR"))
+		if (!strcmp(extract_tag(line), "ap_descCRIPTOR"))
 		{
-			char* value = APExtractStringVaule(pos+1);
+			char* value = extract_str(pos+1);
 			int len = strlen(value);
 			
 			create_string(ap_desc, len + 1, return false;);
@@ -169,9 +169,9 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;
 		}
-		if (!strcmp(APExtractTag(line), "ETH_INTERFACE"))
+		if (!strcmp(extract_tag(line), "ETH_INTERFACE"))
 		{
-			char* value = APExtractStringVaule(pos+1);
+			char* value = extract_str(pos+1);
 			int len = strlen(value);
 			
 			create_string(ap_ethname, len + 1, return false;);
@@ -182,18 +182,18 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;
 		}
-		if (!strcmp(APExtractTag(line), "DISCOVERY_TYPE"))
+		if (!strcmp(extract_tag(line), "DISCOVERY_TYPE"))
 		{
-			ap_discovery_type = APExtractIntVaule(pos+1);
+			ap_discovery_type = extract_int(pos+1);
 
 			log_d(5, "CONF Discovery Type: %u", ap_discovery_type);
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "STATIC_CONTROLLER_ADDRESS"))
+		if (!strcmp(extract_tag(line), "STATIC_CONTROLLER_ADDRESS"))
 		{
 			char* ip;
-			char* value = APExtractStringVaule(pos+1);
+			char* value = extract_str(pos+1);
 			int len = strlen(value);
 			
 			create_string(ip, len + 1, return false;);
@@ -207,17 +207,17 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;
 		}
-		if (!strcmp(APExtractTag(line), "REGISTERED_SERVICE"))
+		if (!strcmp(extract_tag(line), "REGISTERED_SERVICE"))
 		{
-			ap_register_service = APExtractIntVaule(pos+1);
+			ap_register_service = extract_int(pos+1);
 			
 			log_d(5, "CONF Registered Service: %u", ap_register_service);
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "WLAN"))
+		if (!strcmp(extract_tag(line), "WLAN"))
 		{
-			int flag = APExtractIntVaule(pos+1);
+			int flag = extract_int(pos+1);
 			
 			if(!flag) wlflag = false;
 			
@@ -225,9 +225,9 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "SSID"))
+		if (!strcmp(extract_tag(line), "SSID"))
 		{
-			char* value = APExtractStringVaule(pos+1);
+			char* value = extract_str(pos+1);
 			int len = strlen(value);
 			
 			char *ssid;
@@ -241,9 +241,9 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "SUPPRESS_SSID"))
+		if (!strcmp(extract_tag(line), "SUPPRESS_SSID"))
 		{
-			int suppressSSID = APExtractIntVaule(pos+1);
+			int suppressSSID = extract_int(pos+1);
 
 			if(suppressSSID == SUPPRESS_SSID_ENABLED) {
 				wlconf->set_ssid_hidden(wlconf, true);
@@ -255,9 +255,9 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "HW_MODE"))
+		if (!strcmp(extract_tag(line), "HW_MODE"))
 		{
-			int hwMode = APExtractIntVaule(pos+1);
+			int hwMode = extract_int(pos+1);
 			switch(hwMode)
 			{
 				case HWMODE_A:
@@ -278,9 +278,9 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "CHANNEL"))
+		if (!strcmp(extract_tag(line), "CHANNEL"))
 		{
-			int channel = APExtractIntVaule(pos+1);
+			int channel = extract_int(pos+1);
 			
 			wlconf->set_channel(wlconf, channel);
 			
@@ -288,9 +288,9 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "TX_POWER"))
+		if (!strcmp(extract_tag(line), "TX_POWER"))
 		{
-			int tx_power = APExtractIntVaule(pos+1);
+			int tx_power = extract_int(pos+1);
 			
 			wlconf->set_txpower(wlconf, tx_power);
 			
@@ -298,9 +298,9 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "SECURITY_OPTION"))
+		if (!strcmp(extract_tag(line), "SECURITY_OPTION"))
 		{
-			int securityOption = APExtractIntVaule(pos+1);
+			int securityOption = extract_int(pos+1);
 			
 			switch(securityOption)
 			{
@@ -322,9 +322,9 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "WPA_PASSPHRASE"))
+		if (!strcmp(extract_tag(line), "WPA_PASSPHRASE"))
 		{
-			char* value = APExtractStringVaule(pos+1);
+			char* value = extract_str(pos+1);
 			int len = strlen(value);
 			
 			char *password;
@@ -338,9 +338,9 @@ bool APParseSettingsFile()
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(APExtractTag(line), "RESET_MAC_FILTER"))
+		if (!strcmp(extract_tag(line), "RESET_MAC_FILTER"))
 		{
-			int reset = APExtractIntVaule(pos+1);
+			int reset = extract_int(pos+1);
 			
 			if(reset) wlconf->set_macfilter(wlconf, MAC_FILTER_NONE);
 			
@@ -355,7 +355,7 @@ bool APParseSettingsFile()
 	return true;
 }
 
-void APDefaultSettings()
+void init_default_settings()
 {
 	int i;
 
