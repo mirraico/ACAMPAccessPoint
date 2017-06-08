@@ -371,7 +371,7 @@ void APDefaultSettings()
 	//gIfWlanName = NULL;
 	wlflag = true;
 
-	/* IP, MAC and default gateway addr will be automatically obtained soon by APNetworkInitLocalAddr() */
+	/* IP, MAC and default gateway addr will be automatically obtained soon by init_local_addr() */
 	ap_ip = 0;
 	for(i = 0; i < 6; i++) {
 		ap_mac[i] = 0;

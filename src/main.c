@@ -8,8 +8,8 @@
 void APDestroy()
 {
 	log_d(3, "Start destroying AP");
-	APNetworkCloseSocket(gSocket);
-	APNetworkCloseSocket(gSocketBroad);
+	close_socket(ap_socket);
+	close_socket(ap_socket_br);
 	wlconf_free(wlconf);
 	log("AP is down");
 	destroy_log();
@@ -42,7 +42,7 @@ int main()
 		exit(1);
 	}
 
-	if(!APNetworkInitLocalAddr(&ap_ip, ap_mac, &ap_default_gw)) {
+	if(!init_local_addr(&ap_ip, ap_mac, &ap_default_gw)) {
 		log_e("Can't init local address");
 		exit(1);
 	}

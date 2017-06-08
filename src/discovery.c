@@ -164,7 +164,7 @@ bool APParseDiscoveryResponse(char *msg,
 bool APReceiveDiscoveryResponse() {
 	int i;
 	char buf[BUFFER_SIZE];
-	APNetworkAddress addr;
+	struct sockaddr_in addr;
 	controllerVal *controllerPtr = &controllers[foundControllerCount];
 	int readBytes;
 	u32 recvAddr;
@@ -177,7 +177,7 @@ bool APReceiveDiscoveryResponse() {
 	}
 
 	/* receive the datagram */
-	if(!(APNetworkReceiveFromBroad(buf,
+	if(!(recv_udp_br(buf,
 					 BUFFER_SIZE - 1,
 					 &addr,
 					 &readBytes))) {
@@ -220,7 +220,7 @@ bool APReadDiscoveryResponse()
 	{
 		bool success = false;
 
-		if(APNetworkTimedPollRead(gSocketBroad, &new_timeout)) 
+		if(time_poll_read(ap_socket_br, &new_timeout)) 
 		{
 			success = true;
 		}
@@ -259,7 +259,7 @@ APStateTransition APEnterDiscovery()
 	/*reset discovery count*/
 	gDiscoveryCount = 0;
 
-	if(!APNetworkInitBroadcast()) {
+	if(!init_broadcast()) {
 		log_e("Init broadcast socket failed");
 		return AP_ENTER_DOWN;
 	}
@@ -282,7 +282,7 @@ APStateTransition APEnterDiscovery()
 			return AP_ENTER_DOWN;
 		}
 		log("Send Discovery Request");
-		if(!(APNetworkSendToBroad(sendMsg))) {
+		if(!(send_udp_br(sendMsg))) {
 			log_e("Failed to send Discovery Request");
 			return AP_ENTER_DOWN;
 		}

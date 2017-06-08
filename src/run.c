@@ -31,7 +31,7 @@ static void APRretransmitHandler(struct uloop_timeout *t)
 	}
 	uloop_timeout_set(&tRetransmit, retransmitInterval * 1000);
 	log_d(5, "Adjust the retransmit interval to %d sec and retransmit", retransmitInterval);
-	if(!(APNetworkSend(retransmitMsg))) {
+	if(!(send_udp(retransmitMsg))) {
 		log_e("Failed to retransmit Request");
 		uloop_end();
 		return;
@@ -66,7 +66,7 @@ static void APKeepAliveHandler(struct uloop_timeout *t)
 		return;
 	}
 	log("Send Keep Alive Request");
-	if(!(APNetworkSend(sendMsg))) {
+	if(!(send_udp(sendMsg))) {
 		log_e("Failed to send Keep Alive Request");
 		uloop_end();
 		return;
@@ -574,12 +574,12 @@ bool APParseConfigurationRequest(APProtocolMessage *completeMsg, u16 msgLen, u8 
 bool APReceiveMessageInRunState() 
 {
 	char buf[BUFFER_SIZE];
-	APNetworkAddress addr;
+	struct sockaddr_in addr;
 	int readBytes;
 	u32 recvAddr;
 
 	/* receive the datagram */
-	if(!(APNetworkReceive(buf,
+	if(!(recv_udp(buf,
 					 BUFFER_SIZE - 1,
 					 &addr,
 					 &readBytes))) {
@@ -627,7 +627,7 @@ bool APReceiveMessageInRunState()
 			}
 
 			log_d(3, "Send Cache Message");
-			if(!(APNetworkSend(cacheMsg))) {
+			if(!(send_udp(cacheMsg))) {
 				log_e("Failed to send Cache Message");
 				return false;
 			}
@@ -661,7 +661,7 @@ bool APReceiveMessageInRunState()
 					return false;
 				}
 				log("Send Configuration Response");
-				if(!(APNetworkSend(responseMsg))) {
+				if(!(send_udp(responseMsg))) {
 					log_e("Failed to send Configuration Response");
 					return false;
 				}
@@ -691,7 +691,7 @@ bool APReceiveMessageInRunState()
 					return false;
 				}
 				log("Send Configuration Update Response");
-				if(!(APNetworkSend(responseMsg))) {
+				if(!(send_udp(responseMsg))) {
 					log_e("Failed to send Configuration Update Response");
 					return false;
 				}
@@ -720,7 +720,7 @@ bool APReceiveMessageInRunState()
 					return false;
 				}
 				log("Send System Response");
-				if(!(APNetworkSend(responseMsg))) {
+				if(!(send_udp(responseMsg))) {
 					log_e("Failed to send System Response");
 					return false;
 				}
@@ -748,7 +748,7 @@ bool APReceiveMessageInRunState()
 					return false;
 				}
 				log("Send Unregister Response");
-				if(!(APNetworkSend(responseMsg))) {
+				if(!(send_udp(responseMsg))) {
 					log_e("Failed to send Unregister Response");
 					return false;
 				}
@@ -794,7 +794,7 @@ bool APReceiveMessageInRunState()
 static void APEvents(struct uloop_fd *event_fd, unsigned int events)
 {
 	int sockfd = event_fd->fd;
-	if(sockfd != gSocket) {
+	if(sockfd != ap_socket) {
 		log_e("Received an event from unknown source");
 	}
 	(APReceiveMessageInRunState());
@@ -815,7 +815,7 @@ APStateTransition APEnterRun()
 	tKeepAlive.cb = APKeepAliveHandler;
 	uloop_timeout_set(&tKeepAlive, 100); //send a keep alive req soon
 
-	fdSocket.fd = gSocket;
+	fdSocket.fd = ap_socket;
 	fdSocket.cb = APEvents;
 	uloop_fd_add(&fdSocket, ULOOP_READ);
 

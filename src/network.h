@@ -11,24 +11,23 @@ for getting local network info
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 
-typedef int APSocket;
-typedef struct sockaddr_in APNetworkAddress;
+extern int ap_socket;
+extern int ap_socket_br;
 
-extern APSocket gSocket;
-extern APSocket gSocketBroad;
+bool init_local_addr(u32* localIP, u8* localMAC, u32* localDefaultGateway);
+bool init_controller_addr(u32 controllerAddr);
+bool init_broadcast();
+void close_socket(int s);
 
-bool APNetworkInitLocalAddr(u32* localIP, u8* localMAC, u32* localDefaultGateway);
-bool APNetworkInitControllerAddr(u32 controllerAddr);
-bool APNetworkInitBroadcast();
-void APNetworkCloseSocket(APSocket s);
-
-bool APNetworkSend(
+bool send_udp(
 					APProtocolMessage sendMsg);
-bool APNetworkSendToBroad(
+bool send_udp_br(
 					APProtocolMessage sendMsg);
-bool APNetworkReceive(u8* buffer,
-					 int bufferLen, APNetworkAddress* addr, int* readLenPtr);
-bool APNetworkReceiveFromBroad(u8* buffer,
-					 int bufferLen, APNetworkAddress* addr, int* readLenPtr);
+bool recv_udp(u8* buffer,
+					 int bufferLen, struct sockaddr_in* addr, int* readLenPtr);
+bool recv_udp_br(u8* buffer,
+					 int bufferLen, struct sockaddr_in* addr, int* readLenPtr);
+
+bool time_poll_read(int sock, struct timeval *timeout);
 
 #endif

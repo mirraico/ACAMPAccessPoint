@@ -327,14 +327,14 @@ bool APParseRegisterResponse(char *msg,
 bool APReceiveRegisterResponse() 
 {
 	char buf[BUFFER_SIZE];
-	APNetworkAddress addr;
+	struct sockaddr_in addr;
 	int readBytes;
 	u32 recvAddr;
 
 	recvAPID = recvRegisteredService = 0;
 	
 	/* receive the datagram */
-	if(!(APNetworkReceive(buf,
+	if(!(recv_udp(buf,
 					 BUFFER_SIZE - 1,
 					 &addr,
 					 &readBytes))) {
@@ -375,7 +375,7 @@ bool APReadRegisterResponse()
 	{
 		bool success = false;
 
-		if(APNetworkTimedPollRead(gSocket, &new_timeout)) 
+		if(time_poll_read(ap_socket, &new_timeout)) 
 		{
 			success = true;
 		}
@@ -416,7 +416,7 @@ APStateTransition APEnterRegister()
 	gMaxRegister = max_retransmit;
 	gRegisterInterval = retransmit_interval;
 
-	if(!APNetworkInitControllerAddr(controller_ip)) {
+	if(!init_controller_addr(controller_ip)) {
 		log_e("Init singlecast socket failed");
 		return AP_ENTER_DOWN;
 	}
@@ -437,7 +437,7 @@ APStateTransition APEnterRegister()
 			return AP_ENTER_DOWN;
 		}
 		log("Send Register Request");
-		if(!(APNetworkSend(sendMsg))) {
+		if(!(send_udp(sendMsg))) {
 			log_e("Failed to send Register Request");
 			return AP_ENTER_DOWN;
 		}

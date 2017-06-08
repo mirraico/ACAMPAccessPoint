@@ -29,7 +29,7 @@ void destroy_log()
 
 __inline__ void _log_d(int level, const char *format, va_list args) 
 {
-	char *logStr = NULL;
+	char *logstr = NULL;
 	time_t curtime;
 	char *timestr = NULL;
 	char label[10];
@@ -42,28 +42,28 @@ __inline__ void _log_d(int level, const char *format, va_list args)
 	
 	timestr[strlen(timestr)-1] = '\0';
 	
-	create_string(logStr, (strlen(format)+strlen(timestr)+100), return;);
+	create_string(logstr, (strlen(format)+strlen(timestr)+100), return;);
 	
 	zero_memory(label, 10);
 	if(level == -1) strcpy(label, "ERROR ");
 	else if(level == 0) strcpy(label, "LOG   ");
 	else sprintf(label, "DEBUG%d", level);
-	sprintf(logStr, "[AP-%s::%s]\t %s\n", label, timestr, format);
+	sprintf(logstr, "[AP-%s::%s]\t %s\n", label, timestr, format);
 	
-	char fileLine[256];
-	vsnprintf(fileLine, 255, logStr, args);
+	char fileline[256];
+	vsnprintf(fileline, 255, logstr, args);
 
 	if(log_level >= level && log_file != NULL) 
 	{
-		fwrite(fileLine, strlen(fileLine), 1, log_file);
+		fwrite(fileline, strlen(fileline), 1, log_file);
 		fflush(log_file);
 	}
 	if(log_stdlev >= level)
 	{
-		printf("%s", fileLine);
+		printf("%s", fileline);
 	}
 	
-	free_object(logStr);
+	free_object(logstr);
 }
 
 __inline__ void log(const char *format, ...)
