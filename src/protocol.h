@@ -231,26 +231,10 @@ typedef enum {
 							}\
 							free_object(ar_name); }
 
-
-void store_8(protocol_msg *msg_p, u8 val);
-void store_16(protocol_msg *msg_p, u16 val);
-void store_32(protocol_msg *msg_p, u32 val);
-void store_str(protocol_msg *msg_p, char *str);
-void store_msg(protocol_msg *msg_p, protocol_msg *msgToStorePtr);
-void store_raw(protocol_msg *msg_p, u8 *bytes, int len);
-void store_reserved(protocol_msg *msg_p, int reservedLen);
-
-bool assemble_msgelem(protocol_msg *msg_p, u16 type);
 bool assemble_msg(protocol_msg *msg_p, u16 apid, u32 seq_num,
-						 u16 msg_type, protocol_msg *msgelems, int msgElemNum);
-bool assemble_header(protocol_msg *controlHdrPtr, header_val *valPtr);
+						 u16 msg_type, protocol_msg *msgelems, int msgelems_num);
 
-u8 retrieve_8(protocol_msg *msg_p);
-u16 retrieve_16(protocol_msg *msg_p);
-u32 retrieve_32(protocol_msg *msg_p);
-char *retrieve_str(protocol_msg *msg_p, int len);
-u8 *retrieve_raw(protocol_msg *msg_p, int len);
-void retrieve_reserved(protocol_msg *msg_p, int reservedLen);
+void copy_msg(protocol_msg *msg_p, protocol_msg *from_p);
 
 bool parse_header(protocol_msg *msg_p, header_val *valPtr);
 void parse_msgelem(protocol_msg *msg_p, u16 *type, u16 *len);

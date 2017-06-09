@@ -73,7 +73,7 @@ static void keepalive_handler(struct uloop_timeout *t)
 	}
 
 	init_protocol_msg_size(retransmit_msg, send_msg.offset, log_e("Failed to init Retransmit Message"); uloop_end(); return;);
-	store_msg(&retransmit_msg, &send_msg);
+	copy_msg(&retransmit_msg, &send_msg);
 	retransmit_msg.type = MSGTYPE_KEEPALIVE_REQUEST; //easy to match response
 	free_protocol_msg(send_msg);
 	
@@ -413,23 +413,23 @@ bool parse_conf_update_req(protocol_msg *complete_msg, u16 msg_len)
 	return true;
 }
 
-bool assemble_conf_resp(protocol_msg *msg_p, u8* list, int listSize)
+bool assemble_conf_resp(protocol_msg *msg_p, u8* list, int list_size)
 {
 	int k = -1;
 	int pos = 0;
-	u16 desiredType = 0;
+	u16 desired_type = 0;
 	if(msg_p == NULL) return false;
 	
 	protocol_msg *msgelems;
-	int msgelem_cnt = listSize;
+	int msgelem_cnt = list_size;
 	create_protocol_arr(msgelems, msgelem_cnt, return false;);
 
 	wlconf->update(wlconf);
-	while(pos < listSize * 2)
+	while(pos < list_size * 2)
 	{
-		copy_memory(&desiredType, list + pos, 2);
+		copy_memory(&desired_type, list + pos, 2);
 
-		switch(desiredType)
+		switch(desired_type)
 		{
 			case MSGELEMTYPE_SSID:
 				if(!(assemble_ssid(&(msgelems[++k])))) {
@@ -522,7 +522,7 @@ bool assemble_conf_resp(protocol_msg *msg_p, u8* list, int listSize)
 	);
 }
 
-bool parse_conf_req(protocol_msg *complete_msg, u16 msg_len, u8 **listPtr, int *listSize)
+bool parse_conf_req(protocol_msg *complete_msg, u16 msg_len, u8 **listPtr, int *list_size)
 {
 	log_i("Parse Configuration Request");
 
@@ -544,8 +544,8 @@ bool parse_conf_req(protocol_msg *complete_msg, u16 msg_len, u8 **listPtr, int *
 					log_e("Repeated Message Element");
 					break;
 				}
-				*listSize = len / 2; //each type takes 2 bytes
-				log_d(5, "Parse Desired Conf List Size: %d", *listSize);
+				*list_size = len / 2; //each type takes 2 bytes
+				log_d(5, "Parse Desired Conf List Size: %d", *list_size);
 
 				if(!(parse_desired_conf_list(complete_msg, len, listPtr)))
 					return false;
@@ -563,7 +563,7 @@ bool parse_conf_req(protocol_msg *complete_msg, u16 msg_len, u8 **listPtr, int *
 		return false;
 	}
 
-	if(*listSize == 0) {
+	if(*list_size == 0) {
 		log_e("There is no requested configuration");
 	}
 	log_i("Accept Configuration Request");
@@ -649,14 +649,14 @@ bool msg_handle_in_run()
 			case MSGTYPE_CONFIGURATION_REQUEST:
 			{
 				u8* list = NULL;
-				int listSize; 
-				if(!(parse_conf_req(&complete_msg, control_val.msg_len, &list, &listSize))) {
+				int list_size; 
+				if(!(parse_conf_req(&complete_msg, control_val.msg_len, &list, &list_size))) {
 					return false;
 				}
 
 				protocol_msg responseMsg;
 				init_protocol_msg(responseMsg);
-				if(!(assemble_conf_resp(&responseMsg, list, listSize))) {
+				if(!(assemble_conf_resp(&responseMsg, list, list_size))) {
 					log_e("Failed to assemble Configuration Response");
 					return false;
 				}
@@ -669,7 +669,7 @@ bool msg_handle_in_run()
 
 				free_protocol_msg(cache_msg);
 				init_protocol_msg_size(cache_msg, responseMsg.offset, return false;);
-				store_msg(&cache_msg, &responseMsg);
+				copy_msg(&cache_msg, &responseMsg);
 				cache_msg.type = MSGTYPE_CONFIGURATION_RESPONSE; //easy to match request
 				free_protocol_msg(responseMsg);
 
@@ -698,7 +698,7 @@ bool msg_handle_in_run()
 
 				free_protocol_msg(cache_msg);
 				init_protocol_msg_size(cache_msg, responseMsg.offset, return false;);
-				store_msg(&cache_msg, &responseMsg);
+				copy_msg(&cache_msg, &responseMsg);
 				cache_msg.type = MSGTYPE_CONFIGURATION_UPDATE_RESPONSE; //easy to match request
 				free_protocol_msg(responseMsg);
 
@@ -727,7 +727,7 @@ bool msg_handle_in_run()
 
 				free_protocol_msg(cache_msg);
 				init_protocol_msg_size(cache_msg, responseMsg.offset, return false;);
-				store_msg(&cache_msg, &responseMsg);
+				copy_msg(&cache_msg, &responseMsg);
 				cache_msg.type = MSGTYPE_SYSTEM_RESPONSE; //easy to match request
 				free_protocol_msg(responseMsg);
 

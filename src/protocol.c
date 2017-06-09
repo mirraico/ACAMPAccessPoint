@@ -5,7 +5,7 @@
  * @param msg_p [a initialized protocol_msg and there is space left]
  * @param val    [value you want to store]
  */
-void store_8(protocol_msg *msg_p, u8 val)
+static void store_8(protocol_msg *msg_p, u8 val)
 {
 	copy_memory(&((msg_p->msg)[(msg_p->offset)]), &(val), 1);
 	(msg_p->offset) += 1;
@@ -16,7 +16,7 @@ void store_8(protocol_msg *msg_p, u8 val)
  * @param msg_p [a initialized protocol_msg and there is space left]
  * @param val    [value you want to store]
  */
-void store_16(protocol_msg *msg_p, u16 val)
+static void store_16(protocol_msg *msg_p, u16 val)
 {
 	val = htons(val);
 	copy_memory(&((msg_p->msg)[(msg_p->offset)]), &(val), 2);
@@ -28,7 +28,7 @@ void store_16(protocol_msg *msg_p, u16 val)
  * @param msg_p [a initialized protocol_msg and there is space left]
  * @param val    [value you want to store]
  */
-void store_32(protocol_msg *msg_p, u32 val)
+static void store_32(protocol_msg *msg_p, u32 val)
 {
 	val = htonl(val);
 	copy_memory(&((msg_p->msg)[(msg_p->offset)]), &(val), 4);
@@ -40,7 +40,7 @@ void store_32(protocol_msg *msg_p, u32 val)
  * @param msg_p [a initialized protocol_msg and there is space left]
  * @param str    [value you want to store, a standard string must end with '\0']
  */
-void store_str(protocol_msg *msg_p, char *str)
+static void store_str(protocol_msg *msg_p, char *str)
 {
 	int len = strlen(str);
 	copy_memory(&((msg_p->msg)[(msg_p->offset)]), str, len);
@@ -52,7 +52,7 @@ void store_str(protocol_msg *msg_p, char *str)
  * @param msg_p        [a initialized protocol_msg and there is space left]
  * @param from_p [another protocol_msg you want to use]
  */
-void store_msg(protocol_msg *msg_p, protocol_msg *from_p)
+static void store_msg(protocol_msg *msg_p, protocol_msg *from_p)
 {
 	copy_memory(&((msg_p->msg)[(msg_p->offset)]), from_p->msg, from_p->offset);
 	(msg_p->offset) += from_p->offset;
@@ -64,7 +64,7 @@ void store_msg(protocol_msg *msg_p, protocol_msg *from_p)
  * @param bytes  [value you want to store]
  * @param len    [size of raw bytes]
  */
-void store_raw(protocol_msg *msg_p, u8 *bytes, int len)
+static void store_raw(protocol_msg *msg_p, u8 *bytes, int len)
 {
 	copy_memory(&((msg_p->msg)[(msg_p->offset)]), bytes, len);
 	(msg_p->offset) += len;
@@ -75,10 +75,33 @@ void store_raw(protocol_msg *msg_p, u8 *bytes, int len)
  * @param msg_p      [a initialized protocol_msg and there is space left]
  * @param reserved_len [size of reserved space]
  */
-void store_reserved(protocol_msg *msg_p, int reserved_len)
+static void store_reserved(protocol_msg *msg_p, int reserved_len)
 {
 	zero_memory(&((msg_p->msg)[(msg_p->offset)]), reserved_len);
 	(msg_p->offset) += reserved_len;
+}
+
+/**
+ * assemble a msg header
+ * @param  control_hdr_p [a APAssembleMessage type value, which will output a formatted msg header]
+ * @param  val_p        [header info]
+ * @return               [whether the operation is success or not]
+ */
+bool assemble_header(protocol_msg *control_hdr_p, header_val *val_p)
+{
+	if(control_hdr_p == NULL || val_p == NULL) return false;
+
+	init_protocol_msg_size(*control_hdr_p, HEADER_LEN, return false;);
+
+	store_8(control_hdr_p, val_p->version);
+	store_8(control_hdr_p, val_p->type);
+	store_16(control_hdr_p, val_p->apid);
+	store_32(control_hdr_p, val_p->seq_num);
+	store_16(control_hdr_p, val_p->msg_type);
+	store_16(control_hdr_p, val_p->msg_len);
+	store_reserved(control_hdr_p, 4);
+
+	return true;
 }
 
 /**
@@ -87,7 +110,7 @@ void store_reserved(protocol_msg *msg_p, int reserved_len)
  * @param  type   [the type of msg elem]
  * @return        [whether the operation is success or not]
  */
-bool assemble_msgelem(protocol_msg *msg_p, u16 type)
+static bool assemble_msgelem(protocol_msg *msg_p, u16 type)
 {
 	protocol_msg complete_msg;
 
@@ -114,43 +137,43 @@ bool assemble_msgelem(protocol_msg *msg_p, u16 type)
  * @param  seq_num     [seq num that will be used in message header]
  * @param  msg_type    [the type of msg]
  * @param  msgelems   [a array of msgelems, which will be used in msg]
- * @param  msgElemNum [count of msgelems]
+ * @param  msgelems_num [count of msgelems]
  * @return            [whether the operation is success or not]
  */
 bool assemble_msg(protocol_msg *msg_p, u16 apid, u32 seq_num,
-						 u16 msg_type, protocol_msg *msgelems, int msgElemNum)
+						 u16 msg_type, protocol_msg *msgelems, int msgelems_num)
 {
-	protocol_msg controlHdr, complete_msg;
-	int msgElemsLen = 0, i;
-	header_val controlHdrVal;
-	init_protocol_msg(controlHdr);
+	protocol_msg control_hdr, complete_msg;
+	int msgelems_len = 0, i;
+	header_val control_hdr_val;
+	init_protocol_msg(control_hdr);
 
-	if(msg_p == NULL || (msgelems == NULL && msgElemNum > 0))
+	if(msg_p == NULL || (msgelems == NULL && msgelems_num > 0))
 		return false;
 
-	for(i = 0; i < msgElemNum; i++) msgElemsLen += msgelems[i].offset;
+	for(i = 0; i < msgelems_num; i++) msgelems_len += msgelems[i].offset;
 
-	controlHdrVal.version = CURRENT_VERSION;
-	controlHdrVal.type = TYPE_CONTROL;
-	controlHdrVal.apid = apid;
-	controlHdrVal.seq_num = seq_num;
-	controlHdrVal.msg_type = msg_type;
-	controlHdrVal.msg_len = HEADER_LEN + msgElemsLen;
+	control_hdr_val.version = CURRENT_VERSION;
+	control_hdr_val.type = TYPE_CONTROL;
+	control_hdr_val.apid = apid;
+	control_hdr_val.seq_num = seq_num;
+	control_hdr_val.msg_type = msg_type;
+	control_hdr_val.msg_len = HEADER_LEN + msgelems_len;
 
-	if(!(assemble_header(&controlHdr, &controlHdrVal))) {
-		free_protocol_msg(controlHdr);
-		free_arr_and_protocol_msg(msgelems, msgElemNum);
+	if(!(assemble_header(&control_hdr, &control_hdr_val))) {
+		free_protocol_msg(control_hdr);
+		free_arr_and_protocol_msg(msgelems, msgelems_num);
 		return false;
 	}
 
-	init_protocol_msg_size(complete_msg, controlHdr.offset + msgElemsLen, return false;);
-	store_msg(&complete_msg, &controlHdr);
-	free_protocol_msg(controlHdr);
+	init_protocol_msg_size(complete_msg, control_hdr.offset + msgelems_len, return false;);
+	store_msg(&complete_msg, &control_hdr);
+	free_protocol_msg(control_hdr);
 
-	for(i = 0; i < msgElemNum; i++) {
+	for(i = 0; i < msgelems_num; i++) {
 		store_msg(&complete_msg, &(msgelems[i]));
 	}
-	free_arr_and_protocol_msg(msgelems, msgElemNum);
+	free_arr_and_protocol_msg(msgelems, msgelems_num);
 
 	free_protocol_msg(*msg_p);
 	msg_p->msg = complete_msg.msg;
@@ -161,26 +184,13 @@ bool assemble_msg(protocol_msg *msg_p, u16 apid, u32 seq_num,
 }
 
 /**
- * assemble a msg header
- * @param  controlHdrPtr [a APAssembleMessage type value, which will output a formatted msg header]
- * @param  val_p        [header info]
- * @return               [whether the operation is success or not]
+ * copy content in another protocol_msg into a initialized protocol_msg
+ * @param msg_p        [a initialized protocol_msg and there is space left]
+ * @param from_p [another protocol_msg you want to use]
  */
-bool assemble_header(protocol_msg *controlHdrPtr, header_val *val_p)
+void copy_msg(protocol_msg *msg_p, protocol_msg *from_p)
 {
-	if(controlHdrPtr == NULL || val_p == NULL) return false;
-
-	init_protocol_msg_size(*controlHdrPtr, HEADER_LEN, return false;);
-
-	store_8(controlHdrPtr, val_p->version);
-	store_8(controlHdrPtr, val_p->type);
-	store_16(controlHdrPtr, val_p->apid);
-	store_32(controlHdrPtr, val_p->seq_num);
-	store_16(controlHdrPtr, val_p->msg_type);
-	store_16(controlHdrPtr, val_p->msg_len);
-	store_reserved(controlHdrPtr, 4);
-
-	return true;
+	store_msg(msg_p, from_p);
 }
 
 /**
@@ -188,7 +198,7 @@ bool assemble_header(protocol_msg *controlHdrPtr, header_val *val_p)
  * @param  msg_p [a protocol_msg that include value]
  * @return        [u8 value]
  */
-u8 retrieve_8(protocol_msg *msg_p) 
+static u8 retrieve_8(protocol_msg *msg_p) 
 {
 	u8 val;
 
@@ -203,7 +213,7 @@ u8 retrieve_8(protocol_msg *msg_p)
  * @param  msg_p [a protocol_msg that include value]
  * @return        [u16 value]
  */
-u16 retrieve_16(protocol_msg *msg_p) 
+static u16 retrieve_16(protocol_msg *msg_p) 
 {
 	u16 val;
 
@@ -218,7 +228,7 @@ u16 retrieve_16(protocol_msg *msg_p)
  * @param  msg_p [a protocol_msg that include value]
  * @return        [u32 value]
  */
-u32 retrieve_32(protocol_msg *msg_p) 
+static u32 retrieve_32(protocol_msg *msg_p) 
 {
 	u32 val;
 
@@ -234,7 +244,7 @@ u32 retrieve_32(protocol_msg *msg_p)
  * @param  len    [length of string]
  * @return        [a standard string that end with '\0']
  */
-char* retrieve_str(protocol_msg *msg_p, int len) 
+static char* retrieve_str(protocol_msg *msg_p, int len) 
 {
 	u8* str;
 
@@ -253,7 +263,7 @@ char* retrieve_str(protocol_msg *msg_p, int len)
  * @param  len    [size of raw bytes]
  * @return        [an array that include raw bytes]
  */
-u8* retrieve_raw(protocol_msg *msg_p, int len) 
+static u8* retrieve_raw(protocol_msg *msg_p, int len) 
 {
 	u8* bytes;
 
@@ -270,7 +280,7 @@ u8* retrieve_raw(protocol_msg *msg_p, int len)
  * @param msg_p      [a protocol_msg]
  * @param reserved_len [size of reserved space]
  */
-void retrieve_reserved(protocol_msg *msg_p, int reserved_len) 
+static void retrieve_reserved(protocol_msg *msg_p, int reserved_len) 
 {
 	(msg_p->offset) += reserved_len;
 }

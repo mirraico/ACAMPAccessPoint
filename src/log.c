@@ -27,7 +27,7 @@ void destroy_log()
 	log_file = NULL;
 }
 
-__inline__ void _log_d(int level, const char *format, va_list args) 
+static __inline__ void _log_d(int level, const char *format, va_list args) 
 {
 	char *logstr = NULL;
 	time_t curtime;

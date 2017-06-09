@@ -7,7 +7,7 @@ static FILE* settings_file = NULL;
  * @param	configFile [config file]
  * @return	[a "useful" line]
  */
-char * get_line(FILE *configFile) {
+static char * get_line(FILE *configFile) {
 
 	char *buff = NULL;
 	char *command = NULL;
@@ -37,7 +37,7 @@ char * get_line(FILE *configFile) {
  * @param	tag [a specified tag]
  * @return	[a "useful" tag]
  */
-char* extract_tag(char *tag)
+static char* extract_tag(char *tag)
 {
 	int i = strlen(tag) - 1;
 	while(tag[i] == ' ' || tag[i] == '\t' || tag[i] == '\n' || tag[i] == '\r')
@@ -57,7 +57,7 @@ char* extract_tag(char *tag)
  * @param	str [a specified string]
  * @return	[a "useful" string vaule]
  */
-char* extract_str(char *str)
+static char* extract_str(char *str)
 {
 	int i = strlen(str) - 1;
 	while(str[i] == ' ' || str[i] == '\t' || str[i] == '\n' || str[i] == '\r')
@@ -79,7 +79,7 @@ char* extract_str(char *str)
  * @param	str [a specified string]
  * @return	[a "useful" int vaule]
  */
-int extract_int(char *str)
+static int extract_int(char *str)
 {
 	int i = strlen(str) - 1;
 	while(str[i] == ' ' || str[i] == '\t' || str[i] == '\n' || str[i] == '\r')
@@ -156,7 +156,7 @@ bool parse_settings_file()
 			free_object(line);
 			continue;	
 		}
-		if (!strcmp(extract_tag(line), "ap_descCRIPTOR"))
+		if (!strcmp(extract_tag(line), "AP_DESCRIPTOR"))
 		{
 			char* value = extract_str(pos+1);
 			int len = strlen(value);

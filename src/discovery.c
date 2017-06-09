@@ -13,8 +13,8 @@ typedef struct {
 
 
 static int discovery_cnt;
-static int max_discovery = 3;
-static int discovery_interval = 10;
+static const int max_discovery = 3;
+static const int discovery_interval = 10;
 
 #define MAX_WAIT_CONTROLLER 5
 static int controller_num;
@@ -229,6 +229,7 @@ bool read_discovery_resp()
 
 		if((receive_discovery_resp())) {
 			controller_num++;
+			if(controller_num == MAX_WAIT_CONTROLLER) break;
 		}
 		/* compute time and go on */
 		gettimeofday(&after, NULL);
